@@ -5,7 +5,7 @@ const DISPOSITIONS = {
   1: "friendly",
   0: "neutral",
   [-1]: "hostile",
-  null: "secret"
+  2: "secret"
 };
 
 Hooks.once("init", () => {
