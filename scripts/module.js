@@ -61,4 +61,10 @@ Hooks.once("ready", () => {
   console.log("✅⭕ Greybearded Token Frames (libWrapper Draw-Patch) aktiv.");
 });
 
+Hooks.once("canvasReady", () => {
+  for (const token of canvas.tokens.placeables) {
+    applyFrameToToken(token); // jetzt ist iconGroup garantiert gesetzt
+  }
+});
+
 
