@@ -7,17 +7,16 @@
 export function getTintColor(token) {
   const actor = token.actor;
 
-  // Spielercharaktere erhalten immer diesen Grauton
-  if (actor && actor.hasPlayerOwner) {
-    return "#888888";
+  if (actor?.type === "character" && actor.hasPlayerOwner) {
+    return "#7F7F7F"; // Spielercharakter
   }
 
-  const disp = token.document.disposition;
-  switch (disp) {
-    case -1: return "#882211"; // hostile
-    case 0:  return "#B79A75"; // neutral
-    case 1:  return "#667788"; // friendly
-    case 2:  return "#776688"; // secret
-    default: return "#444444"; // fallback
+  switch (token.document.disposition) {
+    case -1: return "#993333"; // Feindlich
+    case 0:  return "#B7A789"; // Neutral
+    case 1:  return "#5F7A8A"; // Freundlich
+    case 2:  return "#6B5E7A"; // Geheim
+    default: return "#555555"; // Fallback
   }
 }
+
