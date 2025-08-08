@@ -6,17 +6,16 @@ import { getTintColor } from "./get-tint-color.js";
  * @param {Token} token
  */
 export function applyFrameToToken(token) {
-  if (token.document.getFlag("greybearded-tokens", "disableFrame")) {
-    return;
-  }
+  if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
 
   const framePath = game.settings.get("greybearded-tokens", "frameImagePath") || 
     "modules/greybearded-tokens/assets/frame-default.png";
+
   const scaleX = token.document.texture.scaleX ?? 1;
   const scaleY = token.document.texture.scaleY ?? 1;
   const userScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
 
-  const existing = token.iconGroup.children.find(c => c.name === "gb-frame");
+  const existing = token.iconGroup?.children.find(c => c.name === "gb-frame");
   if (existing) token.iconGroup.removeChild(existing);
 
   const texture = PIXI.Texture.from(framePath);
