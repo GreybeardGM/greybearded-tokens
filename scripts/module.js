@@ -10,6 +10,25 @@ Hooks.once("init", () => {
     default: "modules/greybearded-tokens/assets/frame-default.png",
     filePicker: "image"  // aktiviert den Datei-Browser für Bilddateien
   });
+
+  game.settings.register("greybearded-tokens", "applyMask", {
+    name: "Alpha-Maske auf Token anwenden",
+    hint: "Wenn aktiviert, wird eine zusätzliche Bildmaske über das Token gelegt, um Teile davon basierend auf dem Maskenbild transparent zu machen.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+  });
+
+  game.settings.register("greybearded-tokens", "maskImagePath", {
+    name: "Pfad zur Alpha-Maske",
+    hint: "Pfad zu einer PNG-Datei mit transparenter Mitte und opakem Rand, die als Alpha-Maske auf das Token angewendet wird.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "",
+    filePicker: "image"
+  });
   
   game.settings.register("greybearded-tokens", "frameScale", {
     name: "Token Frame Scale",
