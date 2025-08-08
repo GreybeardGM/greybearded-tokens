@@ -52,19 +52,12 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  libWrapper.register("greybearded-tokens", "Token.prototype.draw", async function (wrapped, ...args) {
-    const result = await wrapped(...args); // Token normal zeichnen lassen
-    applyFrameToToken(this);               // Danach Rahmen hinzufügen
+  libWrapper.register("greybearded-tokens", "Token.prototype._drawIcon", async function (wrapped, ...args) {
+    const result = await wrapped(...args);
+    applyFrameToToken(this); // ← Hier ist iconGroup garantiert da
     return result;
   }, "WRAPPER");
 
-  console.log("✅⭕ Greybearded Token Frames (libWrapper Draw-Patch) aktiv.");
+  console.log("✅⭕ Greybearded Token Frames: _drawIcon-Patch aktiv.");
 });
-
-Hooks.once("canvasReady", () => {
-  for (const token of canvas.tokens.placeables) {
-    applyFrameToToken(token); // jetzt ist iconGroup garantiert gesetzt
-  }
-});
-
 
