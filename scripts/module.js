@@ -6,7 +6,7 @@ Hooks.once("init", () => {
   Hooks.on("renderToken", (token, html) => {
     console.log("renderToken hook fired for", token.name);
 
-    const framePath = "modules/greybearded-tokens/assets/frame-default.png";
+    const framePath = "https://assets.forge-vtt.com/6409126bc31700d40e3ac139/Dungeon%20World/Tokens/Frames/player.png";
     const tint = getTintColor(token);
 
     const img = document.createElement("img");
@@ -22,7 +22,6 @@ Hooks.once("init", () => {
       objectFit: "contain",
       pointerEvents: "none",
       zIndex: "20",
-
       backgroundColor: tint,
       maskImage: `url(${framePath})`,
       webkitMaskImage: `url(${framePath})`,
