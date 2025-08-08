@@ -52,19 +52,13 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  console.log("✅⭕ Greybearded Token Frames ready.");
-  
-  for (const token of canvas.tokens.placeables) {
-    applyFrameToToken(token);
-  }
+  libWrapper.register("greybearded-tokens", "Token.prototype.draw", async function (wrapped, ...args) {
+    const result = await wrapped(...args); // Token normal zeichnen lassen
+    applyFrameToToken(this);               // Danach Rahmen hinzufügen
+    return result;
+  }, "WRAPPER");
 
-  Hooks.on("drawToken", token => {
-    applyFrameToToken(token);
-  });
-
-  Hooks.on("updateToken", (doc) => {
-    const token = canvas.tokens.get(doc.id);
-    if (token) applyFrameToToken(token);
-  });
+  console.log("✅⭕ Greybearded Token Frames (libWrapper Draw-Patch) aktiv.");
 });
+
 
