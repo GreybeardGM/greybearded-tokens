@@ -6,22 +6,30 @@ import { getTintColor } from "./get-tint-color.js";
  * @param {Token} token
  */
 export function applyFrameToToken(token) {
+  // iconGroup noch nicht verfügbar? Dann warten
+  if (!token.iconGroup) {
+    console.warn(`⏳ Warten auf draw() für ${token.name}...`);
+    token.once("drawn", () => applyFrameToToken(token));
+    return;
+  }
+
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) {
     console.log(`⛔ Token ${token.name} hat disableFrame-Flag. Rahmen wird nicht angewendet.`);
     return;
   }
 
   const framePath = game.settings.get("greybearded-tokens", "frameImagePath") || 
-    "https://assets.forge-vtt.com/6409126bc31700d40e3ac139/Dungeon%20World/Tokens/Frames/default.png";
+    "modules/greybearded-tokens/assets/frame-default.png";
+
   const scaleX = token.document.texture.scaleX ?? 1;
   const scaleY = token.document.texture.scaleY ?? 1;
   const userScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
 
-  // Vorherigen Rahmen entfernen
+  // Alten Frame entfernen
   const existing = token.iconGroup.children.find(c => c.name === "gb-frame");
   if (existing) token.iconGroup.removeChild(existing);
 
-  // Frame erstellen
+  // Neuen Frame hinzufügen
   const texture = PIXI.Texture.from(framePath);
   const sprite = new PIXI.Sprite(texture);
   sprite.name = "gb-frame";
@@ -37,4 +45,3 @@ export function applyFrameToToken(token) {
 
   token.iconGroup.addChild(sprite);
 }
-
