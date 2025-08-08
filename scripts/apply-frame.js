@@ -13,8 +13,9 @@ export function applyFrameToToken(token) {
 
   token.sortableChildren = true;
   const framePath = game.settings.get("greybearded-tokens", "frameImagePath") || "https://assets.forge-vtt.com/6409126bc31700d40e3ac139/Dungeon%20World/Tokens/Frames/default.png";
-  const frameScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
-  const textureScale = token.document.texture.scale ?? 1;
+  const scaleX = token.document.texture.scaleX ?? 1;
+  const scaleY = token.document.texture.scaleY ?? 1;
+  const userScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
   const zIndex = game.settings.get("greybearded-tokens", "frameZIndex");
 
   // Existierenden Frame entfernen
@@ -27,8 +28,8 @@ export function applyFrameToToken(token) {
   sprite.name = "gb-frame";
 
   sprite.anchor.set(0.5);
-  sprite.width = token.w * frameScale * textureScale;
-  sprite.height = token.h * frameScale * textureScale;
+  sprite.width = token.w * scaleX * userScale;
+  sprite.height = token.h * scaleY * userScale;
   sprite.x = token.w / 2;
   sprite.y = token.h / 2;
   sprite.zIndex = zIndex;
