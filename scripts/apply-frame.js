@@ -6,13 +6,6 @@ import { getTintColor } from "./get-tint-color.js";
  * @param {Token} token
  */
 export function applyFrameToToken(token) {
-  // iconGroup noch nicht verfügbar? Dann warten
-  if (!token.iconGroup) {
-    console.warn(`⏳ Warten auf draw() für ${token.name}...`);
-    token.once("drawn", () => applyFrameToToken(token));
-    return;
-  }
-
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) {
     console.log(`⛔ Token ${token.name} hat disableFrame-Flag. Rahmen wird nicht angewendet.`);
     return;
