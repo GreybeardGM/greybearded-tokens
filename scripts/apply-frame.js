@@ -16,26 +16,32 @@ export function applyFrameToToken(token) {
   const scaleX = token.document.texture.scaleX ?? 1;
   const scaleY = token.document.texture.scaleY ?? 1;
   const userScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
-  const zIndex = game.settings.get("greybearded-tokens", "frameZIndex");
 
   // Existierenden Frame entfernen
   const existing = token.children.find(c => c.name === "gb-frame");
   if (existing) token.removeChild(existing);
 
-  // Frame erstellen
-  const texture = PIXI.Texture.from(framePath);
+  // Frame-Sprite erzeugen
+  const mesh = token.children.find(c => c.name === "tokenMesh");
+  const bars = token.children.find(c => c.name === "bars");
   const sprite = new PIXI.Sprite(texture);
   sprite.name = "gb-frame";
-
+  // Optional: sprite.zIndex = 0;
   sprite.anchor.set(0.5);
   sprite.width = token.w * scaleX * userScale;
   sprite.height = token.h * scaleY * userScale;
   sprite.x = token.w / 2;
   sprite.y = token.h / 2;
-  sprite.zIndex = zIndex;
+  
+  // Sprites in token.children gezielt platzieren
+  if (bars) {
+    const barIndex = token.children.indexOf(bars);
+    token.addChildAt(sprite, barIndex); // direkt unterhalb der Bars
+  } else if (mesh) {
+    const meshIndex = token.children.indexOf(mesh);
+    token.addChildAt(sprite, meshIndex + 1); // direkt über dem Mesh
+  } else {
+    token.addChild(sprite); // fallback
+  }
 
-  const tint = getTintColor(token);
-  if (tint) sprite.tint = PIXI.utils.string2hex(tint);
-
-  token.addChildAt(sprite, 0); // 0 für unterste die Position
 }
