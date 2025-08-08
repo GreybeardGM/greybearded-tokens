@@ -6,10 +6,7 @@ import { getTintColor } from "./get-tint-color.js";
  * @param {Token} token
  */
 export function applyFrameToToken(token) {
-  if (token.document.getFlag("greybearded-tokens", "disableFrame")) {
-    console.log(`⛔ Token ${token.name} hat disableFrame-Flag. Rahmen wird nicht angewendet.`);
-    return;
-  }
+  if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
 
   token.sortableChildren = true;
 
@@ -34,7 +31,7 @@ export function applyFrameToToken(token) {
   sprite.height = token.h * scaleY * userScale;
   sprite.x = token.w / 2;
   sprite.y = token.h / 2;
-  sprite.zIndex = 20; // Solider Defaultwert
+  sprite.zIndex = -1; // Hinter Token
 
   const tint = getTintColor(token);
   if (tint) sprite.tint = PIXI.utils.string2hex(tint);
