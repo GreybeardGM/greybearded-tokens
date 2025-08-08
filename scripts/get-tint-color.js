@@ -1,8 +1,9 @@
-function getTintColor(token) {
-  switch (token.document.disposition) {
-    case -1: return "#ff4444";
-    case 0: return "#ffff00";
-    case 1: return "#44ff44";
-    default: return "#888888";
+export function getTintColor(token) {
+  const disp = token.document.disposition;
+  switch (disp) {
+    case -1: return "#ff4444"; // hostile
+    case 0:  return "#ffff00"; // neutral
+    case 1:  return "#44ff44"; // friendly
+    default: return "#888888"; // fallback
   }
 }
