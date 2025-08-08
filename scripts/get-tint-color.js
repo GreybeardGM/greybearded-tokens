@@ -5,18 +5,25 @@
  * @returns {string} CSS-Farbwert
  */
 export function getTintColor(token) {
-  const actor = token.actor;
+  const disp = token.document.disposition;
+  const actorType = token.actor?.type;
 
-  if (actor?.type === "character" && actor.hasPlayerOwner) {
-    return "#7F7F7F"; // Spielercharakter
+  const hasPlayerOwner = token.actor?.hasPlayerOwner;
+
+  const colorFromSettings = (key, fallback) =>
+    game.settings.get("greybearded-tokens", `color-${key}`) || fallback;
+
+  // Spielercharakter?
+  if (actorType === "character" && hasPlayerOwner) {
+    return colorFromSettings("character", "#AAAAAA");
   }
 
-  switch (token.document.disposition) {
-    case -1: return "#993333"; // Feindlich
-    case 0:  return "#B7A789"; // Neutral
-    case 1:  return "#5F7A8A"; // Freundlich
-    case 2:  return "#6B5E7A"; // Geheim
-    default: return "#555555"; // Fallback
+  switch (disp) {
+    case -1: return colorFromSettings("hostile", "#882211");
+    case 0:  return colorFromSettings("neutral", "#B79A75");
+    case 1:  return colorFromSettings("friendly", "#667788");
+    case 2:  return colorFromSettings("secret", "#888888");
+    default: return "#776688";
   }
 }
 
