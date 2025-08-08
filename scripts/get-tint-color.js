@@ -19,11 +19,11 @@ export function getTintColor(token) {
   }
 
   switch (disp) {
-    case -1: return colorFromSettings("hostile", "#882211");
-    case 0:  return colorFromSettings("neutral", "#B79A75");
-    case 1:  return colorFromSettings("friendly", "#667788");
-    case 2:  return colorFromSettings("secret", "#888888");
-    default: return "#776688";
+    case -1: return colorFromSettings("hostile", "#993333");
+    case 0:  return colorFromSettings("neutral", "#B7A789");
+    case 1:  return colorFromSettings("friendly", "#5F7A8A");
+    case 2:  return colorFromSettings("secret", "#6B5E7A");
+    default: return "#555555";
   }
 }
 
