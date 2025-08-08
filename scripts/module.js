@@ -2,26 +2,32 @@ import { getTintColor } from "./get-tint-color.js";
 
 Hooks.on("renderToken", (token, html) => {
   const framePath = "modules/greybearded-tokens/assets/frame-default.png";
-  const tint = getTintColor(token);  // einfache Logik vorerst
+  const tint = getTintColor(token);
 
   const img = document.createElement("img");
   img.src = framePath;
   img.classList.add("token-frame-overlay");
-  img.style.position = "absolute";
-  img.style.top = "0";
-  img.style.left = "0";
-  img.style.width = "100%";
-  img.style.height = "100%";
-  img.style.objectFit = "contain";
-  img.style.pointerEvents = "none";
-  img.style.zIndex = "20";
 
-  // Tint per Maske
-  img.style.backgroundColor = tint;
-  img.style.maskImage = `url(${framePath})`;
-  img.style.webkitMaskImage = `url(${framePath})`;
-  img.style.maskSize = "100% 100%";
-  img.style.webkitMaskSize = "100% 100%";
+  // Mitskalierend positionieren
+  Object.assign(img.style, {
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
+    pointerEvents: "none",
+    zIndex: "20",
+
+    // Tint mit Maskierung
+    backgroundColor: tint,
+    maskImage: `url(${framePath})`,
+    webkitMaskImage: `url(${framePath})`,
+    maskSize: "100% 100%",
+    webkitMaskSize: "100% 100%`,
+    mixBlendMode: "multiply",
+    opacity: "0.9",
+  });
 
   html.append(img);
 });
