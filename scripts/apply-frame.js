@@ -20,20 +20,21 @@ export function applyFrameToToken(token) {
   // Existierenden Frame entfernen
   const existing = token.children.find(c => c.name === "gb-frame");
   if (existing) token.removeChild(existing);
-
-  // Frame-Sprite erzeugen
-  const mesh = token.children.find(c => c.name === "tokenMesh");
-  const bars = token.children.find(c => c.name === "bars");
+  
+  // Frame erstellen
+  const texture = PIXI.Texture.from(framePath);
   const sprite = new PIXI.Sprite(texture);
   sprite.name = "gb-frame";
-  // Optional: sprite.zIndex = 0;
   sprite.anchor.set(0.5);
   sprite.width = token.w * scaleX * userScale;
   sprite.height = token.h * scaleY * userScale;
   sprite.x = token.w / 2;
   sprite.y = token.h / 2;
   
-  // Sprites in token.children gezielt platzieren
+  // Neue Layer-Reihenfolge (siehe vorheriger Vorschlag)
+  const mesh = token.children.find(c => c.name === "tokenMesh");
+  const bars = token.children.find(c => c.name === "bars");
+  
   if (bars) {
     const barIndex = token.children.indexOf(bars);
     token.addChildAt(sprite, barIndex); // direkt unterhalb der Bars
