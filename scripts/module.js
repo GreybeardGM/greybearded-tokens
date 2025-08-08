@@ -1,3 +1,5 @@
+import { getTintColor } from "./get-tint-color.js";
+
 Hooks.on("renderToken", (token, html) => {
   const framePath = "modules/greybearded-tokens/assets/frame-default.png";
   const tint = getTintColor(token);  // einfache Logik vorerst
@@ -19,7 +21,7 @@ Hooks.on("renderToken", (token, html) => {
   img.style.maskImage = `url(${framePath})`;
   img.style.webkitMaskImage = `url(${framePath})`;
   img.style.maskSize = "100% 100%";
-  img.style.webkitMaskSize = "100% 100%`;
+  img.style.webkitMaskSize = "100% 100%";
 
   html.append(img);
 });
