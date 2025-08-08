@@ -1,6 +1,16 @@
 import { applyFrameToToken } from "./apply-frame.js";
 
 Hooks.once("init", () => {
+  game.settings.register("greybearded-tokens", "frameImagePath", {
+    name: "Standardbild für Tokenrahmen",
+    hint: "Pfad zum PNG/SVG-Bild, das als Tokenrahmen verwendet wird.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "modules/greybearded-tokens/assets/frame-default.png",
+    filePicker: "image"  // aktiviert den Datei-Browser für Bilddateien
+  });
+  
   game.settings.register("greybearded-tokens", "frameScale", {
     name: "Token Frame Scale",
     hint: "Verändert die Größe des Tokenrahmens relativ zum Token selbst. 1 = exakt gleich groß, 1.05 = leicht größer, 0.95 = leicht kleiner.",
