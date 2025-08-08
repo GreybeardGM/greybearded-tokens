@@ -13,6 +13,7 @@ export function applyFrameToToken(token) {
 
   const framePath = "https://assets.forge-vtt.com/6409126bc31700d40e3ac139/Dungeon%20World/Tokens/Frames/player.png";
   const scale = game.settings.get("greybearded-tokens", "frameScale") || 1;
+  const zIndex = game.settings.get("greybearded-tokens", "frameZIndex");
 
   // Existierenden Frame entfernen
   const existing = token.children.find(c => c.name === "gb-frame");
@@ -28,7 +29,7 @@ export function applyFrameToToken(token) {
   sprite.height = token.h * scale;
   sprite.x = token.w / 2;
   sprite.y = token.h / 2;
-  sprite.zIndex = 100;
+  sprite.zIndex = zIndex;
 
   const tint = getTintColor(token);
   if (tint) sprite.tint = PIXI.utils.string2hex(tint);
