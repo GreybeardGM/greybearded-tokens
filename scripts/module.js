@@ -18,7 +18,26 @@ Hooks.once("init", () => {
     type: Number,
     default: 15,
   });
-  
+
+  const defaultColors = {
+    hostile: "#993333",
+    neutral: "#B7A789",
+    friendly: "#5F7A8A",
+    secret: "#6B5E7A",
+    character: "#7F7F7F"
+  };
+
+  for (const [key, defaultValue] of Object.entries(defaultColors)) {
+    game.settings.register("greybearded-tokens", `color-${key}`, {
+      name: `Farbe für ${key}`,
+      hint: `Rahmenfarbe für ${key === "character" ? "Spielercharaktere" : `Disposition: ${key}`}`,
+      scope: "world",
+      config: true,
+      type: String,
+      default: defaultValue
+    });
+  }
+
   console.log("✅⭕ Greybearded Token Frames initialized.");
 });
 
