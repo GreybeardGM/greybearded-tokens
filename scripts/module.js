@@ -3,22 +3,17 @@ import { applyFrameToToken } from "./apply-frame.js";
 Hooks.once("init", () => {
   game.settings.register("greybearded-tokens", "frameScale", {
     name: "Token Frame Scale",
-    hint: "Verändert die Größe des Tokenrahmens relativ zum Token selbst. 1 = exakt gleich groß, 1.1 = etwas größer.",
-    scope: "client",
+    hint: "Verändert die Größe des Tokenrahmens relativ zum Token selbst. 1 = exakt gleich groß, 1.05 = leicht größer, 0.95 = leicht kleiner.",
+    scope: "world",
     config: true,
     type: Number,
-    default: 1,
-    range: {
-      min: 0.5,
-      max: 2,
-      step: 0.01
-    }
+    default: 1
   });
 
   game.settings.register("greybearded-tokens", "frameZIndex", {
     name: "Tokenrahmen-Z-Ebene",
     hint: "Legt fest, wie weit oben der Rahmen über dem Token erscheinen soll. Höhere Werte bedeuten höhere Sichtbarkeit, können aber UI-Elemente überdecken.",
-    scope: "client",
+    scope: "world",
     config: true,
     type: Number,
     default: 15,
