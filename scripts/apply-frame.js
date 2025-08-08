@@ -15,7 +15,7 @@ export function applyFrameToToken(token) {
 
   const framePath = game.settings.get("greybearded-tokens", "frameImagePath") || 
     "https://assets.forge-vtt.com/6409126bc31700d40e3ac139/Dungeon%20World/Tokens/Frames/default.png";
-  
+
   const scaleX = token.document.texture.scaleX ?? 1;
   const scaleY = token.document.texture.scaleY ?? 1;
   const userScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
@@ -34,10 +34,11 @@ export function applyFrameToToken(token) {
   sprite.height = token.h * scaleY * userScale;
   sprite.x = token.w / 2;
   sprite.y = token.h / 2;
-  sprite.zIndex = 20; // Solider Defaultwert
 
   const tint = getTintColor(token);
   if (tint) sprite.tint = PIXI.utils.string2hex(tint);
 
-  token.addChild(sprite);
+  // Wichtig: Frame zwischen Token-Artwork und Bars/Highlight einsortieren
+  const iconIndex = token.children.indexOf(token.icon);
+  token.addChildAt(sprite, iconIndex + 1); // Direkt über dem Token-Bild
 }
