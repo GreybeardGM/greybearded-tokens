@@ -13,7 +13,7 @@ Hooks.once("ready", () => {
   }
 
   // Neue Tokens (async Polling)
-  Hooks.on("createToken", (doc) => {
+  /*Hooks.on("createToken", (doc) => {
     const maxRetries = 10;
     const retryDelay = 50; // ms
   
@@ -30,7 +30,7 @@ Hooks.once("ready", () => {
     };
   
     tryApplyFrame();
-  });
+  });*/
   Hooks.on("drawToken", token => {
     console.log(`🎨 drawToken → Rahmen wird angewendet für ${token.name}`);
     applyFrameToToken(token);
