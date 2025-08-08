@@ -17,13 +17,6 @@ Hooks.once("init", () => {
     config: true,
     type: Number,
     default: 15,
-    choices: {
-      10: "Unter dem HUD (10)",
-      15: "Über dem Token, unter dem HUD (15)",
-      20: "Neben dem HUD (20)",
-      30: "Über Zielmarkern (30)",
-      40: "Ganz oben (40 – kann UI überdecken)",
-    }
   });
   
   console.log("✅⭕ Greybearded Token Frames initialized.");
