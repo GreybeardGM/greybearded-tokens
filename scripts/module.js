@@ -14,6 +14,22 @@ Hooks.once("init", () => {
       step: 0.01
     }
   });
+
+  game.settings.register("greybearded-tokens", "frameZIndex", {
+    name: "Tokenrahmen-Z-Ebene",
+    hint: "Legt fest, wie weit oben der Rahmen über dem Token erscheinen soll. Höhere Werte bedeuten höhere Sichtbarkeit, können aber UI-Elemente überdecken.",
+    scope: "client",
+    config: true,
+    type: Number,
+    default: 15,
+    choices: {
+      10: "Unter dem HUD (10)",
+      15: "Über dem Token, unter dem HUD (15)",
+      20: "Neben dem HUD (20)",
+      30: "Über Zielmarkern (30)",
+      40: "Ganz oben (40 – kann UI überdecken)",
+    }
+  });
   
   console.log("✅⭕ Greybearded Token Frames initialized.");
 });
