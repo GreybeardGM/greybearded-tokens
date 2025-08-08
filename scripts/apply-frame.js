@@ -6,18 +6,25 @@ import { getTintColor } from "./get-tint-color.js";
  * @param {Token} token
  */
 export function applyFrameToToken(token) {
-  if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
+  if (token.document.getFlag("greybearded-tokens", "disableFrame")) {
+    console.log(`⛔ Token ${token.name} hat disableFrame-Flag. Rahmen wird nicht angewendet.`);
+    return;
+  }
+
+  token.sortableChildren = true;
 
   const framePath = game.settings.get("greybearded-tokens", "frameImagePath") || 
-    "modules/greybearded-tokens/assets/frame-default.png";
-
+    "https://assets.forge-vtt.com/6409126bc31700d40e3ac139/Dungeon%20World/Tokens/Frames/default.png";
+  
   const scaleX = token.document.texture.scaleX ?? 1;
   const scaleY = token.document.texture.scaleY ?? 1;
   const userScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
 
-  const existing = token.iconGroup?.children.find(c => c.name === "gb-frame");
-  if (existing) token.iconGroup.removeChild(existing);
+  // Existierenden Frame entfernen
+  const existing = token.children.find(c => c.name === "gb-frame");
+  if (existing) token.removeChild(existing);
 
+  // Frame erstellen
   const texture = PIXI.Texture.from(framePath);
   const sprite = new PIXI.Sprite(texture);
   sprite.name = "gb-frame";
@@ -27,9 +34,10 @@ export function applyFrameToToken(token) {
   sprite.height = token.h * scaleY * userScale;
   sprite.x = token.w / 2;
   sprite.y = token.h / 2;
+  sprite.zIndex = 20; // Solider Defaultwert
 
   const tint = getTintColor(token);
   if (tint) sprite.tint = PIXI.utils.string2hex(tint);
 
-  token.iconGroup.addChild(sprite);
+  token.addChild(sprite);
 }
