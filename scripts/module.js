@@ -52,11 +52,22 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  libWrapper.register("greybearded-tokens", "TokenLayer.prototype.drawToken", async function(wrapped, ...args) {
-    const token = await wrapped(...args); // Token wurde erstellt und gerendert
-    applyFrameToToken(token);             // Jetzt ist iconGroup garantiert vorhanden
-    return token;
-  }, "WRAPPER");
+  console.log("✅⭕ Greybearded Token Frames ready.");
 
-  console.log("✅⭕ Greybearded Token Frames: drawToken-Patch aktiv.");
+  // Bestehende Tokens
+  for (const token of canvas.tokens.placeables) {
+    applyFrameToToken(token);
+  }
+
+  // Neue Tokens
+  Hooks.on("drawToken", token => {
+    console.log(`🎨 drawToken → Rahmen wird angewendet für ${token.name}`);
+    applyFrameToToken(token);
+  });
+  
+  // Token wird aktualisiert
+  Hooks.on("updateToken", (doc) => {
+    const token = canvas.tokens.get(doc.id);
+    if (token) applyFrameToToken(token);
+  });
 });
