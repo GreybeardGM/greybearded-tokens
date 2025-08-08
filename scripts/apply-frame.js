@@ -11,7 +11,7 @@ export function applyFrameToToken(token) {
     return;
   }
 
-  const framePath = "https://assets.forge-vtt.com/6409126bc31700d40e3ac139/Dungeon%20World/Tokens/Frames/player.png";
+  const framePath = "https://assets.forge-vtt.com/6409126bc31700d40e3ac139/Dungeon%20World/Tokens/Frames/default.png";
   const scale = game.settings.get("greybearded-tokens", "frameScale") || 1;
   const zIndex = game.settings.get("greybearded-tokens", "frameZIndex");
 
