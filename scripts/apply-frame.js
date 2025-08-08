@@ -37,5 +37,5 @@ export function applyFrameToToken(token) {
   const tint = getTintColor(token);
   if (tint) sprite.tint = PIXI.utils.string2hex(tint);
 
-  token.addChild(sprite);
+  token.addChildAt(sprite, 0); // 0 für unterste die Position
 }
