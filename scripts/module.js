@@ -1,41 +1,50 @@
 import { getTintColor } from "./get-tint-color.js";
 
 Hooks.once("init", () => {
-  console.log("✅⭕Greybearded Token Frames initialized.");
+  console.log("✅⭕ Greybearded Token Frames initialized.");
 });
 
-// ACHTUNG: renderToken-Hook muss *nach* canvas existieren!
 Hooks.once("ready", () => {
-  console.log("✅⭕Greybearded Token Frames ready.");
+  console.log("✅⭕ Greybearded Token Frames ready.");
 
-  Hooks.on("renderToken", (token, html) => {
-    console.log("⭕renderToken hook fired for", token.name);
+  const framePath = "https://assets.forge-vtt.com/6409126bc31700d40e3ac139/Dungeon%20World/Tokens/Frames/player.png";
 
-    const framePath = "https://assets.forge-vtt.com/6409126bc31700d40e3ac139/Dungeon%20World/Tokens/Frames/player.png";
+  function applyFrameToToken(token) {
+    // Entferne alten Frame, falls vorhanden
+    const existing = token.children.find(c => c.name === "gb-frame");
+    if (existing) token.removeChild(existing);
+
+    // Erzeuge neuen Frame
+    const texture = PIXI.Texture.from(framePath);
+    const sprite = new PIXI.Sprite(texture);
+    sprite.name = "gb-frame";
+
+    sprite.anchor.set(0.5);
+    sprite.width = token.w;
+    sprite.height = token.h;
+    sprite.zIndex = 100;
+
+    // Färbung per modularer Funktion
     const tint = getTintColor(token);
+    if (tint) sprite.tint = PIXI.utils.string2hex(tint);
 
-    const img = document.createElement("img");
-    img.src = framePath;
-    img.classList.add("token-frame-overlay");
+    token.addChild(sprite);
+  }
 
-    Object.assign(img.style, {
-      position: "absolute",
-      top: "0",
-      left: "0",
-      width: "100%",
-      height: "100%",
-      objectFit: "contain",
-      pointerEvents: "none",
-      zIndex: "20",
-      backgroundColor: tint,
-      maskImage: `url(${framePath})`,
-      webkitMaskImage: `url(${framePath})`,
-      maskSize: "100% 100%",
-      webkitMaskSize: "100% 100%",
-      mixBlendMode: "multiply",
-      opacity: "0.9"
-    });
+  // Wende Rahmen auf vorhandene Tokens an
+  for (const token of canvas.tokens.placeables) {
+    applyFrameToToken(token);
+  }
 
-    html.append(img);
+  // Neue Tokens
+  Hooks.on("createToken", (doc) => {
+    const token = canvas.tokens.get(doc.id);
+    if (token) applyFrameToToken(token);
+  });
+
+  // Token-Änderungen (Größe, Disposition, etc.)
+  Hooks.on("updateToken", (doc) => {
+    const token = canvas.tokens.get(doc.id);
+    if (token) applyFrameToToken(token);
   });
 });
