@@ -17,19 +17,11 @@ export function applyFrameToToken(token) {
   const scaleY = token.document.texture.scaleY ?? 1;
   const userScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
 
-  // Existierende Ebene bereinigen
-  if (token.gbFrameLayer) {
-    token.removeChild(token.gbFrameLayer);
-    token.gbFrameLayer.destroy({ children: true });
-  }
+  // Vorherigen Rahmen entfernen
+  const existing = token.iconGroup.children.find(c => c.name === "gb-frame");
+  if (existing) token.iconGroup.removeChild(existing);
 
-  // Neue Ebene erstellen
-  const frameLayer = new PIXI.Container();
-  frameLayer.name = "gb-frame-layer";
-  frameLayer.zIndex = 10;
-  frameLayer.sortableChildren = false;
-
-  // Sprite bauen
+  // Frame erstellen
   const texture = PIXI.Texture.from(framePath);
   const sprite = new PIXI.Sprite(texture);
   sprite.name = "gb-frame";
@@ -43,11 +35,6 @@ export function applyFrameToToken(token) {
   const tint = getTintColor(token);
   if (tint) sprite.tint = PIXI.utils.string2hex(tint);
 
-  frameLayer.addChild(sprite);
-  token.gbFrameLayer = frameLayer;
-
-  // Nach dem icon, vor bars/effects hinzufügen
-  const iconIndex = token.children.indexOf(token.icon);
-  token.addChildAt(frameLayer, iconIndex + 1);
-  console.log(token.children.map(c => c.name));
+  token.iconGroup.addChild(sprite);
 }
+
