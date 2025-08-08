@@ -22,6 +22,8 @@ Hooks.once("ready", () => {
     sprite.anchor.set(0.5);
     sprite.width = token.w;
     sprite.height = token.h;
+    sprite.x = token.w / 2;
+    sprite.y = token.h / 2;
     sprite.zIndex = 100;
 
     // Färbung per modularer Funktion
