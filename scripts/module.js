@@ -12,25 +12,7 @@ Hooks.once("ready", () => {
     applyFrameToToken(token);
   }
 
-  // Neue Tokens (async Polling)
-  /*Hooks.on("createToken", (doc) => {
-    const maxRetries = 10;
-    const retryDelay = 50; // ms
-  
-    const tryApplyFrame = async (attempt = 0) => {
-      const token = canvas.tokens.get(doc.id);
-      if (token) {
-        console.log(`⭕ createToken → Rahmen angewendet bei Versuch #${attempt + 1} für ${token.name}`);
-        applyFrameToToken(token);
-      } else if (attempt < maxRetries) {
-        setTimeout(() => tryApplyFrame(attempt + 1), retryDelay);
-      } else {
-        console.warn("❌ createToken → Kein Token gefunden nach 10 Versuchen:", doc);
-      }
-    };
-  
-    tryApplyFrame();
-  });*/
+  // Neue Tokens
   Hooks.on("drawToken", token => {
     console.log(`🎨 drawToken → Rahmen wird angewendet für ${token.name}`);
     applyFrameToToken(token);
