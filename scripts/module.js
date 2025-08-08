@@ -53,32 +53,18 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   console.log("✅⭕ Greybearded Token Frames ready.");
-
-  // Bestehende Tokens
+  
   for (const token of canvas.tokens.placeables) {
-    if (token.iconGroup) {
-      applyFrameToToken(token);
-    } else {
-      token.once("drawn", () => applyFrameToToken(token));
-    }
+    applyFrameToToken(token);
   }
 
-  // Neue Tokens beim Zeichnen
   Hooks.on("drawToken", token => {
-    console.log(`🎨 drawToken → Rahmen wird angewendet für ${token.name}`);
     applyFrameToToken(token);
   });
 
-  // Token wird aktualisiert
   Hooks.on("updateToken", (doc) => {
     const token = canvas.tokens.get(doc.id);
-    if (!token) return;
-
-    if (token.iconGroup) {
-      applyFrameToToken(token);
-    } else {
-      token.once("drawn", () => applyFrameToToken(token));
-    }
+    if (token) applyFrameToToken(token);
   });
 });
 
