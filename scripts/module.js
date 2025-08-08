@@ -11,7 +11,7 @@ Hooks.once("init", () => {
     range: {
       min: 0.5,
       max: 2,
-      step: 0.05
+      step: 0.01
     }
   });
   
