@@ -52,12 +52,11 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  libWrapper.register("greybearded-tokens", "Token.prototype._drawIcon", async function (wrapped, ...args) {
-    const result = await wrapped(...args);
-    applyFrameToToken(this); // ← Hier ist iconGroup garantiert da
-    return result;
+  libWrapper.register("greybearded-tokens", "TokenLayer.prototype.drawToken", async function(wrapped, ...args) {
+    const token = await wrapped(...args); // Token wurde erstellt und gerendert
+    applyFrameToToken(token);             // Jetzt ist iconGroup garantiert vorhanden
+    return token;
   }, "WRAPPER");
 
-  console.log("✅⭕ Greybearded Token Frames: _drawIcon-Patch aktiv.");
+  console.log("✅⭕ Greybearded Token Frames: drawToken-Patch aktiv.");
 });
-
