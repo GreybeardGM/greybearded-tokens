@@ -54,6 +54,7 @@ export function applyFrameToToken(token) {
     maskSprite.y = token.h / 2;
 
     // Es ist keine addChild nötig – Sprite nur als Maske benutzt
+console.log("🌀 Applying alphaMask to", token.name, sprite);
     token.icon.alphaMask = maskSprite;
   }
 }
