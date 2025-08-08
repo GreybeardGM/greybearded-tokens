@@ -73,10 +73,10 @@ Hooks.once("init", () => {
 Hooks.once("ready", () => {
   console.log("✅⭕ Greybearded Token Frames ready.");
 
-  /*// Bestehende Tokens
+  // Bestehende Tokens
   for (const token of canvas.tokens.placeables) {
     applyFrameToToken(token);
-  }*/
+  }
 
   // Neue Tokens
   Hooks.on("drawToken", token => {
