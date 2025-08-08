@@ -42,6 +42,13 @@ export function applyFrameToToken(token) {
   // ⛔ Alte Masken entfernen
   if (token.icon && token.icon.alphaMask) token.icon.alphaMask = null;
 
+console.log("🧪 Setze alphaMask", {
+  tokenName: token.name,
+  iconExists: !!token.icon,
+  maskPath,
+  maskSpriteTextureValid: PIXI.Texture.from(maskPath).valid
+});
+  
   // ✅ Maske anwenden, wenn gewünscht
   if (applyMask && maskPath) {
     const maskTexture = PIXI.Texture.from(maskPath);
@@ -54,7 +61,7 @@ export function applyFrameToToken(token) {
     maskSprite.y = token.h / 2;
 
     // Es ist keine addChild nötig – Sprite nur als Maske benutzt
-console.log("🌀 Applying alphaMask to", token.name, sprite);
+    console.log("🌀 Applying alphaMask to", token.name, sprite);
     token.icon.alphaMask = maskSprite;
   }
 }
