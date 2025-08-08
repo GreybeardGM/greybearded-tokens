@@ -31,7 +31,11 @@ Hooks.once("ready", () => {
   
     tryApplyFrame();
   });
-
+  Hooks.on("drawToken", token => {
+    console.log(`🎨 drawToken → Rahmen wird angewendet für ${token.name}`);
+    applyFrameToToken(token);
+  });
+  
   // Token wird aktualisiert
   Hooks.on("updateToken", (doc) => {
     const token = canvas.tokens.get(doc.id);
