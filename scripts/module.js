@@ -40,8 +40,20 @@ Hooks.once("ready", () => {
 
   // Neue Tokens
   Hooks.on("createToken", (doc) => {
-    const token = canvas.tokens.get(doc.id);
-    if (token) applyFrameToToken(token);
+    // Warte, bis das Token tatsächlich auf dem Canvas existiert
+    const waitForToken = async () => {
+      for (let i = 0; i < 10; i++) {
+        const token = canvas.tokens.get(doc.id);
+        if (token) {
+          applyFrameToToken(token);
+          return;
+        }
+        await new Promise(r => setTimeout(r, 50)); // 50ms warten
+      }
+      console.warn("⭕ Greybearded Token Frames: Token not found after createToken.", doc);
+    };
+  
+    waitForToken();
   });
 
   // Token-Änderungen (Größe, Disposition, etc.)
