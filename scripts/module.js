@@ -56,18 +56,29 @@ Hooks.once("ready", () => {
 
   // Bestehende Tokens
   for (const token of canvas.tokens.placeables) {
-    applyFrameToToken(token);
+    if (token.iconGroup) {
+      applyFrameToToken(token);
+    } else {
+      token.once("drawn", () => applyFrameToToken(token));
+    }
   }
 
-  // Neue Tokens
+  // Neue Tokens beim Zeichnen
   Hooks.on("drawToken", token => {
     console.log(`🎨 drawToken → Rahmen wird angewendet für ${token.name}`);
     applyFrameToToken(token);
   });
-  
+
   // Token wird aktualisiert
   Hooks.on("updateToken", (doc) => {
     const token = canvas.tokens.get(doc.id);
-    if (token) applyFrameToToken(token);
+    if (!token) return;
+
+    if (token.iconGroup) {
+      applyFrameToToken(token);
+    } else {
+      token.once("drawn", () => applyFrameToToken(token));
+    }
   });
 });
+
