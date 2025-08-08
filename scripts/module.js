@@ -24,7 +24,7 @@ Hooks.on("renderToken", (token, html) => {
     maskImage: `url(${framePath})`,
     webkitMaskImage: `url(${framePath})`,
     maskSize: "100% 100%",
-    webkitMaskSize: "100% 100%`,
+    webkitMaskSize: "100% 100%",
     mixBlendMode: "multiply",
     opacity: "0.9",
   });
