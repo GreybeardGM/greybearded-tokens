@@ -1,6 +1,16 @@
 import { applyFrameToToken } from "./apply-frame.js";
 
 Hooks.once("init", () => {
+
+  // ──────────────────────────────────────────────────────────────────────────────
+  // Einfärbemethode
+  // ──────────────────────────────────────────────────────────────────────────────
+  const TINT_CHOICES = {
+    Disposition: "Disposition",
+    PlayerColor: "Player Color",
+    NoTint: "No Tint"
+  };
+
   game.settings.register("greybearded-tokens", "frameImagePath", {
     name: "Standardbild für Tokenrahmen",
     hint: "Pfad zum PNG/SVG-Bild, das als Tokenrahmen verwendet wird.",
@@ -18,6 +28,16 @@ Hooks.once("init", () => {
     config: true,
     type: Number,
     default: 1
+  });
+  
+  game.settings.register("greybearded-tokens", "frameTintMode", {
+    name: "Einfärbemethode (Rahmen 1)",
+    hint: "Bestimmt, wie der erste Rahmen eingefärbt wird.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: TINT_CHOICES,
+    default: "Disposition"
   });
 
   // ──────────────────────────────────────────────────────────────────────────────
@@ -40,6 +60,16 @@ Hooks.once("init", () => {
     type: String,
     default: "modules/greybearded-tokens/assets/frame-secondary.png",
     filePicker: "image"
+  });
+  
+  game.settings.register("greybearded-tokens", "secondaryFrameTintMode", {
+    name: "Einfärbemethode (Rahmen 2)",
+    hint: "Bestimmt, wie der zweite Rahmen eingefärbt wird.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: TINT_CHOICES,
+    default: "PlayerColor"
   });
   
   game.settings.register("greybearded-tokens", "secondaryFrameScale", {
