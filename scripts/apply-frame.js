@@ -1,27 +1,6 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
 
-const FRAME_FLAG = "_gbFrame";
-let CACHED_TEX = null;
-
-async function getFrameTexture() {
-  const framePath = game.settings.get("greybearded-tokens", "frameImagePath");
-  // Einmalig vorladen, damit Maße konsistent sind
-  if (!CACHED_TEX || CACHED_TEX.baseTexture.resource.url !== framePath) {
-    // Falls deine Foundry-Version PIXI.Assets hat, nimm das – sonst PIXI.Texture.from
-    if (PIXI.Assets?.load) {
-      const base = await PIXI.Assets.load(framePath);
-      CACHED_TEX = new PIXI.Texture(base);
-    } else {
-      CACHED_TEX = PIXI.Texture.from(framePath);
-      if (!CACHED_TEX.baseTexture.valid) {
-        await new Promise(res => CACHED_TEX.baseTexture.once("loaded", res));
-      }
-    }
-  }
-  return CACHED_TEX;
-}
-
 export async function applyFrameToToken(token) {
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
   // ... innerhalb von applyFrameToToken(token)
@@ -65,9 +44,14 @@ export async function applyFrameToToken(token) {
   const sx = mesh.scale.x || 1;
   const sy = mesh.scale.y || 1;
   
-  // Breite/Höhe so setzen, dass die geerbte Eltern-Skalierung kompensiert wird:
-  frame.width  = (kW * userScale) / sx;
-  frame.height = (kH * userScale) / sy;
+  // Textur-Skalierung (per Token-Dokument gesetzt)
+  const tx = Math.abs(token.document.texture?.scaleX ?? 1);
+  const ty = Math.abs(token.document.texture?.scaleY ?? 1);
+  
+  // Breite/Höhe so setzen, dass die geerbte Eltern-Skalierung kompensiert
+  // UND der Textur-Zoom berücksichtigt wird
+  frame.width  = (kW * tx * userScale) / sx;
+  frame.height = (kH * ty * userScale) / sy;
   
   // v12: Mesh-Mitte ist (0,0)
   frame.position.set(0, 0);
