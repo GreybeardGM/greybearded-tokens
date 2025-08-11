@@ -15,9 +15,6 @@ export async function applyFrameToToken(token) {
   const path1     = game.settings.get("greybearded-tokens", "frameImagePath");
 
   const secondEnabled = !!game.settings.get("greybearded-tokens", "secondaryFrameEnabled");
-  const tintMode2     = game.settings.get("greybearded-tokens", "secondaryFrameTintMode") ?? "Disposition";
-  const scale2        = Number(game.settings.get("greybearded-tokens","secondaryFrameScale")) || 1;
-  const path2         = game.settings.get("greybearded-tokens", "secondaryFrameImagePath");
 
   // bestehende Sprites suchen
   let frame1 = mesh.children.find(c => c?._gbFramePrimary);
@@ -45,6 +42,7 @@ export async function applyFrameToToken(token) {
 
   // Frame 2 erstellen/entfernen je nach Setting
   if (secondEnabled) {
+    const path2 = game.settings.get("greybearded-tokens", "secondaryFrameImagePath");
     if (!frame2) {
       frame2 = new PIXI.Sprite(PIXI.Texture.from(path2));
       frame2._gbFrameSecondary = true;
@@ -61,14 +59,13 @@ export async function applyFrameToToken(token) {
   }
 
   // Tints aktualisieren (bei jedem Refresh)
-  {
-    const t1 = getTintColor(token, tintMode1);
-    frame1.tint = t1 ? PIXI.utils.string2hex(t1) : 0xFFFFFF;
+  const t1 = getTintColor(token, tintMode1);
+  frame1.tint = t1 ? PIXI.utils.string2hex(t1) : 0xFFFFFF;
 
-    if (frame2) {
-      const t2 = getTintColor(token, tintMode2);
-      frame2.tint = t2 ? PIXI.utils.string2hex(t2) : 0xFFFFFF;
-    }
+  if (frame2) {
+    const tintMode2 = game.settings.get("greybearded-tokens", "secondaryFrameTintMode") ?? "Disposition";
+    const t2 = getTintColor(token, tintMode2);
+    frame2.tint = t2 ? PIXI.utils.string2hex(t2) : 0xFFFFFF;
   }
 
   // Geometrie/Skalierung
@@ -99,6 +96,7 @@ export async function applyFrameToToken(token) {
   frame1.height = (kH * ty * scale1) / sy;
 
   if (frame2) {
+    const scale2 = Number(game.settings.get("greybearded-tokens","secondaryFrameScale")) || 1;
     frame2.width  = (kW * tx * scale2) / sx;
     frame2.height = (kH * ty * scale2) / sy;
   }
