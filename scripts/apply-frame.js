@@ -1,40 +1,48 @@
+// apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
 
-/**
- * Fügt dem gegebenen Token einen gerahmten Pixi-Sprite hinzu.
- * Entfernt vorhandenen Rahmen, wenn nötig.
- * @param {Token} token
- */
+const FRAME_FLAG = "_gbFrame";
+
 export function applyFrameToToken(token) {
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
+  const mesh = token.mesh;
+  if (!mesh) return;
 
-  token.sortableChildren = true;
+  mesh.sortableChildren = true;
 
-  const framePath = game.settings.get("greybearded-tokens", "frameImagePath");
+  // Frame suchen/erstellen
+  let frame = mesh.children.find(c => c?.[FRAME_FLAG]);
+  if (!frame) {
+    const framePath = game.settings.get("greybearded-tokens", "frameImagePath");
+    const texture = PIXI.Texture.from(framePath);
 
-  const scaleX = token.document.texture.scaleX ?? 1;
-  const scaleY = token.document.texture.scaleY ?? 1;
+    frame = new PIXI.Sprite(texture);
+    frame[FRAME_FLAG] = true;
+    frame.name = "gb-frame";
+    frame.anchor.set(0.5);
+
+    // Z unter Bars, über Artwork (Bars haben meist höheren zIndex)
+    const barsZ = mesh.bars?.zIndex ?? 20;
+    frame.zIndex = barsZ - 1;
+
+    // Farbe
+    const tint = getTintColor(token);
+    if (tint) frame.tint = PIXI.utils.string2hex(tint);
+
+    mesh.addChild(frame);
+  }
+
+  // Größe/Position jedes Mal neu setzen
   const userScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
 
-  // Remove old frame
-  const existing = token.children.find(c => c.name === "gb-frame");
-  if (existing) token.removeChild(existing);
+  // token.w/h = gerenderte Pixelgröße des Tokens (inkl. document width/height & Grid)
+  frame.width  = token.w * userScale;
+  frame.height = token.h * userScale;
 
-  // Add frame sprite
-  const texture = PIXI.Texture.from(framePath);
-  const sprite = new PIXI.Sprite(texture);
-  sprite.name = "gb-frame";
+  // Mitte des Tokens (lokale Mesh-Koordinaten)
+  frame.position.set(token.w / 2, token.h / 2);
 
-  sprite.anchor.set(0.5);
-  sprite.width = token.w * scaleX * userScale;
-  sprite.height = token.h * scaleY * userScale;
-  sprite.x = token.w / 2;
-  sprite.y = token.h / 2;
-  sprite.zIndex = -1;
-
-  const tint = getTintColor(token);
-  if (tint) sprite.tint = PIXI.utils.string2hex(tint);
-
-  token.addChild(sprite);
-
+  // Z-Reihenfolge gegen Bars absichern (falls Bars gerade neu gebaut wurden)
+  const barsZ = mesh.bars?.zIndex ?? 20;
+  frame.zIndex = barsZ - 1;
 }
