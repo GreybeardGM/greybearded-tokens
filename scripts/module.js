@@ -15,8 +15,10 @@ Hooks.once("init", () => {
   // ──────────────────────────────────────────────────────────────────────────────
   const TINT_CHOICES = {
     Disposition: "Disposition",
-    PlayerColor: "Player Color",
-    NoTint: "No Tint"
+    PlayerColor: "PlayerColor",
+    Unicolor: "Unicolor",
+    Advanced: "Advanced",
+    NoTint: "NoTint"
   };
 
   game.settings.register("greybearded-tokens", "frameImagePath", {
