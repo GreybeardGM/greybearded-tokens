@@ -24,49 +24,53 @@ async function getFrameTexture() {
 
 export async function applyFrameToToken(token) {
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
+  // ... innerhalb von applyFrameToToken(token)
   const mesh = token.mesh;
   if (!mesh) return;
-
+  
   mesh.sortableChildren = true;
-
-  // Frame holen/erstellen
-  let frame = mesh.children.find(c => c?.[FRAME_FLAG]);
+  
+  let frame = mesh.children.find(c => c?._gbFrame);
   if (!frame) {
-    const tex = await getFrameTexture();
+    const framePath = game.settings.get("greybearded-tokens", "frameImagePath");
+    const tex = PIXI.Texture.from(framePath);
     frame = new PIXI.Sprite(tex);
-    frame[FRAME_FLAG] = true;
+    frame._gbFrame = true;
     frame.name = "gb-frame";
     frame.anchor.set(0.5);
-    frame.roundPixels = true;
-
-    // Tönung nach Disposition
+  
     const tint = getTintColor(token);
     if (tint) frame.tint = PIXI.utils.string2hex(tint);
-
-    // Unter die Bars
+  
     const barsZ = mesh.bars?.zIndex ?? 20;
     frame.zIndex = barsZ - 1;
-
+  
     mesh.addChild(frame);
   }
-
-  // ——— deterministische Größe/Position ———
+  
+  // — deterministische Größe/Position —
   const userScale = Number(game.settings.get("greybearded-tokens", "frameScale")) || 1;
-
-  // Token-Pixelmaße (Hülle, nicht das Artwork)
-  const w = token.document.width  * canvas.grid.size;
-  const h = token.document.height * canvas.grid.size;
-
+  
+  // Token-Kachelmaße (Pixel)
+  const baseW = token.document.width  * canvas.grid.size;
+  const baseH = token.document.height * canvas.grid.size;
+  
+  // Bild-Zoom des Icons (per Token-Dokument gesetzt)
+  const texScaleX = Math.abs(token.document.texture?.scaleX ?? 1);
+  const texScaleY = Math.abs(token.document.texture?.scaleY ?? 1);
+  
   // Keine kumulative Skalierung
   frame.scale.set(1, 1);
-
-  frame.width  = w * userScale;
-  frame.height = h * userScale;
-
+  
+  // Rahmen an sichtbaren Bild-Zoom anpassen
+  frame.width  = baseW * texScaleX * userScale;
+  frame.height = baseH * texScaleY * userScale;
+  
   // v12: Mesh-Mitte ist (0,0)
   frame.position.set(0, 0);
-
-  // Z-Order ggf. nachziehen, falls Bars gerade neu gebaut wurden
+  
+  // Bars-Z erneut sichern (falls gerade neu erzeugt)
   const barsZ2 = mesh.bars?.zIndex ?? 20;
   frame.zIndex = barsZ2 - 1;
+
 }
