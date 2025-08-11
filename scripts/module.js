@@ -1,4 +1,5 @@
 import { applyFrameToToken } from "./apply-frame.js";
+import { getGbFrameSettings } from "./settings-snapshot.js";
 
 Hooks.once("init", () => {
   function requestReload() {
@@ -133,38 +134,49 @@ Hooks.once("init", () => {
   console.log("✅⭕ Greybearded Token Frames initialized.");
 });
 
-Hooks.once("ready", () => {
-  async function preloadFrameTextures() {
-    const S = getGbFrameSettings();
-    const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
-    if (PIXI.Assets?.load) {
-      await Promise.all(paths.map(p => PIXI.Assets.load(p)));
-    } else {
-      // Fallback: einmal anstoßen
-      paths.forEach(p => PIXI.Texture.from(p));
-    }
+// ──────────────────────────────────────────────────────────────────────────────
+// Rendering Hooks etc.
+// ──────────────────────────────────────────────────────────────────────────────
+async function preloadFrameTextures() {
+  const S = getGbFrameSettings();
+  const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
+  if (PIXI.Assets?.load) {
+    await Promise.all(paths.map(p => PIXI.Assets.load(p)));
+  } else {
+    paths.forEach(p => PIXI.Texture.from(p));
   }
-  
-  function nextTick(fn) {
-    // sicherstellen, dass alles gezeichnet ist (Bars etc.)
-    requestAnimationFrame(() => requestAnimationFrame(fn));
-  }
-  
-  Hooks.on("canvasReady", async () => {
+}
+
+function nextTick(fn) {
+  requestAnimationFrame(() => requestAnimationFrame(fn));
+}
+
+Hooks.on("canvasReady", async () => {
+  await preloadFrameTextures();
+  nextTick(() => {
+    for (const t of canvas.tokens.placeables) applyFrameToToken(t);
+  });
+});
+
+Hooks.on("drawToken", (token) => {
+  nextTick(() => applyFrameToToken(token));
+});
+
+// Optional, selten: PlayerColor-Änderung
+Hooks.on("updateUser", (user, change) => {
+  if (!("color" in (change ?? {}))) return;
+  for (const t of canvas.tokens.placeables) applyFrameToToken(t);
+});
+
+// Einmaliger Fallback, falls die Szene schon fertig war,
+// bevor die obenstehenden Hooks registriert wurden (z.B. Module-Lade-Reihenfolge)
+Hooks.once("ready", async () => {
+  // Wenn Canvas bereits ready ist, trotzdem Texturen preloaden und sweepen
+  if (canvas?.ready) {
     await preloadFrameTextures();
     nextTick(() => {
       for (const t of canvas.tokens.placeables) applyFrameToToken(t);
     });
-  });
-  
-  Hooks.on("drawToken", (token) => {
-    // beim erstmaligen Zeichnen minimal verzögert anwenden
-    nextTick(() => applyFrameToToken(token));
-  });
-  
-  // Optional, aber sehr selten: wenn sich User-Farben ändern (PlayerColor-Mode)
-  Hooks.on("updateUser", (user, change) => {
-    if (!("color" in (change ?? {}))) return;
-    for (const t of canvas.tokens.placeables) applyFrameToToken(t);
-  });
+  }
 });
+
