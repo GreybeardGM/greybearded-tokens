@@ -48,8 +48,26 @@ export async function applyFrameToToken(token) {
     mesh.addChild(frame);
   }
   
-  // — deterministische Größe/Position —
-  const userScale = Number(game.settings.get("greybearded-tokens", "frameScale")) || 1;
+  // Frame bleibt: mesh.addChild(frame)
+  
+  const userScale = Number(game.settings.get("greybearded-tokens","frameScale")) || 1;
+  
+  // Starte neutral
+  frame.scale.set(1,1);
+  frame.anchor.set(0.5);
+  frame.position.set(0,0);
+  
+  // Größe der Kachel
+  const kW = token.w;
+  const kH = token.h;
+  
+  // Eltern-Skalierung (das Problemkind)
+  const sx = mesh.scale.x || 1;
+  const sy = mesh.scale.y || 1;
+  
+  // Breite/Höhe so setzen, dass die geerbte Eltern-Skalierung kompensiert wird:
+  frame.width  = (kW * userScale) / sx;
+  frame.height = (kH * userScale) / sy;
   
   // v12: Mesh-Mitte ist (0,0)
   frame.position.set(0, 0);
