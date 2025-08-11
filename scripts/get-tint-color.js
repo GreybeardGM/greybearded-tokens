@@ -17,7 +17,7 @@ export function getTintColor(token, tintMode = "Disposition") {
   if (tintMode === "PlayerColor") {
     const owner = getOwnerUserForToken(token);
     const css = userColorToCss(owner);
-    return css ?? "#888888"; // Fallback, falls kein Owner oder keine Farbe
+    return css ?? "#888888";
   }
 
   // Default / "Disposition"
@@ -39,20 +39,31 @@ export function getTintColor(token, tintMode = "Disposition") {
   }
 }
 
+// Robust: v12 (OWNERSHIP) → v9/v10 (PERMISSION) → Fallback 3
+const OWNER_LVL =
+  (globalThis.CONST?.DOCUMENT_OWNERSHIP_LEVELS?.OWNER) ??
+  (globalThis.CONST?.DOCUMENT_PERMISSION_LEVELS?.OWNER) ?? 3;
+
 function userColorToCss(user) {
   const c = user?.color;
-  if (typeof c === "number") return PIXI.utils.hex2string(c); // z.B. 16711680 → "#ff0000"
+  if (typeof c === "number") return PIXI.utils.hex2string(c);
   if (typeof c === "string" && c.trim()) return c.startsWith("#") ? c : `#${c.replace(/^0x/i, "")}`;
   return null;
 }
 
 function getOwnerUserForToken(token) {
-  const isOwner = (doc, u) =>
-    doc?.testUserPermission?.(u, CONST.DOCUMENT_PERMISSION_LEVELS.OWNER) ?? false;
+  const doc = token?.document;
+  const actor = token?.actor;
 
-  // Owner gemäß TokenDocument **oder** Actor (falls Token eigene Permissions nicht nutzt)
-  const owners = game.users.filter(u => isOwner(token.document, u) || isOwner(token.actor, u));
+  const isOwner = (d, u) => {
+    if (!d || !u) return false;
+    // testUserPermission erwartet die numerische Stufe
+    try { return d.testUserPermission(u, OWNER_LVL); }
+    catch { return false; }
+  };
 
+  // Owner via TokenDocument ODER Actor (falls Token keine eigenen Rechte nutzt)
+  const owners = game.users.filter(u => isOwner(doc, u) || isOwner(actor, u));
   if (!owners.length) return null;
 
   const playerOwners = owners.filter(u => !u.isGM);
