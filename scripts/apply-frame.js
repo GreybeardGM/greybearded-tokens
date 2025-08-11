@@ -51,21 +51,6 @@ export async function applyFrameToToken(token) {
   // — deterministische Größe/Position —
   const userScale = Number(game.settings.get("greybearded-tokens", "frameScale")) || 1;
   
-  // Token-Kachelmaße (Pixel)
-  const baseW = token.document.width  * canvas.grid.size;
-  const baseH = token.document.height * canvas.grid.size;
-  
-  // Bild-Zoom des Icons (per Token-Dokument gesetzt)
-  const texScaleX = Math.abs(token.document.texture?.scaleX ?? 1);
-  const texScaleY = Math.abs(token.document.texture?.scaleY ?? 1);
-  
-  // Keine kumulative Skalierung
-  frame.scale.set(1, 1);
-  
-  // Rahmen an sichtbaren Bild-Zoom anpassen
-  frame.width  = baseW * texScaleX * userScale;
-  frame.height = baseH * texScaleY * userScale;
-  
   // v12: Mesh-Mitte ist (0,0)
   frame.position.set(0, 0);
   
