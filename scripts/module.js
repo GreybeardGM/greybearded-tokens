@@ -84,10 +84,10 @@ Hooks.once("ready", () => {
     applyFrameToToken(token);
   });
 
-  Hooks.on("refreshToken", (token) => {
+  /*Hooks.on("refreshToken", (token) => {
     console.log(`🎨 refreshToken → Rahmen wird angewendet für ${token.name}`);
     applyFrameToToken(token);
-  });
+  });*/
   
   // Token wird aktualisiert
   Hooks.on("updateToken", (doc) => {
