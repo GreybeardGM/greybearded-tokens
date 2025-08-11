@@ -134,59 +134,37 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  // 1) bei neu gezeichneten Tokens
-  Hooks.on("drawToken", token => applyFrameToToken(token));
-
-  // 2) bei Token-Änderungen: nur bei relevanten Keys
-  Hooks.on("updateToken", (doc, change) => {
-    if (!doc?.object) return;
-    if (shouldRefreshOnTokenChange(change)) {
-      applyFrameToToken(doc.object);
+  async function preloadFrameTextures() {
+    const S = getGbFrameSettings();
+    const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
+    if (PIXI.Assets?.load) {
+      await Promise.all(paths.map(p => PIXI.Assets.load(p)));
+    } else {
+      // Fallback: einmal anstoßen
+      paths.forEach(p => PIXI.Texture.from(p));
     }
+  }
+  
+  function nextTick(fn) {
+    // sicherstellen, dass alles gezeichnet ist (Bars etc.)
+    requestAnimationFrame(() => requestAnimationFrame(fn));
+  }
+  
+  Hooks.on("canvasReady", async () => {
+    await preloadFrameTextures();
+    nextTick(() => {
+      for (const t of canvas.tokens.placeables) applyFrameToToken(t);
+    });
   });
-
-  // 3a) optional – Actor-Änderungen können Tint beeinflussen (PC/Owner etc.)
-  Hooks.on("updateActor", (actor, change) => {
-    for (const token of actor.getActiveTokens(true)) {
-      // PC-Flag, Disposition via prototypeToken, etc.
-      if (shouldRefreshOnActorChange(change)) applyFrameToToken(token);
-    }
+  
+  Hooks.on("drawToken", (token) => {
+    // beim erstmaligen Zeichnen minimal verzögert anwenden
+    nextTick(() => applyFrameToToken(token));
   });
-
-  // 3b) optional – PlayerColor-Mode: User-Farbwechsel
+  
+  // Optional, aber sehr selten: wenn sich User-Farben ändern (PlayerColor-Mode)
   Hooks.on("updateUser", (user, change) => {
     if (!("color" in (change ?? {}))) return;
-    // only re-tint tokens owned by this user (cheap enough; kommt selten vor)
-    canvas.tokens.placeables
-      .filter(t => isOwnedByUser(t, user))
-      .forEach(t => applyFrameToToken(t));
+    for (const t of canvas.tokens.placeables) applyFrameToToken(t);
   });
 });
-
-function shouldRefreshOnTokenChange(change = {}) {
-  // Größen-/Darstellungsrelevant
-  if ("width" in change || "height" in change) return true;
-  if ("scale" in change) return true; // (falls genutzt)
-  if ("disposition" in change) return true; // Tint
-  if ("hidden" in change) return true; // Z-Order/Visibility (optional)
-  // Textur-Scale unter v12:
-  if (change.texture && ("scaleX" in change.texture || "scaleY" in change.texture)) return true;
-  return false;
-}
-
-function shouldRefreshOnActorChange(change = {}) {
-  // z.B. Typwechsel, Ownership via prototypeToken, etc.
-  if ("type" in change) return true;
-  // wenn du Ownership am Actor auswertest, könnte auch ownership/folder/permission relevant sein
-  if ("ownership" in change) return true;
-  return false;
-}
-
-function isOwnedByUser(token, user) {
-  try {
-    const lvl = (globalThis.CONST?.DOCUMENT_OWNERSHIP_LEVELS?.OWNER)
-             ?? (globalThis.CONST?.DOCUMENT_PERMISSION_LEVELS?.OWNER) ?? 3;
-    return token.document.testUserPermission(user, lvl) || token.actor?.testUserPermission(user, lvl);
-  } catch { return false; }
-}
-
