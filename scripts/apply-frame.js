@@ -1,5 +1,6 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
+import { getGbFrameSettings } from "./settings-snapshot.js";
 
 export async function applyFrameToToken(token) {
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
@@ -8,27 +9,25 @@ export async function applyFrameToToken(token) {
   if (!mesh) return;
 
   mesh.sortableChildren = true;
+  const S = getGbFrameSettings();
 
   // vorhandene Sprites suchen
   let frame1 = mesh.children.find(c => c?._gbFramePrimary);
   let frame2 = mesh.children.find(c => c?._gbFrameSecondary);
 
-  // Frame 1 erzeugen (Pfad nur jetzt lesen)
+  // Frame 1 erzeugen (Pfad/Anchor aus Snapshot)
   if (!frame1) {
-    const path1 = game.settings.get("greybearded-tokens", "frameImagePath");
-    frame1 = new PIXI.Sprite(PIXI.Texture.from(path1));
+    frame1 = new PIXI.Sprite(PIXI.Texture.from(S.path1));
     frame1._gbFramePrimary = true;
     frame1.name = "gb-frame-1";
     frame1.anchor.set(0.5);
     mesh.addChild(frame1);
   }
 
-  // Frame 2 je nach Setting erzeugen/entfernen (Pfad nur jetzt lesen)
-  const secondEnabled = !!game.settings.get("greybearded-tokens", "secondaryFrameEnabled");
-  if (secondEnabled) {
+  // Frame 2 je nach Snapshot erzeugen/entfernen
+  if (S.secondEnabled) {
     if (!frame2) {
-      const path2 = game.settings.get("greybearded-tokens", "secondaryFrameImagePath");
-      frame2 = new PIXI.Sprite(PIXI.Texture.from(path2));
+      frame2 = new PIXI.Sprite(PIXI.Texture.from(S.path2));
       frame2._gbFrameSecondary = true;
       frame2.name = "gb-frame-2";
       frame2.anchor.set(0.5);
@@ -40,35 +39,31 @@ export async function applyFrameToToken(token) {
     frame2 = null;
   }
 
-  // Tints (dürfen weiter live sein, wenn du willst – oder auch reloadpflichtig machen)
+  // Tints (Mode fix aus Snapshot; Wert dynamisch je Token-Zustand)
   {
-    const tintMode1 = game.settings.get("greybearded-tokens", "frameTintMode") ?? "Disposition";
-    const t1 = getTintColor(token, tintMode1);
+    const t1 = getTintColor(token, S.mode1);
     frame1.tint = t1 ? PIXI.utils.string2hex(t1) : 0xFFFFFF;
 
     if (frame2) {
-      const tintMode2 = game.settings.get("greybearded-tokens", "secondaryFrameTintMode") ?? "Disposition";
-      const t2 = getTintColor(token, tintMode2);
+      const t2 = getTintColor(token, S.mode2);
       frame2.tint = t2 ? PIXI.utils.string2hex(t2) : 0xFFFFFF;
     }
   }
 
-  // Geometrie/Skalierung
+  // Geometrie/Skalierung (Scale fix aus Snapshot)
   {
     const kW = token.w, kH = token.h;
     const sx = mesh.scale.x || 1, sy = mesh.scale.y || 1;
     const tx = Math.abs(token.document.texture?.scaleX ?? 1);
     const ty = Math.abs(token.document.texture?.scaleY ?? 1);
 
-    const scale1 = Number(game.settings.get("greybearded-tokens","frameScale")) || 1;
-    frame1.width  = (kW * tx * scale1) / sx;
-    frame1.height = (kH * ty * scale1) / sy;
+    frame1.width  = (kW * tx * S.scale1) / sx;
+    frame1.height = (kH * ty * S.scale1) / sy;
     frame1.position.set(0, 0);
 
     if (frame2) {
-      const scale2 = Number(game.settings.get("greybearded-tokens","secondaryFrameScale")) || 1;
-      frame2.width  = (kW * tx * scale2) / sx;
-      frame2.height = (kH * ty * scale2) / sy;
+      frame2.width  = (kW * tx * S.scale2) / sx;
+      frame2.height = (kH * ty * S.scale2) / sy;
       frame2.position.set(0, 0);
     }
   }
