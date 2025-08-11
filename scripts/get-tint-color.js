@@ -15,18 +15,9 @@ export function getTintColor(token, tintMode = "Disposition") {
   if (tintMode === "NoTint") return null;
 
   if (tintMode === "PlayerColor") {
-    // game.user.color kann Zahl (0xRRGGBB) oder bereits String sein
-    const uc = game.user?.color;
-    if (typeof uc === "number") {
-      // PIXI-Zahl → CSS-String
-      return PIXI.utils.hex2string(uc); // -> "#rrggbb"
-    }
-    if (typeof uc === "string" && uc.trim()) {
-      // Falls FF-String wie "#aabbcc"
-      return uc.startsWith("#") ? uc : `#${uc.replace(/^0x/i, "")}`;
-    }
-    // Fallback, falls keine User-Farbe verfügbar
-    return "#888888";
+    const owner = getOwnerUserForToken(token);
+    const css = userColorToCss(owner);
+    return css ?? "#888888"; // Fallback, falls kein Owner oder keine Farbe
   }
 
   // Default / "Disposition"
@@ -46,4 +37,30 @@ export function getTintColor(token, tintMode = "Disposition") {
     case  2: return colorFromSettings("secret",   "#6B5E7A");
     default: return "#555555";
   }
+}
+
+function userColorToCss(user) {
+  const c = user?.color;
+  if (typeof c === "number") return PIXI.utils.hex2string(c); // z.B. 16711680 → "#ff0000"
+  if (typeof c === "string" && c.trim()) return c.startsWith("#") ? c : `#${c.replace(/^0x/i, "")}`;
+  return null;
+}
+
+function getOwnerUserForToken(token) {
+  const isOwner = (doc, u) =>
+    doc?.testUserPermission?.(u, CONST.DOCUMENT_PERMISSION_LEVELS.OWNER) ?? false;
+
+  // Owner gemäß TokenDocument **oder** Actor (falls Token eigene Permissions nicht nutzt)
+  const owners = game.users.filter(u => isOwner(token.document, u) || isOwner(token.actor, u));
+
+  if (!owners.length) return null;
+
+  const playerOwners = owners.filter(u => !u.isGM);
+  return (
+    playerOwners.find(u => u.active) ??
+    playerOwners[0] ??
+    owners.find(u => u.active) ??
+    owners[0] ??
+    null
+  );
 }
