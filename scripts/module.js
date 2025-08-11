@@ -162,6 +162,14 @@ Hooks.on("drawToken", (token) => {
   nextTick(() => applyFrameToToken(token));
 });
 
+Hooks.on("updateToken", (doc, change) => {
+  // nur reagieren, wenn sich die Disposition geändert hat
+  if (!("disposition" in (change ?? {}))) return;
+  const token = doc?.object;
+  if (!token || !canvas?.ready) return;
+  applyFrameToToken(token);
+});
+
 // Optional, selten: PlayerColor-Änderung
 Hooks.on("updateUser", (user, change) => {
   if (!("color" in (change ?? {}))) return;
