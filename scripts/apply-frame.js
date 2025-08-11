@@ -1,55 +1,72 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
-const FRAME_FLAG = "_gbFrame";
 
-export function applyFrameToToken(token) {
+const FRAME_FLAG = "_gbFrame";
+let CACHED_TEX = null;
+
+async function getFrameTexture() {
+  const framePath = game.settings.get("greybearded-tokens", "frameImagePath");
+  // Einmalig vorladen, damit Maße konsistent sind
+  if (!CACHED_TEX || CACHED_TEX.baseTexture.resource.url !== framePath) {
+    // Falls deine Foundry-Version PIXI.Assets hat, nimm das – sonst PIXI.Texture.from
+    if (PIXI.Assets?.load) {
+      const base = await PIXI.Assets.load(framePath);
+      CACHED_TEX = new PIXI.Texture(base);
+    } else {
+      CACHED_TEX = PIXI.Texture.from(framePath);
+      if (!CACHED_TEX.baseTexture.valid) {
+        await new Promise(res => CACHED_TEX.baseTexture.once("loaded", res));
+      }
+    }
+  }
+  return CACHED_TEX;
+}
+
+export async function applyFrameToToken(token) {
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
   const mesh = token.mesh;
   if (!mesh) return;
 
   mesh.sortableChildren = true;
 
+  // Frame holen/erstellen
   let frame = mesh.children.find(c => c?.[FRAME_FLAG]);
   if (!frame) {
-    const framePath = game.settings.get("greybearded-tokens", "frameImagePath");
-    const texture = PIXI.Texture.from(framePath);
-
-    frame = new PIXI.Sprite(texture);
+    const tex = await getFrameTexture();
+    frame = new PIXI.Sprite(tex);
     frame[FRAME_FLAG] = true;
     frame.name = "gb-frame";
     frame.anchor.set(0.5);
+    frame.roundPixels = true;
 
-    // unter Bars, über Artwork
-    const barsZ = mesh.bars?.zIndex ?? 20;
-    frame.zIndex = barsZ - 1;
-
+    // Tönung nach Disposition
     const tint = getTintColor(token);
     if (tint) frame.tint = PIXI.utils.string2hex(tint);
+
+    // Unter die Bars
+    const barsZ = mesh.bars?.zIndex ?? 20;
+    frame.zIndex = barsZ - 1;
 
     mesh.addChild(frame);
   }
 
-  // === WICHTIG: Größe/Position im lokalen Mesh-Koordinatensystem ===
-  // Eindeutige Größe aus dem Token selbst (unabhängig vom Frame)
-  const userScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
-  
-  // Wichtig: keine kumulative Skalierung – immer zurück auf 1 setzen
+  // ——— deterministische Größe/Position ———
+  const userScale = Number(game.settings.get("greybearded-tokens", "frameScale")) || 1;
+
+  // Token-Pixelmaße (Hülle, nicht das Artwork)
+  const w = token.document.width  * canvas.grid.size;
+  const h = token.document.height * canvas.grid.size;
+
+  // Keine kumulative Skalierung
   frame.scale.set(1, 1);
-  
-  // token.w / token.h = aktuelle gerenderte Pixelgröße des Tokens
-  const w = token.w;
-  const h = token.h;
-  
+
   frame.width  = w * userScale;
   frame.height = h * userScale;
-  
-  // Position je nach Koordinatensystem:
-  frame.anchor.set(0.5);
-  
-  // Variante A (meist korrekt in v12): Ursprung oben‑links
+
+  // v12: Mesh-Mitte ist (0,0)
   frame.position.set(0, 0);
 
-  // Zur Sicherheit nach Bars einsortieren (falls die eben neu gebaut wurden)
-  const barsZ = mesh.bars?.zIndex ?? 20;
-  frame.zIndex = barsZ - 1;
+  // Z-Order ggf. nachziehen, falls Bars gerade neu gebaut wurden
+  const barsZ2 = mesh.bars?.zIndex ?? 20;
+  frame.zIndex = barsZ2 - 1;
 }
