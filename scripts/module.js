@@ -1,6 +1,13 @@
 import { applyFrameToToken } from "./apply-frame.js";
 
 Hooks.once("init", () => {
+  function requestReload() {
+    // entweder nur Hinweis …
+    ui.notifications?.info("Greybearded Tokens: Bitte Oberfläche neu laden (F5), um Änderungen zu übernehmen.");
+    // … oder: sofort neu laden
+    // window.location.reload();
+  }
+
   game.settings.register("greybearded-tokens", "defaultFrameColor", {
     name: "Standardfarbe für Rahmen",
     hint: "Wird genutzt, wenn keine andere Farbe aus Disposition, Spielerfarbe oder Tint-Mode verfügbar ist.",
@@ -31,7 +38,8 @@ Hooks.once("init", () => {
     config: true,
     type: String,
     default: "modules/greybearded-tokens/assets/frame-default.png",
-    filePicker: "image"  // aktiviert den Datei-Browser für Bilddateien
+    filePicker: "image",
+    onChange: requestReload
   });
 
   game.settings.register("greybearded-tokens", "frameScale", {
@@ -40,7 +48,8 @@ Hooks.once("init", () => {
     scope: "world",
     config: true,
     type: Number,
-    default: 1
+    default: 1,
+    onChange: requestReload
   });
   
   game.settings.register("greybearded-tokens", "frameTintMode", {
@@ -50,7 +59,8 @@ Hooks.once("init", () => {
     config: true,
     type: String,
     choices: TINT_CHOICES,
-    default: "Disposition"
+    default: "Disposition",
+    onChange: requestReload
   });
 
   // ──────────────────────────────────────────────────────────────────────────────
@@ -62,7 +72,8 @@ Hooks.once("init", () => {
     scope: "world",
     config: true,
     type: Boolean,
-    default: false
+    default: false,
+    onChange: requestReload
   });
   
   game.settings.register("greybearded-tokens", "secondaryFrameImagePath", {
@@ -72,7 +83,8 @@ Hooks.once("init", () => {
     config: true,
     type: String,
     default: "modules/greybearded-tokens/assets/frame-secondary.png",
-    filePicker: "image"
+    filePicker: "image",
+    onChange: requestReload
   });
   
   game.settings.register("greybearded-tokens", "secondaryFrameTintMode", {
@@ -82,7 +94,8 @@ Hooks.once("init", () => {
     config: true,
     type: String,
     choices: TINT_CHOICES,
-    default: "PlayerColor"
+    default: "PlayerColor",
+    onChange: requestReload
   });
   
   game.settings.register("greybearded-tokens", "secondaryFrameScale", {
@@ -91,7 +104,8 @@ Hooks.once("init", () => {
     scope: "world",
     config: true,
     type: Number,
-    default: 1
+    default: 1,
+    onChange: requestReload
   });
 
   // ──────────────────────────────────────────────────────────────────────────────
