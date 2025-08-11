@@ -8,34 +8,48 @@
  * @param {"Disposition"|"PlayerColor"|"NoTint"} [tintMode="Disposition"]
  * @returns {string|null} CSS-Farbwert "#RRGGBB" oder null bei NoTint
  */
+// get-tint-color.js
 export function getTintColor(token, tintMode = "Disposition") {
   const colorFromSettings = (key, fallback) =>
     game.settings.get("greybearded-tokens", `color-${key}`) || fallback;
 
-  if (tintMode === "NoTint") return null;
+  const defaultColor =
+    game.settings.get("greybearded-tokens", "defaultFrameColor") || "#888888";
 
-  if (tintMode === "PlayerColor") {
-    const owner = getOwnerUserForToken(token);
-    const css = userColorToCss(owner);
-    return css ?? "#888888";
-  }
+  switch (tintMode) {
+    case "NoTint":
+      return null;
 
-  // Default / "Disposition"
-  const disp = token.document?.disposition;
-  const actorType = token.actor?.type;
-  const hasPlayerOwner = token.actor?.hasPlayerOwner;
+    case "Unicolor":
+      return defaultColor;
 
-  // Spielercharakter → character-Farbe aus Settings (dein bisheriges Verhalten)
-  if (actorType === "character" && hasPlayerOwner) {
-    return colorFromSettings("character", "#AAAAAA");
-  }
+    case "Advanced":
+      // Platzhalter: später erweiterbar (z.B. per Actor-Flag/Status)
+      return defaultColor;
 
-  switch (disp) {
-    case -1: return colorFromSettings("hostile",  "#993333");
-    case  0: return colorFromSettings("neutral",  "#B7A789");
-    case  1: return colorFromSettings("friendly", "#5F7A8A");
-    case  2: return colorFromSettings("secret",   "#6B5E7A");
-    default: return "#555555";
+    case "PlayerColor": {
+      const owner = getOwnerUserForToken(token);         // <- dein bestehender Helper
+      const css   = userColorToCss(owner);               // <- dein bestehender Helper
+      return css ?? defaultColor;
+    }
+
+    case "Disposition":
+    default: {
+      const disp = token.document?.disposition;
+      const actorType = token.actor?.type;
+      const hasPlayerOwner = token.actor?.hasPlayerOwner;
+
+      if (actorType === "character" && hasPlayerOwner) {
+        return colorFromSettings("character", defaultColor);
+      }
+      switch (disp) {
+        case -1: return colorFromSettings("hostile",  defaultColor);
+        case  0: return colorFromSettings("neutral",  defaultColor);
+        case  1: return colorFromSettings("friendly", defaultColor);
+        case  2: return colorFromSettings("secret",   defaultColor);
+        default: return defaultColor;
+      }
+    }
   }
 }
 
