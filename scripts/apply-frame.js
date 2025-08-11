@@ -1,6 +1,5 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
-
 const FRAME_FLAG = "_gbFrame";
 
 export function applyFrameToToken(token) {
@@ -10,7 +9,6 @@ export function applyFrameToToken(token) {
 
   mesh.sortableChildren = true;
 
-  // Frame suchen/erstellen
   let frame = mesh.children.find(c => c?.[FRAME_FLAG]);
   if (!frame) {
     const framePath = game.settings.get("greybearded-tokens", "frameImagePath");
@@ -21,28 +19,31 @@ export function applyFrameToToken(token) {
     frame.name = "gb-frame";
     frame.anchor.set(0.5);
 
-    // Z unter Bars, über Artwork (Bars haben meist höheren zIndex)
+    // unter Bars, über Artwork
     const barsZ = mesh.bars?.zIndex ?? 20;
     frame.zIndex = barsZ - 1;
 
-    // Farbe
     const tint = getTintColor(token);
     if (tint) frame.tint = PIXI.utils.string2hex(tint);
 
     mesh.addChild(frame);
   }
 
-  // Größe/Position jedes Mal neu setzen
+  // === WICHTIG: Größe/Position im lokalen Mesh-Koordinatensystem ===
   const userScale = game.settings.get("greybearded-tokens", "frameScale") ?? 1;
 
-  // token.w/h = gerenderte Pixelgröße des Tokens (inkl. document width/height & Grid)
-  frame.width  = token.w * userScale;
-  frame.height = token.h * userScale;
+  // In v12 ist (0,0) die MITTE des Mesh. Also Frame mittig bei (0,0) lassen.
+  frame.position.set(0, 0);
 
-  // Mitte des Tokens (lokale Mesh-Koordinaten)
-  frame.position.set(token.w / 2, token.h / 2);
+  // Robuste Maße: lokale Bounds des Mesh (entsprechen der sichtbaren Tokenfläche)
+  const b = mesh.getLocalBounds();            // { x:-w/2, y:-h/2, width:w, height:h }
+  const w = b.width;
+  const h = b.height;
 
-  // Z-Reihenfolge gegen Bars absichern (falls Bars gerade neu gebaut wurden)
+  frame.width  = w * userScale;
+  frame.height = h * userScale;
+
+  // Zur Sicherheit nach Bars einsortieren (falls die eben neu gebaut wurden)
   const barsZ = mesh.bars?.zIndex ?? 20;
   frame.zIndex = barsZ - 1;
 }
