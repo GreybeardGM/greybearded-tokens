@@ -1,7 +1,15 @@
 import { applyFrameToToken } from "./apply-frame.js";
 
 Hooks.once("init", () => {
-
+  game.settings.register("greybearded-tokens", "defaultFrameColor", {
+    name: "Standardfarbe für Rahmen",
+    hint: "Wird genutzt, wenn keine andere Farbe aus Disposition, Spielerfarbe oder Tint-Mode verfügbar ist.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "#888888"
+  });
+  
   // ──────────────────────────────────────────────────────────────────────────────
   // Einfärbemethode
   // ──────────────────────────────────────────────────────────────────────────────
