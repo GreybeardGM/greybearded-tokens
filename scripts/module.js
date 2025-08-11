@@ -85,12 +85,16 @@ Hooks.once("ready", () => {
   });
 
   Hooks.on("refreshToken", (token) => {
+    console.log(`🎨 refreshToken → Rahmen wird angewendet für ${token.name}`);
     applyFrameToToken(token);
   });
   
   // Token wird aktualisiert
   Hooks.on("updateToken", (doc) => {
     const token = canvas.tokens.get(doc.id);
-    if (token) applyFrameToToken(token);
+    if (token) {
+      console.log(`🎨 updateToken → Rahmen wird angewendet für ${token.name}`);
+      applyFrameToToken(token);
+    }
   });
 });
