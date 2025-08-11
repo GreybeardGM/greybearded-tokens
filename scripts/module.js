@@ -11,7 +11,7 @@ Hooks.once("init", () => {
   });
   
   // ──────────────────────────────────────────────────────────────────────────────
-  // Einfärbemethode
+  // Einfärbemethoden
   // ──────────────────────────────────────────────────────────────────────────────
   const TINT_CHOICES = {
     Disposition: "Disposition",
@@ -21,6 +21,9 @@ Hooks.once("init", () => {
     NoTint: "NoTint"
   };
 
+  // ──────────────────────────────────────────────────────────────────────────────
+  // Erster Rahmen: Settings
+  // ──────────────────────────────────────────────────────────────────────────────
   game.settings.register("greybearded-tokens", "frameImagePath", {
     name: "Standardbild für Tokenrahmen",
     hint: "Pfad zum PNG/SVG-Bild, das als Tokenrahmen verwendet wird.",
