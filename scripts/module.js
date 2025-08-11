@@ -11,25 +11,6 @@ Hooks.once("init", () => {
     filePicker: "image"  // aktiviert den Datei-Browser für Bilddateien
   });
 
-  game.settings.register("greybearded-tokens", "applyMask", {
-    name: "Alpha-Maske auf Token anwenden",
-    hint: "Wenn aktiviert, wird eine zusätzliche Bildmaske über das Token gelegt, um Teile davon basierend auf dem Maskenbild transparent zu machen.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: false
-  });
-
-  game.settings.register("greybearded-tokens", "maskImagePath", {
-    name: "Pfad zur Alpha-Maske",
-    hint: "Pfad zu einer PNG-Datei mit transparenter Mitte und opakem Rand, die als Alpha-Maske auf das Token angewendet wird.",
-    scope: "world",
-    config: true,
-    type: String,
-    default: "",
-    filePicker: "image"
-  });
-  
   game.settings.register("greybearded-tokens", "frameScale", {
     name: "Token Frame Scale",
     hint: "Verändert die Größe des Tokenrahmens relativ zum Token selbst. 1 = exakt gleich groß, 1.05 = leicht größer, 0.95 = leicht kleiner.",
@@ -39,15 +20,40 @@ Hooks.once("init", () => {
     default: 1
   });
 
-  game.settings.register("greybearded-tokens", "frameZIndex", {
-    name: "Tokenrahmen-Z-Ebene",
-    hint: "Legt fest, wie weit oben der Rahmen über dem Token erscheinen soll. Höhere Werte bedeuten höhere Sichtbarkeit, können aber UI-Elemente überdecken.",
+  // ──────────────────────────────────────────────────────────────────────────────
+  // Zweiter Rahmen: Settings
+  // ──────────────────────────────────────────────────────────────────────────────
+  game.settings.register("greybearded-tokens", "secondaryFrameEnabled", {
+    name: "Zweiten Rahmen aktivieren",
+    hint: "Wenn aktiviert, wird zusätzlich zum Standardrahmen ein zweiter Rahmen überlagert.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+  });
+  
+  game.settings.register("greybearded-tokens", "secondaryFrameImagePath", {
+    name: "Bildpfad für zweiten Rahmen",
+    hint: "Pfad zum PNG/SVG, das als zweiter Tokenrahmen verwendet wird.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "modules/greybearded-tokens/assets/frame-secondary.png",
+    filePicker: "image"
+  });
+  
+  game.settings.register("greybearded-tokens", "secondaryFrameScale", {
+    name: "Skalierung des zweiten Rahmens",
+    hint: "Größe relativ zum Token. 1 = exakt Token-Größe; 1.05 = etwas größer; 0.95 = etwas kleiner.",
     scope: "world",
     config: true,
     type: Number,
-    default: 15,
+    default: 1
   });
 
+  // ──────────────────────────────────────────────────────────────────────────────
+  // Farben
+  // ──────────────────────────────────────────────────────────────────────────────
   const defaultColors = {
     hostile: "#993333",
     neutral: "#B7A789",
@@ -73,28 +79,9 @@ Hooks.once("init", () => {
 Hooks.once("ready", () => {
   console.log("✅⭕ Greybearded Token Frames ready.");
 
-  // Bestehende Tokens
-  /*for (const token of canvas.tokens.placeables) {
-    applyFrameToToken(token);
-  }*/
-
-  /*// Neue Tokens
-  Hooks.on("drawToken", token => {
-    console.log(`🎨 drawToken → Rahmen wird angewendet für ${token.name}`);
-    applyFrameToToken(token);
-  });*/
-
   Hooks.on("refreshToken", (token) => {
     console.log(`🎨 refreshToken → Rahmen wird angewendet für ${token.name}`);
     applyFrameToToken(token);
   });
-  
-  // Token wird aktualisiert
-  /*Hooks.on("updateToken", (doc) => {
-    const token = canvas.tokens.get(doc.id);
-    if (token) {
-      console.log(`🎨 updateToken → Rahmen wird angewendet für ${token.name}`);
-      applyFrameToToken(token);
-    }
-  });*/
+
 });
