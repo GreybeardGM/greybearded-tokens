@@ -9,56 +9,38 @@ export async function applyFrameToToken(token) {
 
   mesh.sortableChildren = true;
 
-  // bestehende Sprites suchen
+  // vorhandene Sprites suchen
   let frame1 = mesh.children.find(c => c?._gbFramePrimary);
   let frame2 = mesh.children.find(c => c?._gbFrameSecondary);
 
-  // robustes Texture-Ensure
-  const ensureTexture = (sprite, path) => {
-    if (!sprite || !path) return;
-    const cur = sprite.texture?.baseTexture;
-    const curUrl = cur?.resource?.url;
-    if (!cur?.valid || curUrl !== path) {
-      sprite.texture = PIXI.Texture.from(path);
-    }
-  };
-
-  // Frame 1 erstellen/aktualisieren
-  {
+  // Frame 1 erzeugen (Pfad nur jetzt lesen)
+  if (!frame1) {
     const path1 = game.settings.get("greybearded-tokens", "frameImagePath");
-    if (!frame1) {
-      frame1 = new PIXI.Sprite(PIXI.Texture.from(path1));
-      frame1._gbFramePrimary = true;
-      frame1.name = "gb-frame-1";
-      frame1.anchor.set(0.5);     // nur beim Erzeugen
-      mesh.addChild(frame1);
-    } else {
-      ensureTexture(frame1, path1);
-    }
+    frame1 = new PIXI.Sprite(PIXI.Texture.from(path1));
+    frame1._gbFramePrimary = true;
+    frame1.name = "gb-frame-1";
+    frame1.anchor.set(0.5);
+    mesh.addChild(frame1);
   }
 
-  // Frame 2 erstellen/entfernen je nach Setting
-  {
-    const secondEnabled = !!game.settings.get("greybearded-tokens", "secondaryFrameEnabled");
-    if (secondEnabled) {
+  // Frame 2 je nach Setting erzeugen/entfernen (Pfad nur jetzt lesen)
+  const secondEnabled = !!game.settings.get("greybearded-tokens", "secondaryFrameEnabled");
+  if (secondEnabled) {
+    if (!frame2) {
       const path2 = game.settings.get("greybearded-tokens", "secondaryFrameImagePath");
-      if (!frame2) {
-        frame2 = new PIXI.Sprite(PIXI.Texture.from(path2));
-        frame2._gbFrameSecondary = true;
-        frame2.name = "gb-frame-2";
-        frame2.anchor.set(0.5);   // nur beim Erzeugen
-        mesh.addChild(frame2);
-      } else {
-        ensureTexture(frame2, path2);
-      }
-    } else if (frame2) {
-      frame2.parent?.removeChild(frame2);
-      frame2.destroy({ children: true, texture: false, baseTexture: false });
-      frame2 = null;
+      frame2 = new PIXI.Sprite(PIXI.Texture.from(path2));
+      frame2._gbFrameSecondary = true;
+      frame2.name = "gb-frame-2";
+      frame2.anchor.set(0.5);
+      mesh.addChild(frame2);
     }
+  } else if (frame2) {
+    frame2.parent?.removeChild(frame2);
+    frame2.destroy({ children: true, texture: false, baseTexture: false });
+    frame2 = null;
   }
 
-  // Tints (Settings erst hier lesen)
+  // Tints (dürfen weiter live sein, wenn du willst – oder auch reloadpflichtig machen)
   {
     const tintMode1 = game.settings.get("greybearded-tokens", "frameTintMode") ?? "Disposition";
     const t1 = getTintColor(token, tintMode1);
@@ -71,7 +53,7 @@ export async function applyFrameToToken(token) {
     }
   }
 
-  // Geometrie/Skalierung (Settings nur wenn nötig)
+  // Geometrie/Skalierung
   {
     const kW = token.w, kH = token.h;
     const sx = mesh.scale.x || 1, sy = mesh.scale.y || 1;
@@ -91,9 +73,9 @@ export async function applyFrameToToken(token) {
     }
   }
 
-  // Z‑Order (Bars > Frame1 > Frame2 > Token)
+  // Z‑Order: Bars > Frame1 > Frame2 > Token
   const barsZ = mesh.bars?.zIndex ?? 20;
   frame1.zIndex = barsZ - 1;
   if (frame2) frame2.zIndex = frame1.zIndex - 1;
-  mesh.sortDirty = true; // Pixi soll neu sortieren
+  mesh.sortDirty = true;
 }
