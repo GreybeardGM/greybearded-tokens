@@ -43,10 +43,10 @@ export function getTintColor(token, tintMode = "Disposition") {
         return colorFromSettings("character", defaultColor);
       }
       switch (disp) {
+        case -2: return colorFromSettings("secret",   defaultColor);
         case -1: return colorFromSettings("hostile",  defaultColor);
         case  0: return colorFromSettings("neutral",  defaultColor);
         case  1: return colorFromSettings("friendly", defaultColor);
-        case  2: return colorFromSettings("secret",   defaultColor);
         default: return defaultColor;
       }
     }
