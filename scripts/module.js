@@ -1,11 +1,10 @@
 import { applyFrameToToken } from "./apply-frame.js";
 import { getGbFrameSettings } from "./settings-snapshot.js";
+import { rebuildPlayerColorSnapshot } from "./get-player-color.js"; //
 
 Hooks.once("init", () => {
   function requestReload() {
-    // entweder nur Hinweis …
     ui.notifications?.info("Greybearded Tokens: Bitte Oberfläche neu laden (F5), um Änderungen zu übernehmen.");
-    // … oder: sofort neu laden
     // window.location.reload();
   }
 
@@ -17,7 +16,7 @@ Hooks.once("init", () => {
     type: String,
     default: "#888888"
   });
-  
+
   // ──────────────────────────────────────────────────────────────────────────────
   // Einfärbemethoden
   // ──────────────────────────────────────────────────────────────────────────────
@@ -52,7 +51,7 @@ Hooks.once("init", () => {
     default: 1,
     onChange: requestReload
   });
-  
+
   game.settings.register("greybearded-tokens", "frameTintMode", {
     name: "Einfärbemethode (Rahmen 1)",
     hint: "Bestimmt, wie der erste Rahmen eingefärbt wird.",
@@ -76,7 +75,7 @@ Hooks.once("init", () => {
     default: false,
     onChange: requestReload
   });
-  
+
   game.settings.register("greybearded-tokens", "secondaryFrameImagePath", {
     name: "Bildpfad für zweiten Rahmen",
     hint: "Pfad zum PNG/SVG, das als zweiter Tokenrahmen verwendet wird.",
@@ -87,7 +86,7 @@ Hooks.once("init", () => {
     filePicker: "image",
     onChange: requestReload
   });
-  
+
   game.settings.register("greybearded-tokens", "secondaryFrameTintMode", {
     name: "Einfärbemethode (Rahmen 2)",
     hint: "Bestimmt, wie der zweite Rahmen eingefärbt wird.",
@@ -98,7 +97,7 @@ Hooks.once("init", () => {
     default: "PlayerColor",
     onChange: requestReload
   });
-  
+
   game.settings.register("greybearded-tokens", "secondaryFrameScale", {
     name: "Skalierung des zweiten Rahmens",
     hint: "Größe relativ zum Token. 1 = exakt Token-Größe; 1.05 = etwas größer; 0.95 = etwas kleiner.",
@@ -151,11 +150,30 @@ function nextTick(fn) {
   requestAnimationFrame(() => requestAnimationFrame(fn));
 }
 
-Hooks.on("canvasReady", async () => {
-  await preloadFrameTextures();
+function sweepAllTokenFrames() {
   nextTick(() => {
     for (const t of canvas.tokens.placeables) applyFrameToToken(t);
   });
+}
+
+// ⬇️ Start-of-game: noch vor dem ersten Frames-Auftrag Snapshot bauen
+Hooks.once("ready", async () => {
+  // Player-Color-Snapshot zuerst
+  rebuildPlayerColorSnapshot();
+
+  // Dann Texturen laden und initialen Sweep fahren
+  if (canvas?.ready) {
+    await preloadFrameTextures();
+    sweepAllTokenFrames();
+  }
+});
+
+Hooks.on("canvasReady", async () => {
+  // Sicherstellen, dass der Snapshot existiert (z. B. bei Scene-Wechseln)
+  if (!canvas?.ready) return;
+  rebuildPlayerColorSnapshot();
+  await preloadFrameTextures();
+  sweepAllTokenFrames();
 });
 
 Hooks.on("drawToken", (token) => {
@@ -170,21 +188,34 @@ Hooks.on("updateToken", (doc, change) => {
   applyFrameToToken(token);
 });
 
-// Optional, selten: PlayerColor-Änderung
+// ──────────────────────────────────────────────────────────────────────────────
+// PlayerColor-Snapshot aktuell halten
+// ──────────────────────────────────────────────────────────────────────────────
 Hooks.on("updateUser", (user, change) => {
-  if (!("color" in (change ?? {}))) return;
-  for (const t of canvas.tokens.placeables) applyFrameToToken(t);
-});
-
-// Einmaliger Fallback, falls die Szene schon fertig war,
-// bevor die obenstehenden Hooks registriert wurden (z.B. Module-Lade-Reihenfolge)
-Hooks.once("ready", async () => {
-  // Wenn Canvas bereits ready ist, trotzdem Texturen preloaden und sweepen
-  if (canvas?.ready) {
-    await preloadFrameTextures();
-    nextTick(() => {
-      for (const t of canvas.tokens.placeables) applyFrameToToken(t);
-    });
+  if (!change) return;
+  if ("color" in change || "character" in change) {
+    rebuildPlayerColorSnapshot();
+    // Frames neu einfärben, falls PlayerColor-Modus aktiv
+    if (canvas?.ready) sweepAllTokenFrames();
   }
 });
 
+Hooks.on("createUser", () => {
+  rebuildPlayerColorSnapshot();
+  if (canvas?.ready) sweepAllTokenFrames();
+});
+
+Hooks.on("deleteUser", () => {
+  rebuildPlayerColorSnapshot();
+  if (canvas?.ready) sweepAllTokenFrames();
+});
+
+// Einmaliger Fallback (falls Szene fertig war, bevor Hooks registriert waren)
+Hooks.once("ready", async () => {
+  // Hinweis: Dieser Block bleibt als Sicherheitsnetz bestehen.
+  // (Er baut den Snapshot NICHT erneut, weil oben bereits rebuild auf ready läuft.)
+  if (canvas?.ready) {
+    await preloadFrameTextures();
+    sweepAllTokenFrames();
+  }
+});
