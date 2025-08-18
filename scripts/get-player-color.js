@@ -1,4 +1,4 @@
-// get-player-cam.js (ESM)
+// get-player-color.js (ESM)
 // Snapshot: Map<actorId, "#RRGGBB">
 let _playerColorSnapshot = null;
 
