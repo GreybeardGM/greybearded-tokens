@@ -1,5 +1,5 @@
 // get-tint-color.js
-import { getPlayerColor } from "./get-player-cam.js";
+import { getPlayerColor } from "./get-player-color.js";
 
 /**
  * Liefert die Rahmenfarbe je nach Tint-Mode.
