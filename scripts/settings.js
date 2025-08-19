@@ -1,24 +1,21 @@
 import { MOD_ID, SETTING_KEYS, TINT_CHOICES } from "./constants.js";
-import { regDebugSetting } from "./debug.js";
 
 function requestReload() {
   ui.notifications?.info("Greybearded Tokens: Bitte Oberfläche neu laden (F5), um Änderungen zu übernehmen.");
 }
 
 export function registerSettings() {
-  // Debug
-  regDebugSetting();
-
+  // Basis
   game.settings.register(MOD_ID, SETTING_KEYS.defaultFrameColor, {
     name: "Standardfarbe für Rahmen",
-    hint: "Wird genutzt, wenn keine andere Farbe aus Disposition, Spielerfarbe oder Tint-Mode verfügbar ist.",
+    hint: "Wird genutzt, wenn kein anderer Farbmodus greift.",
     scope: "world",
     config: true,
     type: String,
     default: "#888888"
   });
 
-  // Rahmen 1
+  // ── Rahmen 1 ────────────────────────────────────────────────────────────────
   game.settings.register(MOD_ID, SETTING_KEYS.frameImagePath, {
     name: "Standardbild für Tokenrahmen",
     hint: "Pfad zum PNG/SVG-Bild, das als Tokenrahmen verwendet wird.",
@@ -40,9 +37,19 @@ export function registerSettings() {
     onChange: requestReload
   });
 
+  game.settings.register(MOD_ID, SETTING_KEYS.usePlayerColor1, {
+    name: "Use Player Color (Rahmen 1)",
+    hint: "Wenn verfügbar, nutze die Spielerfarbe für Rahmen 1. Fällt zurück auf die gewählte Einfärbemethode.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+    onChange: requestReload
+  });
+
   game.settings.register(MOD_ID, SETTING_KEYS.frameTintMode, {
     name: "Einfärbemethode (Rahmen 1)",
-    hint: "Bestimmt, wie der erste Rahmen eingefärbt wird.",
+    hint: "Bestimmt, wie Rahmen 1 eingefärbt wird (ohne Spielerfarbe).",
     scope: "world",
     config: true,
     type: String,
@@ -51,7 +58,6 @@ export function registerSettings() {
     onChange: requestReload
   });
 
-  // Rahmen 2
   game.settings.register(MOD_ID, SETTING_KEYS.secondaryFrameEnabled, {
     name: "Zweiten Rahmen aktivieren",
     hint: "Zusätzlichen Rahmen überlagern.",
@@ -73,28 +79,28 @@ export function registerSettings() {
     onChange: requestReload
   });
 
+  game.settings.register(MOD_ID, SETTING_KEYS.usePlayerColor2, {
+    name: "Use Player Color (Rahmen 2)",
+    hint: "Wenn verfügbar, nutze die Spielerfarbe für Rahmen 2. Fällt zurück auf die gewählte Einfärbemethode.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: requestReload
+  });
+
   game.settings.register(MOD_ID, SETTING_KEYS.secondaryFrameTintMode, {
     name: "Einfärbemethode (Rahmen 2)",
-    hint: "Bestimmt, wie der zweite Rahmen eingefärbt wird.",
+    hint: "Bestimmt, wie Rahmen 2 eingefärbt wird (ohne Spielerfarbe).",
     scope: "world",
     config: true,
     type: String,
     choices: TINT_CHOICES,
-    default: "PlayerColor",
+    default: "Unicolor",
     onChange: requestReload
   });
 
-  game.settings.register(MOD_ID, SETTING_KEYS.secondaryFrameScale, {
-    name: "Skalierung des zweiten Rahmens",
-    hint: "1 = exakt; 1.05 = größer; 0.95 = kleiner.",
-    scope: "world",
-    config: true,
-    type: Number,
-    default: 1,
-    onChange: requestReload
-  });
-
-  // Disposition-Farben
+  // ── Disposition-Farben ──────────────────────────────────────────────────────
   const defaultColors = {
     [SETTING_KEYS.colorHostile]: "#993333",
     [SETTING_KEYS.colorNeutral]: "#B7A789",
