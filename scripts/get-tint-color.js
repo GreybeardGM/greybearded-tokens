@@ -1,6 +1,5 @@
 // get-tint-color.js
 import { getPlayerColor } from "./get-player-color.js";
-import { dbg } from "./debug.js";
 
 export function getTintColor(token, tintMode = "Disposition") {
   const colorFromSettings = (key, fallback) =>
@@ -19,21 +18,17 @@ export function getTintColor(token, tintMode = "Disposition") {
 
   switch (tintMode) {
     case "NoTint":
-      dbg("getTintColor NoTint", tokenInfo());
       return null;
 
     case "Unicolor":
-      dbg("getTintColor Unicolor", tokenInfo(), { color: defaultColor });
       return defaultColor;
 
     case "Advanced":
-      dbg("getTintColor Advanced (placeholder)", tokenInfo(), { color: defaultColor });
       return defaultColor;
 
     case "PlayerColor": {
       const actorId = token?.actor?.id ?? null;
       const snapColor = actorId ? getPlayerColor(actorId) : null;
-      dbg("getTintColor PlayerColor", tokenInfo(), { snapHit: !!snapColor, snapColor });
       return snapColor ?? defaultColor;
     }
 
@@ -55,7 +50,6 @@ export function getTintColor(token, tintMode = "Disposition") {
           default: color = defaultColor;
         }
       }
-      dbg("getTintColor Disposition", tokenInfo(), { color });
       return color;
     }
   }
