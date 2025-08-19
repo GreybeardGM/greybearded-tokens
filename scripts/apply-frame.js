@@ -43,12 +43,12 @@ export async function applyFrameToToken(token) {
   // Tints (Mode fix aus Snapshot; Wert dynamisch je Token-Zustand)
   {
     const t1 = getTintColor(token, S.mode1);
-    dbg("apply primary tint", { token: token.name, id: token.id, mode, color: t1 });
+    dbg("apply primary tint", { token: token.name, id: token.id, mode: S.mode1, color: t1 });
     frame1.tint = t1 ? PIXI.utils.string2hex(t1) : 0xFFFFFF;
 
     if (frame2) {
       const t2 = getTintColor(token, S.mode2);
-      dbg("apply secondary tint", { token: token.name, id: token.id, mode, color: t2 });
+      dbg("apply secondary tint", { token: token.name, id: token.id, mode: S.mode2, color: t2 });
       frame2.tint = t2 ? PIXI.utils.string2hex(t2) : 0xFFFFFF;
     }
   }
