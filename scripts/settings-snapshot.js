@@ -1,6 +1,9 @@
+// settings-snapshot.js
 import { MOD_ID, SETTING_KEYS } from "./constants.js";
 
-export function getGbFrameSettings() {
+let _S = null;
+
+function buildSnapshot() {
   const get = (k) => game.settings.get(MOD_ID, k);
 
   return {
@@ -20,11 +23,21 @@ export function getGbFrameSettings() {
     // Farben
     defaultColor: get(SETTING_KEYS.defaultFrameColor),
     colors: {
-      hostile: get(SETTING_KEYS.colorHostile),
-      neutral: get(SETTING_KEYS.colorNeutral),
-      friendly: get(SETTING_KEYS.colorFriendly),
-      secret: get(SETTING_KEYS.colorSecret),
+      hostile:   get(SETTING_KEYS.colorHostile),
+      neutral:   get(SETTING_KEYS.colorNeutral),
+      friendly:  get(SETTING_KEYS.colorFriendly),
+      secret:    get(SETTING_KEYS.colorSecret),
       character: get(SETTING_KEYS.colorCharacter),
     }
   };
+}
+
+/** Liefert ein einmal erzeugtes Snapshot-Objekt (lazy). */
+export function getGbFrameSettings() {
+  return _S ?? (_S = buildSnapshot());
+}
+
+/** Optional – falls du jemals bewusst neu laden willst (Tests, Dev). */
+export function invalidateGbFrameSettings() {
+  _S = null;
 }
