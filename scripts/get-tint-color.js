@@ -1,18 +1,7 @@
 // get-tint-color.js
 import { getPlayerColor } from "./get-player-color.js";
+import { dbg } from "./debug.js";
 
-/**
- * Liefert die Rahmenfarbe je nach Tint-Mode.
- * - "Disposition": nutzt Disposition/Typ + Moduleinstellungen (PCs = character-Farbe)
- * - "PlayerColor": nimmt die Spielerfarbe aus dem Snapshot (per ActorID)
- * - "Unicolor": feste Default-Farbe aus Settings
- * - "Advanced": Platzhalter für spätere Logik
- * - "NoTint": kein Tint (null)
- *
- * @param {Token} token
- * @param {"Disposition"|"PlayerColor"|"Unicolor"|"Advanced"|"NoTint"} [tintMode="Disposition"]
- * @returns {string|null} CSS-Farbwert "#RRGGBB" oder null bei NoTint
- */
 export function getTintColor(token, tintMode = "Disposition") {
   const colorFromSettings = (key, fallback) =>
     game.settings.get("greybearded-tokens", `color-${key}`) || fallback;
@@ -20,20 +9,31 @@ export function getTintColor(token, tintMode = "Disposition") {
   const defaultColor =
     game.settings.get("greybearded-tokens", "defaultFrameColor") || "#888888";
 
+  const tokenInfo = () => ({
+    tokenId: token?.id,
+    name: token?.name,
+    actorId: token?.actor?.id,
+    actorType: token?.actor?.type,
+    disp: token?.document?.disposition
+  });
+
   switch (tintMode) {
     case "NoTint":
+      dbg("getTintColor NoTint", tokenInfo());
       return null;
 
     case "Unicolor":
+      dbg("getTintColor Unicolor", tokenInfo(), { color: defaultColor });
       return defaultColor;
 
     case "Advanced":
-      // Platzhalter: später erweiterbar (z.B. per Actor-Flag/Status)
+      dbg("getTintColor Advanced (placeholder)", tokenInfo(), { color: defaultColor });
       return defaultColor;
 
     case "PlayerColor": {
       const actorId = token?.actor?.id ?? null;
-      const snapColor = actorId ? getPlayerColor(actorId) : null; // <-- Neuer Weg
+      const snapColor = actorId ? getPlayerColor(actorId) : null;
+      dbg("getTintColor PlayerColor", tokenInfo(), { snapHit: !!snapColor, snapColor });
       return snapColor ?? defaultColor;
     }
 
@@ -43,16 +43,20 @@ export function getTintColor(token, tintMode = "Disposition") {
       const actorType = token.actor?.type;
       const hasPlayerOwner = token.actor?.hasPlayerOwner;
 
+      let color;
       if (actorType === "character" && hasPlayerOwner) {
-        return colorFromSettings("character", defaultColor);
+        color = colorFromSettings("character", defaultColor);
+      } else {
+        switch (disp) {
+          case -2: color = colorFromSettings("secret",   defaultColor); break;
+          case -1: color = colorFromSettings("hostile",  defaultColor); break;
+          case  0: color = colorFromSettings("neutral",  defaultColor); break;
+          case  1: color = colorFromSettings("friendly", defaultColor); break;
+          default: color = defaultColor;
+        }
       }
-      switch (disp) {
-        case -2: return colorFromSettings("secret",   defaultColor);
-        case -1: return colorFromSettings("hostile",  defaultColor);
-        case  0: return colorFromSettings("neutral",  defaultColor);
-        case  1: return colorFromSettings("friendly", defaultColor);
-        default: return defaultColor;
-      }
+      dbg("getTintColor Disposition", tokenInfo(), { color });
+      return color;
     }
   }
 }
