@@ -7,7 +7,7 @@ function num(v, fb = 1)   { const n = Number(v); return Number.isFinite(n) ? n :
 function bool(v)          { return !!v; }
 function str(v, fb = "")  { return (typeof v === "string" && v.length) ? v : fb; }
 
-function buildSnapshot() {
+function _buildSnapshot() {
   const get = (k) => game.settings.get(MOD_ID, k);
 
   return {
@@ -39,7 +39,11 @@ function buildSnapshot() {
 /** Lazy + memoized */
 export function getGbFrameSettings() {
   console.log(_S);
-  return _S ?? (_S = buildSnapshot());
+  return _S ?? (_S = _buildSnapshot());
+}
+
+export function buildSnapshot() {
+  return _buildSnapshot();
 }
 
 /** Nur für Tests/Reloads notwendig */
