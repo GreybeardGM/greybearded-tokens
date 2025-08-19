@@ -1,22 +1,22 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
-import { getGbFrameSettings } from "./settings-snapshot.js";
 
-export async function applyFrameToToken(token) {
+export async function applyFrameToToken(token, S) {
+  if (!token || token.destroyed) return;
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
 
   const mesh = token.mesh;
   if (!mesh) return;
 
   mesh.sortableChildren = true;
-  const S = getGbFrameSettings();
 
-  // vorhandene Sprites suchen
-  let frame1 = mesh.children.find(c => c?._gbFramePrimary);
-  let frame2 = mesh.children.find(c => c?._gbFrameSecondary);
+  // vorhandene Sprites
+  let frame1 = mesh.children.find(c => c?._gbFramePrimary === true);
+  let frame2 = mesh.children.find(c => c?._gbFrameSecondary === true);
 
-  // Frame 1 erzeugen (Pfad/Anchor aus Snapshot)
+  // Frame 1 (kein Live-Wechsel der Texturpfade)
   if (!frame1) {
+    if (!S.path1) return;
     frame1 = new PIXI.Sprite(PIXI.Texture.from(S.path1));
     frame1._gbFramePrimary = true;
     frame1.name = "gb-frame-1";
@@ -24,8 +24,8 @@ export async function applyFrameToToken(token) {
     mesh.addChild(frame1);
   }
 
-  // Frame 2 je nach Snapshot erzeugen/entfernen
-  if (S.secondEnabled) {
+  // Frame 2 (an/aus per Setting; keine Live-Änderungen)
+  if (S.secondEnabled && S.path2) {
     if (!frame2) {
       frame2 = new PIXI.Sprite(PIXI.Texture.from(S.path2));
       frame2._gbFrameSecondary = true;
@@ -39,36 +39,36 @@ export async function applyFrameToToken(token) {
     frame2 = null;
   }
 
-  // Tints (Mode fix aus Snapshot; Wert dynamisch je Token-Zustand)
+  // Tints (ziehen aus S; kein Settings-Neuladen hier)
   {
-    const t1 = getTintColor(token, S.mode1);
-    frame1.tint = t1 ? PIXI.utils.string2hex(t1) : 0xFFFFFF;
+    const t1 = getTintColor(token, S, 1);
+    frame1.tint = (t1 != null) ? PIXI.utils.string2hex(t1) : 0xFFFFFF;
 
     if (frame2) {
-      const t2 = getTintColor(token, S.mode2);
-      frame2.tint = t2 ? PIXI.utils.string2hex(t2) : 0xFFFFFF;
+      const t2 = getTintColor(token, S, 2);
+      frame2.tint = (t2 != null) ? PIXI.utils.string2hex(t2) : 0xFFFFFF;
     }
   }
 
-  // Geometrie/Skalierung (Scale fix aus Snapshot)
+  // Geometrie
   {
     const kW = token.w, kH = token.h;
     const sx = mesh.scale.x || 1, sy = mesh.scale.y || 1;
     const tx = Math.abs(token.document.texture?.scaleX ?? 1);
     const ty = Math.abs(token.document.texture?.scaleY ?? 1);
 
-    frame1.width  = (kW * tx * S.scale1) / sx;
-    frame1.height = (kH * ty * S.scale1) / sy;
+    frame1.width  = (kW * tx * (S.scale1 || 1)) / sx;
+    frame1.height = (kH * ty * (S.scale1 || 1)) / sy;
     frame1.position.set(0, 0);
 
     if (frame2) {
-      frame2.width  = (kW * tx * S.scale2) / sx;
-      frame2.height = (kH * ty * S.scale2) / sy;
+      frame2.width  = (kW * tx * (S.scale2 || 1)) / sx;
+      frame2.height = (kH * ty * (S.scale2 || 1)) / sy;
       frame2.position.set(0, 0);
     }
   }
 
-  // Z‑Order: Bars > Frame1 > Frame2 > Token
+  // Z-Order
   const barsZ = mesh.bars?.zIndex ?? 20;
   frame1.zIndex = barsZ - 1;
   if (frame2) frame2.zIndex = frame1.zIndex - 1;
