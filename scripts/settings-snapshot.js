@@ -1,33 +1,30 @@
-export const MOD_ID = "greybearded-tokens";
+import { MOD_ID, SETTING_KEYS } from "./constants.js";
 
-export const SETTING_KEYS = {
-  defaultFrameColor: "defaultFrameColor",
+export function getGbFrameSettings() {
+  const get = (k) => game.settings.get(MOD_ID, k);
 
-  // Frame 1
-  frameImagePath: "frameImagePath",
-  frameScale: "frameScale",
-  frameTintMode: "frameTintMode",
-  usePlayerColor1: "usePlayerColor1",
+  return {
+    // Frame 1
+    path1: get(SETTING_KEYS.frameImagePath),
+    scale1: Number(get(SETTING_KEYS.frameScale)) || 1,
+    tintMode1: get(SETTING_KEYS.frameTintMode),
+    usePlayerColor1: !!get(SETTING_KEYS.usePlayerColor1),
 
-  // Frame 2
-  secondaryFrameEnabled: "secondaryFrameEnabled",
-  secondaryFrameImagePath: "secondaryFrameImagePath",
-  secondaryFrameTintMode: "secondaryFrameTintMode",
-  secondaryFrameScale: "secondaryFrameScale",
-  usePlayerColor2: "usePlayerColor2",
+    // Frame 2
+    secondEnabled: !!get(SETTING_KEYS.secondaryFrameEnabled),
+    path2: get(SETTING_KEYS.secondaryFrameImagePath),
+    scale2: Number(get(SETTING_KEYS.secondaryFrameScale)) || 1,
+    tintMode2: get(SETTING_KEYS.secondaryFrameTintMode),
+    usePlayerColor2: !!get(SETTING_KEYS.usePlayerColor2),
 
-  // Disposition-Farben
-  colorHostile: "color-hostile",
-  colorNeutral: "color-neutral",
-  colorFriendly: "color-friendly",
-  colorSecret: "color-secret",
-  colorCharacter: "color-character",
-};
-
-// Tint Choices
-export const TINT_CHOICES = {
-  Disposition: "Disposition",
-  Unicolor: "Unicolor",
-  Advanced: "Advanced",
-  NoTint: "NoTint"
-};
+    // Farben
+    defaultColor: get(SETTING_KEYS.defaultFrameColor),
+    colors: {
+      hostile: get(SETTING_KEYS.colorHostile),
+      neutral: get(SETTING_KEYS.colorNeutral),
+      friendly: get(SETTING_KEYS.colorFriendly),
+      secret: get(SETTING_KEYS.colorSecret),
+      character: get(SETTING_KEYS.colorCharacter),
+    }
+  };
+}
