@@ -6,23 +6,34 @@ let _playerColorSnapshot = null;
 
 function toCssHex(color) {
   if (color == null) return null;
-  if (typeof color === "number" && Number.isFinite(color)) {
-    try { return PIXI.utils.hex2string(color); } catch { /*noop*/ }
+
+  // 1) Versuche IMMER, zu einer primitiven Zahl zu casten (handlet Number-Objekte & "0x..." Strings)
+  const n = Number(color);
+  if (Number.isFinite(n)) {
+    try {
+      return PIXI.utils.hex2string(n); // -> "#rrggbb"
+    } catch {
+      /* fallthrough to string handling */
+    }
   }
+
+  // 2) String-Fälle (zur Sicherheit)
   if (typeof color === "string") {
     const s = color.trim();
-    if (!s) return null;
-    if (/^0x[0-9a-f]{6}$/i.test(s)) {
-      const n = parseInt(s, 16);
-      try { return PIXI.utils.hex2string(n); } catch { /*noop*/ }
-    }
+
+    // "#aabbcc"
     if (/^#[0-9a-f]{6}$/i.test(s)) return s.toLowerCase();
+
+    // "aabbcc" → "#aabbcc"
     if (/^[0-9a-f]{6}$/i.test(s)) return `#${s}`.toLowerCase();
+
+    // "#abc" → "#aabbcc"
     if (/^#[0-9a-f]{3}$/i.test(s)) {
-      const r=s[1], g=s[2], b=s[3];
+      const r = s[1], g = s[2], b = s[3];
       return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
     }
   }
+
   return null;
 }
 
