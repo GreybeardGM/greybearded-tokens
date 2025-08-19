@@ -1,16 +1,31 @@
 // settings-snapshot.js
-let SNAPSHOT;
-export function getGbFrameSettings() {
-  if (SNAPSHOT) return SNAPSHOT;
-  SNAPSHOT = {
-    path1:  game.settings.get("greybearded-tokens", "frameImagePath"),
-    scale1: Number(game.settings.get("greybearded-tokens", "frameScale")) || 1,
-    mode1:  game.settings.get("greybearded-tokens", "frameTintMode") ?? "Disposition",
+import { MOD_ID, SETTING_KEYS } from "./constants.js";
 
-    secondEnabled: !!game.settings.get("greybearded-tokens", "secondaryFrameEnabled"),
-    path2:  game.settings.get("greybearded-tokens", "secondaryFrameImagePath"),
-    scale2: Number(game.settings.get("greybearded-tokens", "secondaryFrameScale")) || 1,
-    mode2:  game.settings.get("greybearded-tokens", "secondaryFrameTintMode") ?? "Disposition",
+export function getGbFrameSettings() {
+  const get = (k) => game.settings.get(MOD_ID, k);
+
+  const S = {
+    // Frame 1
+    path1: get(SETTING_KEYS.frameImagePath),
+    scale1: Number(get(SETTING_KEYS.frameScale)) || 1,
+    tintMode1: get(SETTING_KEYS.frameTintMode),
+
+    // Frame 2
+    secondEnabled: !!get(SETTING_KEYS.secondaryFrameEnabled),
+    path2: get(SETTING_KEYS.secondaryFrameImagePath),
+    scale2: Number(get(SETTING_KEYS.secondaryFrameScale)) || 1,
+    tintMode2: get(SETTING_KEYS.secondaryFrameTintMode),
+
+    // Farben
+    defaultColor: get(SETTING_KEYS.defaultFrameColor),
+    colors: {
+      hostile: get(SETTING_KEYS.colorHostile),
+      neutral: get(SETTING_KEYS.colorNeutral),
+      friendly: get(SETTING_KEYS.colorFriendly),
+      secret: get(SETTING_KEYS.colorSecret),
+      character: get(SETTING_KEYS.colorCharacter),
+    }
   };
-  return SNAPSHOT;
+
+  return S;
 }
