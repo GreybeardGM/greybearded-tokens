@@ -1,16 +1,20 @@
 export const MOD_ID = "greybearded-tokens";
 
-// Settings keys an einer Stelle – weniger Tippfehler
 export const SETTING_KEYS = {
   defaultFrameColor: "defaultFrameColor",
+
+  // Frame 1
   frameImagePath: "frameImagePath",
   frameScale: "frameScale",
   frameTintMode: "frameTintMode",
+  usePlayerColor1: "usePlayerColor1",
 
+  // Frame 2
   secondaryFrameEnabled: "secondaryFrameEnabled",
   secondaryFrameImagePath: "secondaryFrameImagePath",
   secondaryFrameTintMode: "secondaryFrameTintMode",
   secondaryFrameScale: "secondaryFrameScale",
+  usePlayerColor2: "usePlayerColor2",
 
   // Disposition-Farben
   colorHostile: "color-hostile",
@@ -20,7 +24,7 @@ export const SETTING_KEYS = {
   colorCharacter: "color-character",
 };
 
-// Aktuelle Tint-Choices (noch inkl. PlayerColor – wird im nächsten Schritt ersetzt)
+// Tint Choices
 export const TINT_CHOICES = {
   Disposition: "Disposition",
   Unicolor: "Unicolor",
