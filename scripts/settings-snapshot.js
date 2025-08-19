@@ -43,7 +43,9 @@ export function getGbFrameSettings() {
 }
 
 export function buildSnapshot() {
-  return _buildSnapshot();
+  _S = _buildSnapshot();
+  console.log(_S);
+  return _S;
 }
 
 /** Nur für Tests/Reloads notwendig */
