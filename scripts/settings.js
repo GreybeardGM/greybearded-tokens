@@ -1,6 +1,5 @@
 // settings.js
 import { MOD_ID, TINT_CHOICES } from "./constants.js";
-import { getGbFrameSettings } from "./settings-snapshot.js";
 
 function requestReload() {
   ui.notifications?.info("Greybearded Tokens: Bitte Oberfläche neu laden (F5), um Änderungen zu übernehmen.");
@@ -134,6 +133,5 @@ export function registerSettings() {
     });
   }
 
-  getGbFrameSettings();
   console.log("✅⭕ Greybearded Token Frames: Settings registered.");
 }
