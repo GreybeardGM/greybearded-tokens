@@ -1,33 +1,36 @@
 // get-tint-color.js
-import { getGbFrameSettings } from "./settings-snapshot.js";
 import { getPlayerColor } from "./get-player-color.js";
 
 /**
- * 1) Wenn usePlayerColor=true und Spielerfarbe existiert → return Spielerfarbe.
- * 2) Sonst Farbe gemäß tintMode. Dabei werden defaultColor & Dispo-Farben AUS DEM SNAPSHOT gelesen.
- *    Der Snapshot wird erst geladen, wenn er wirklich gebraucht wird (lazy).
+ * Bestimmt die Tint-Farbe für einen Tokenrahmen.
+ * - Nutzt ausschließlich den übergebenen Settings-Snapshot S (kein internes Laden).
+ * - which = 1 → verwendet S.tintMode1 / S.usePlayerColor1
+ * - which = 2 → verwendet S.tintMode2 / S.usePlayerColor2
  *
  * @param {Token} token
- * @param {"NoTint"|"Unicolor"|"Advanced"|"Disposition"} [tintMode="Disposition"]
- * @param {boolean} [usePlayerColor=false]
- * @param {object|null} [S=null] Optional: bereits vorhandener Settings-Snapshot (getGbFrameSettings()).
- * @returns {string|null} "#rrggbb" oder null (bei NoTint)
+ * @param {object} S             Settings-Snapshot aus getGbFrameSettings()
+ * @param {1|2} which            Rahmenindex: 1 = Primär, 2 = Sekundär
+ * @returns {string|null}        "#rrggbb" oder null (bei NoTint)
  */
-export function getTintColor(token, tintMode = "Disposition", usePlayerColor = false, S = null) {
-  // 1) Optional: Spielerfarbe
+export function getTintColor(token, S, which) {
+  // Safety
+  if (!token || !S || (which !== 1 && which !== 2)) return S?.defaultColor ?? "#888888";
+
+  const defaultColor = S.defaultColor || "#888888";
+  const colorFromSnapshot = (key, fallback) => (S.colors?.[key] ?? fallback);
+
+  const usePlayerColor = which === 1 ? !!S.usePlayerColor1 : !!S.usePlayerColor2;
+  const tintMode       = which === 1 ? (S.tintMode1 || "Disposition") : (S.tintMode2 || "Disposition");
+
+  // 1) Optional zuerst: Spielerfarbe
   if (usePlayerColor) {
     const actorId = token?.actor?.id ?? null;
     if (actorId) {
-      const pc = getPlayerColor(actorId); // "#rrggbb" oder null
+      const pc = getPlayerColor(actorId);  // "#rrggbb" oder null
       if (pc) return pc;
     }
-    // kein Treffer → weiter mit Tint-Mode
+    // kein Treffer → mit Tint-Mode fortfahren
   }
-
-  // Lazy Snapshot Loader
-  const getS = () => (S ?? (S = getGbFrameSettings()));
-  const defaultColor = () => getS().defaultColor || "#888888";
-  const colorFromSnapshot = (key, fallback) => (getS().colors?.[key] ?? fallback);
 
   // 2) Tint-Mode
   switch (tintMode) {
@@ -35,11 +38,11 @@ export function getTintColor(token, tintMode = "Disposition", usePlayerColor = f
       return null;
 
     case "Unicolor":
-      return defaultColor();
+      return defaultColor;
 
     case "Advanced":
-      // TODO: erweiterte Logik (Tags/Flags/Zustände)
-      return defaultColor();
+      // Platzhalter: hier kann später erweiterte Logik rein (Flags, Zustände, Tags, etc.)
+      return defaultColor;
 
     case "Disposition":
     default: {
@@ -48,15 +51,15 @@ export function getTintColor(token, tintMode = "Disposition", usePlayerColor = f
       const hasPlayerOwner = token?.actor?.hasPlayerOwner;
 
       if (actorType === "character" && hasPlayerOwner) {
-        return colorFromSnapshot("character", "#00ff00");
+        return colorFromSnapshot("character", defaultColor);
       }
 
       switch (disp) {
-        case -2: return colorFromSnapshot("secret",   "#8000ff");
-        case -1: return colorFromSnapshot("hostile",  "#ff0000");
-        case  0: return colorFromSnapshot("neutral",  "#ffff00");
-        case  1: return colorFromSnapshot("friendly", "#ff8000");
-        default: return defaultColor();
+        case -2: return colorFromSnapshot("secret",   defaultColor);
+        case -1: return colorFromSnapshot("hostile",  defaultColor);
+        case  0: return colorFromSnapshot("neutral",  defaultColor);
+        case  1: return colorFromSnapshot("friendly", defaultColor);
+        default: return defaultColor;
       }
     }
   }
