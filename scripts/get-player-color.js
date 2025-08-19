@@ -49,7 +49,6 @@ function _rebuildPlayerColorSnapshot() {
     if (!map.has(actorId)) map.set(actorId, css);
   }
 
-  dbg("Snapshot rebuild done. Entries:", map.size, Array.from(map.entries()));
   _playerColorSnapshot = map;
   return _playerColorSnapshot;
 }
