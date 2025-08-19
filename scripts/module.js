@@ -1,8 +1,14 @@
 import { applyFrameToToken } from "./apply-frame.js";
 import { getGbFrameSettings } from "./settings-snapshot.js";
-import { rebuildPlayerColorSnapshot } from "./get-player-color.js"; //
+import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
+import { regDebugSetting } from "./debug.js";
 
 Hooks.once("init", () => {
+  // ──────────────────────────────────────────────────────────────────────────────
+  // DEBUGGING
+  // ──────────────────────────────────────────────────────────────────────────────
+  regDebugSetting();
+  
   function requestReload() {
     ui.notifications?.info("Greybearded Tokens: Bitte Oberfläche neu laden (F5), um Änderungen zu übernehmen.");
     // window.location.reload();
