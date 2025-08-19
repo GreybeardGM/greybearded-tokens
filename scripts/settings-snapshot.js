@@ -38,6 +38,7 @@ function buildSnapshot() {
 
 /** Lazy + memoized */
 export function getGbFrameSettings() {
+  console.log(_S);
   return _S ?? (_S = buildSnapshot());
 }
 
