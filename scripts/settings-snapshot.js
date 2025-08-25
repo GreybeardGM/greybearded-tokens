@@ -24,6 +24,10 @@ function _buildSnapshot() {
     tintMode2:       str(get("tintMode2"), "Unicolor"),
     usePlayerColor2: bool(get("usePlayerColor2")),
 
+    // Mask
+    maskEnabled:     bool(get("maskEnabled")),
+    pathMask:        str(get("pathMask"), "modules/greybearded-tokens/assets/mask-round.png"),
+    
     // Farben
     defaultColor: str(get("defaultColor"), "#888888"),
     colors: {
@@ -38,13 +42,11 @@ function _buildSnapshot() {
 
 /** Lazy + memoized */
 export function getGbFrameSettings() {
-  console.log(_S);
   return _S ?? (_S = _buildSnapshot());
 }
 
 export function buildSnapshot() {
   _S = _buildSnapshot();
-  console.log(_S);
   return _S;
 }
 
