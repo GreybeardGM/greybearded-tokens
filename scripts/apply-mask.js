@@ -78,32 +78,31 @@ export async function applyMaskToToken(token, S) {
     maskSprite.texture = maskTex;
   }
 
-  // ---- Geometry for mesh target (robust via LocalBounds) ----
-  const b = target.getLocalBounds?.();
-  if (!b || !isFinite(b.width) || !isFinite(b.height) || b.width <= 0 || b.height <= 0) {
-    // Wenn das Mesh noch keine Bounds hat, lieber abbrechen – beim nächsten Frame klappt's
-    return;
-  }
+  // --- Geometrie identisch zu apply-frame.js (für mesh) ---
+  const sx = target.scale?.x || 1;
+  const sy = target.scale?.y || 1;
+  const tx = Math.abs(token.document?.texture?.scaleX ?? 1);
+  const ty = Math.abs(token.document?.texture?.scaleY ?? 1);
   
-  // Maske darf NICHT zeichnen:
+  // Zielgröße wie bei den Rahmen:
+  const w = (token.w * tx) / sx;
+  const h = (token.h * ty) / sy;
+  
+  // Maske darf nie sichtbar gezeichnet werden
   maskSprite.renderable = false;
   
-  // Wichtig: Bei Mesh OHNE Anchor zentrieren wir über den Pivot
-  // (der Mask-Sprite hängt am selben Parent wie target)
-  maskSprite.anchor?.set?.(0); // neutralisieren (falls es ein Sprite ist)
-  maskSprite.pivot.set(b.x + b.width / 2, b.y + b.height / 2);
+  // Sprite-Anker mittig, Position (0,0) im selben Parent wie mesh
+  // (mesh ist zentriert, deine Frames stehen genauso)
+  maskSprite.anchor?.set?.(0.5, 0.5);
+  maskSprite.position.set(0, 0);
+  maskSprite.rotation = 0;
   
-  // Position & Rotation 1:1 vom Mesh übernehmen
-  if (maskSprite.position.copyFrom) maskSprite.position.copyFrom(target.position);
-  else maskSprite.position.set(target.x || 0, target.y || 0);
-  maskSprite.rotation = target.rotation || 0;
-  
-  // Auf die Boundsgröße skalieren
+  // auf Zielgröße skalieren (Texture-Px -> Token-Px)
   const texW = maskSprite.texture.width  || maskSprite.texture.baseTexture?.realWidth  || 1;
   const texH = maskSprite.texture.height || maskSprite.texture.baseTexture?.realHeight || 1;
-  maskSprite.scale.set(b.width / texW, b.height / texH);
+  maskSprite.scale.set(w / texW, h / texH);
   
-  // Maske AUF DAS MESH setzen (nicht auf das Token)
+  // Maske AUF DAS MESH setzen (nicht auf den Token selbst)
   target.mask = maskSprite;
   token[_GB_MASK_TARGET] = target;
 
