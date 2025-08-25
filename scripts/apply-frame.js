@@ -8,40 +8,57 @@ export async function applyFrameToToken(token, S) {
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
   S = S || getGbFrameSettings();
 
+  token.sortableChildren = true;
+  
   const mesh = token.mesh;
   if (!mesh) return;
-
   mesh.sortableChildren = true;
 
-  // vorhandene Sprites
-  let frame1 = mesh.children.find(c => c?._gbFramePrimary === true);
-  let frame2 = mesh.children.find(c => c?._gbFrameSecondary === true);
-
-  // Frame 1
-  if (!frame1) {
-    if (!S.path1) return;
+  // Overlay-Container sicherstellen (Sibling von mesh)
+  let overlay = token._gbOverlay;
+  if (!overlay) {
+    overlay = new PIXI.Container();
+    overlay.name = "gb-overlay";
+    token.addChild(overlay);
+    token._gbOverlay = overlay;
+  }
+  
+  // Z-Order: overlay über mesh
+  mesh.zIndex = 10;
+  overlay.zIndex = 11;
+  
+  // vorhandene Frames künftig im OVERLAY suchen/ablegen
+  let frame1 = overlay.children.find(c => c?._gbFramePrimary === true)
+           || mesh.children.find(c => c?._gbFramePrimary === true); // Migration aus alten Builds
+  if (frame1 && frame1.parent !== overlay) overlay.addChild(frame1);
+  
+  let frame2 = overlay.children.find(c => c?._gbFrameSecondary === true)
+           || mesh.children.find(c => c?._gbFrameSecondary === true);
+  if (frame2 && frame2.parent !== overlay) overlay.addChild(frame2);
+  
+  // Neue Frames immer im overlay erzeugen:
+  if (!frame1 && S.path1) {
     frame1 = new PIXI.Sprite(PIXI.Texture.from(S.path1));
     frame1._gbFramePrimary = true;
     frame1.name = "gb-frame-1";
     frame1.anchor.set(0.5);
-    mesh.addChild(frame1);
+    overlay.addChild(frame1);
   }
-
-  // Frame 2
+  
   if (S.secondEnabled && S.path2) {
     if (!frame2) {
       frame2 = new PIXI.Sprite(PIXI.Texture.from(S.path2));
       frame2._gbFrameSecondary = true;
       frame2.name = "gb-frame-2";
       frame2.anchor.set(0.5);
-      mesh.addChild(frame2);
+      overlay.addChild(frame2);
     }
   } else if (frame2) {
     frame2.parent?.removeChild(frame2);
     frame2.destroy({ children: true, texture: false, baseTexture: false });
     frame2 = null;
   }
-
+  
   // Tints
   {
     const t1 = getTintColor(token, S, 1);
