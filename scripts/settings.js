@@ -123,7 +123,7 @@ export function registerSettings() {
     onChange: requestReload
   });
 
-  game.settings.register(MOD_ID, "maskPath", {
+  game.settings.register(MOD_ID, "pathMask", {
     name: "Bildpfad für Maske",
     hint: "Pfad zu einem PNG/SVG mit Alpha. Weiß = sichtbar, Schwarz = ausgeblendet.",
     scope: "world",
