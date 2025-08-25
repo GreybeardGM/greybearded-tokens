@@ -112,6 +112,28 @@ export function registerSettings() {
     onChange: requestReload
   });
 
+  // ── Maske ───────────────────────────────────────────────────────────────────
+  game.settings.register(MOD_ID, "maskEnabled", {
+    name: "Maskierung aktivieren",
+    hint: "Aktiviert eine Alpha-Maske, die auf das Token-Artwork angewendet wird (z. B. runde/abgerundete Tokens).",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+    onChange: requestReload
+  });
+
+  game.settings.register(MOD_ID, "maskPath", {
+    name: "Bildpfad für Maske",
+    hint: "Pfad zu einem PNG/SVG mit Alpha. Weiß = sichtbar, Schwarz = ausgeblendet.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "modules/greybearded-tokens/assets/mask-round.png",
+    filePicker: "image",
+    onChange: requestReload
+  });  
+  
   // ── Disposition-Farben ──────────────────────────────────────────────────────
   const colors = {
     "color-hostile":   "#993333",
