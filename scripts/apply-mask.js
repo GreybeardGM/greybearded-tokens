@@ -1,8 +1,8 @@
-// modules/greybearded-tokens/scripts/apply-mask.js
+// apply-mask.js
 import { getGbFrameSettings } from "./settings-snapshot.js";
 
 export const MASK_FLAG = "_gbMaskSprite";
-const _GB_MASK_TARGET = Symbol("gbMaskTarget");
+const _GB_MASK_TARGET   = Symbol("gbMaskTarget");
 const _GB_MASK_DEBUGGED = Symbol("gbMaskDebugged");
 const MASK_CACHE = new Map(); // url -> PIXI.Texture
 
@@ -37,22 +37,13 @@ export function clearMask(token) {
   }
 }
 
-// Kandidaten: icon → mesh.children → token selbst (falls mit Texture)
-function resolveArtworkTarget(token) {
-  const list = [];
-  if (token.icon) list.push(token.icon);
-  if (token.mesh?.children?.length) list.push(...token.mesh.children);
-  list.push(token); // Fallback
-
-  const valid = list.filter(c => {
-    if (!c || !c.renderable || !c.visible) return false;
-    if (c._gbFramePrimary || c._gbFrameSecondary) return false;
-    const tex = c.texture;
-    const meshTex = c.shader?.texture || tex?.baseTexture;
-    return !!(tex?.valid || meshTex?.valid);
-  });
-
-  return valid[0] ?? null;
+// In v12 ist meist kein token.icon vorhanden; Artwork hängt quasi „am Token“.
+// -> Wir maskieren dann den Token selbst, ABER hängen die Maske als Kind an den Token (nicht an den Layer!).
+function resolveTargetAndParent(token) {
+  // bevorzugt: expliziter Sprite falls vorhanden
+  if (token.icon?.texture?.valid) return { target: token.icon, parent: token.icon.parent ?? token };
+  // Fallback: Token selbst maskieren, Maske ALS KIND DES TOKENS anhängen
+  return { target: token, parent: token };
 }
 
 export async function applyMaskToToken(token, S) {
@@ -61,7 +52,7 @@ export async function applyMaskToToken(token, S) {
 
   if (!S.maskEnabled || !S.pathMask) { clearMask(token); return; }
 
-  // Einmalig kleines Debug zur Struktur
+  // Einmaliges Debug pro Token – hilft bei Strukturfragen
   if (!token[_GB_MASK_DEBUGGED]) {
     const kids = (token.mesh?.children ?? []).map(c => `${c.constructor?.name || "?"}:${c.name || "(unnamed)"}`);
     console.log("GBT mask: mesh children →", kids);
@@ -70,18 +61,24 @@ export async function applyMaskToToken(token, S) {
     token[_GB_MASK_DEBUGGED] = true;
   }
 
-  const target = resolveArtworkTarget(token);
+  const { target, parent } = resolveTargetAndParent(token);
   if (!target) return;
 
-  const texValid = !!(target.texture?.valid || target.shader?.texture?.valid || target.texture?.baseTexture?.valid);
+  // Prüfen, ob das Target überhaupt rendert
+  const texValid =
+    !!(target.texture?.valid ||
+       target.shader?.texture?.valid ||
+       target.texture?.baseTexture?.valid ||
+       target === token); // Token als Container ist ok
+
   if (!texValid) return;
 
+  // Masken-Textur laden
   const maskTex = await loadMaskOnce(S.pathMask);
   if (!maskTex) return;
 
-  const parent = target.parent ?? token.mesh ?? token;
+  // Masken-Sprite sicherstellen – WICHTIG: Parent NIEMALS der Layer-Objects-Container
   let maskSprite = token[MASK_FLAG];
-
   if (!maskSprite || maskSprite.parent !== parent) {
     clearMask(token);
     maskSprite = new PIXI.Sprite(maskTex);
@@ -92,27 +89,49 @@ export async function applyMaskToToken(token, S) {
     maskSprite.texture = maskTex;
   }
 
-  // Anchor/Pivot
-  if (target.anchor && typeof target.anchor.x === "number") {
-    maskSprite.anchor.set(target.anchor.x, target.anchor.y);
+  // Geometrie:
+  if (target === token) {
+    // (A) Token-Container maskieren → zentriert (0,0), keine Rotation
+    // Größe analog zu deinen Frames berechnen
+    const sx = token.mesh?.scale.x || 1;
+    const sy = token.mesh?.scale.y || 1;
+    const tx = Math.abs(token.document?.texture?.scaleX ?? 1);
+    const ty = Math.abs(token.document?.texture?.scaleY ?? 1);
+
+    const w  = (token.w * tx * 1) / sx;
+    const h  = (token.h * ty * 1) / sy;
+
+    const texW = maskTex.width || maskTex.baseTexture?.realWidth || 1;
+    const texH = maskTex.height || maskTex.baseTexture?.realHeight || 1;
+
+    maskSprite.anchor?.set?.(0.5, 0.5);
+    maskSprite.position.set(0, 0);
+    maskSprite.rotation = 0;
+    maskSprite.scale.set(w / texW, h / texH);
   } else {
-    const b = target.getLocalBounds?.() ?? { x: 0, y: 0, width: target.width ?? 1, height: target.height ?? 1 };
-    maskSprite.anchor?.set?.(0);
-    maskSprite.pivot.set(b.x + b.width / 2, b.y + b.height / 2);
+    // (B) Explizites Sprite/Mesh maskieren → Anchor/Pos/Rot spiegeln
+    if (target.anchor && typeof target.anchor.x === "number") {
+      maskSprite.anchor.set(target.anchor.x, target.anchor.y);
+    } else {
+      maskSprite.anchor?.set?.(0.5);
+    }
+    if (maskSprite.position.copyFrom) maskSprite.position.copyFrom(target.position);
+    else maskSprite.position.set(target.x || 0, target.y || 0);
+    maskSprite.rotation = target.rotation || 0;
+
+    const b    = target.getLocalBounds?.() ?? { width: target.width ?? 1, height: target.height ?? 1 };
+    const texW = maskTex.width || maskTex.baseTexture?.realWidth || 1;
+    const texH = maskTex.height || maskTex.baseTexture?.realHeight || 1;
+    maskSprite.scale.set((b.width || 1) / texW, (b.height || 1) / texH);
   }
 
-  // Position/Rotation
-  if (maskSprite.position.copyFrom) maskSprite.position.copyFrom(target.position);
-  else maskSprite.position.set(target.x || 0, target.y || 0);
-  maskSprite.rotation = target.rotation || 0;
+  // Maske setzen (direkt aufs Target; bei (A) ist target === token)
+  try {
+    target.mask = maskSprite;
+  } catch (e) {
+    console.warn("GBT mask: could not set mask on target", target, e);
+    return;
+  }
 
-  // Skalierung
-  const b = target.getLocalBounds?.() ?? { width: target.width ?? 1, height: target.height ?? 1 };
-  const texW = maskTex.width || maskTex.baseTexture?.realWidth || 1;
-  const texH = maskTex.height || maskTex.baseTexture?.realHeight || 1;
-  maskSprite.scale.set((b.width || 1) / texW, (b.height || 1) / texH);
-
-  // Maske setzen (direkt aufs Render-Target)
-  target.mask = maskSprite;
   token[_GB_MASK_TARGET] = target;
 }
