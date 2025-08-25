@@ -1,10 +1,12 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
+import { getGbFrameSettings } from "./settings-snapshot.js";
 import { applyMaskToToken, clearMask } from "./apply-mask.js";
 
 export async function applyFrameToToken(token, S) {
   if (!token || token.destroyed) return;
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
+  S = S || getGbFrameSettings();
 
   const mesh = token.mesh;
   if (!mesh) return;
