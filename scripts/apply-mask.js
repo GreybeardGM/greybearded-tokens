@@ -37,9 +37,8 @@ export function clearMask(token) {
   }
 }
 
-/** wir maskieren IMMER das Mesh, und hängen die Maske als Kind am Token ein */
 function getTargetAndParent(token) {
-  if (token.mesh) return { target: token.mesh, parent: token };
+  if (token.mesh) return { target: token.mesh, parent: token.mesh }; // ⬅️ Parent = mesh!
   return null;
 }
 
@@ -62,7 +61,7 @@ export async function applyMaskToToken(token, S) {
   if (!tp) return;
   const { target, parent } = tp;
 
-  // Masken-Sprite sicherstellen (am TOKEN anhängen, nicht am Layer!)
+  // Masken-Sprite (am MESH, nicht am Token!)
   let maskSprite = token[MASK_FLAG];
   const maskTex  = await loadMaskOnce(S.pathMask);
   if (!maskTex) return;
@@ -71,39 +70,26 @@ export async function applyMaskToToken(token, S) {
     clearMask(token);
     maskSprite = new PIXI.Sprite(maskTex);
     maskSprite.name = "gbt-mask";
-    maskSprite.renderable = false; // Maske NICHT zeichnen
-    parent.addChild(maskSprite);
+    maskSprite.renderable = false;      // nie zeichnen, nur als Maske dienen
+    parent.addChild(maskSprite);        // ⬅️ ans mesh hängen
     token[MASK_FLAG] = maskSprite;
   } else if (maskSprite.texture !== maskTex) {
     maskSprite.texture = maskTex;
   }
 
-  // --- Geometrie identisch zu apply-frame.js (für mesh) ---
-  const sx = target.scale?.x || 1;
-  const sy = target.scale?.y || 1;
-  const tx = Math.abs(token.document?.texture?.scaleX ?? 1);
-  const ty = Math.abs(token.document?.texture?.scaleY ?? 1);
-  
-  // Zielgröße wie bei den Rahmen:
-  const w = (token.w * tx) / sx;
-  const h = (token.h * ty) / sy;
-  
-  // Maske darf nie sichtbar gezeichnet werden
-  maskSprite.renderable = false;
-  
-  // Sprite-Anker mittig, Position (0,0) im selben Parent wie mesh
-  // (mesh ist zentriert, deine Frames stehen genauso)
-  maskSprite.anchor?.set?.(0.5, 0.5);
-  maskSprite.position.set(0, 0);
-  maskSprite.rotation = 0;
-  
-  // auf Zielgröße skalieren (Texture-Px -> Token-Px)
+  // Geometrie: exakt auf die LocalBounds des mesh legen
+  const b = target.getLocalBounds?.();
+  if (!b || !isFinite(b.width) || !isFinite(b.height) || b.width <= 0 || b.height <= 0) return;
+
   const texW = maskSprite.texture.width  || maskSprite.texture.baseTexture?.realWidth  || 1;
   const texH = maskSprite.texture.height || maskSprite.texture.baseTexture?.realHeight || 1;
-  maskSprite.scale.set(w / texW, h / texH);
-  
-  // Maske AUF DAS MESH setzen (nicht auf den Token selbst)
+
+  maskSprite.anchor?.set?.(0.5, 0.5);
+  maskSprite.position.set(0, 0);        // im mesh-LocalSpace zentriert
+  maskSprite.rotation = 0;
+  maskSprite.scale.set(b.width / texW, b.height / texH);
+
+  // Maske AUF DAS MESH setzen
   target.mask = maskSprite;
   token[_GB_MASK_TARGET] = target;
-
 }
