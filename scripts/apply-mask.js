@@ -2,6 +2,7 @@
 import { getGbFrameSettings } from "./settings-snapshot.js";
 
 const MASK_FLAG = "_gbMaskSprite";
+const _GB_MASK_TARGET = Symbol("gbMaskTarget");
 const MASK_CACHE = new Map(); // url -> PIXI.Texture
 
 async function loadMaskOnce(url) {
@@ -15,57 +16,52 @@ async function loadMaskOnce(url) {
     tex = new PIXI.Texture(base);
   } else {
     tex = PIXI.Texture.from(url);
-    if (!tex.baseTexture.valid) await new Promise(res => tex.baseTexture.once("loaded", res));
+    if (!tex.baseTexture.valid) {
+      await new Promise(res => tex.baseTexture.once("loaded", res));
+    }
   }
   MASK_CACHE.set(url, tex);
   return tex;
 }
 
 export function clearMask(token) {
-  const tgt = token?.[_GB_MASK_TARGET]; // s.u. setzen wir den Ziel-Ref
-  const maskSprite = token?.[MASK_FLAG];
-  if (tgt && tgt.mask === maskSprite) tgt.mask = null;
-  if (maskSprite?.parent) maskSprite.parent.removeChild(maskSprite);
-  if (token) {
-    token[MASK_FLAG] = null;
-    token[_GB_MASK_TARGET] = null;
+  try {
+    const tgt = token?.[_GB_MASK_TARGET];
+    const maskSprite = token?.[MASK_FLAG];
+    if (tgt && tgt.mask === maskSprite) tgt.mask = null;
+    if (maskSprite?.parent) maskSprite.parent.removeChild(maskSprite);
+  } finally {
+    if (token) {
+      token[MASK_FLAG] = null;
+      token[_GB_MASK_TARGET] = null;
+    }
   }
 }
 
-// internes Symbol, damit wir nicht mit anderen Props kollidieren
-const _GB_MASK_TARGET = Symbol("gbMaskTarget");
-
-/** robust: finde das eigentliche Artwork-DisplayObject (Sprite oder Mesh) */
+// minimal robust: bevorzugt token.icon; wenn nicht brauchbar, suche in mesh.children
 function resolveArtworkTarget(token) {
-  // 1) direkte Kandidaten
-  const candidates = [];
-  if (token.icon) candidates.push(token.icon);
-  if (token.mesh) candidates.push(...token.mesh.children);
+  const list = [];
+  if (token.icon) list.push(token.icon);
+  if (token.mesh?.children?.length) list.push(...token.mesh.children);
 
-  // 2) filtern: echtes Bild/Mesh mit gültiger Textur, nicht unsere Frames/Bars/Borders
-  const valid = candidates.filter(c => {
+  const valid = list.filter(c => {
     if (!c || !c.renderable || !c.visible) return false;
-    if (c._gbFramePrimary || c._gbFrameSecondary) return false; // unsere Rahmen
-    if (c === token.bars || c === token.border || c === token.nameplate) return false;
-
-    // Sprite mit Texture?
+    if (c._gbFramePrimary || c._gbFrameSecondary) return false; // unsere Rahmen nicht maskieren
+    // Sprite?
     if (c.texture?.valid) return true;
-    // Mesh mit Texture?
+    // Mesh?
     if (c.shader?.texture?.valid || c.texture?.baseTexture?.valid) return true;
-
     return false;
   });
 
-  // 3) nimm den größten (falls mehrere)
-  let best = null; let area = -1;
-  for (const c of valid) {
-    const b = c.getLocalBounds?.() ?? { width: c.width ?? 0, height: c.height ?? 0 };
-    const a = (b.width || 0) * (b.height || 0);
-    if (a > area) { area = a; best = c; }
-  }
-  return best ?? null;
+  // nimm den ersten „echten“ Kandidaten (meist token.icon)
+  return valid[0] ?? null;
 }
 
+/**
+ * Wendet/aktualisiert die Maske auf einem Token – ohne Ticker-Retries.
+ * Falls Ziel/Texture noch nicht ready: bricht leise ab.
+ */
 export async function applyMaskToToken(token, S) {
   if (!token) return;
   S ||= getGbFrameSettings();
@@ -75,31 +71,21 @@ export async function applyMaskToToken(token, S) {
     return;
   }
 
-  // Ziel ermitteln (Sprite oder Mesh)
+  // 1) Ziel ermitteln (Sprite oder Mesh). Wenn keins → sofort aufgeben.
   const target = resolveArtworkTarget(token);
-  if (!target) {
-    // beim nächsten Frame nochmal versuchen (erst wenn alles gezeichnet ist)
-    PIXI.Ticker.shared.addOnce(() => applyMaskToToken(token, S));
-    return;
-  }
+  if (!target) return;
 
-  // Texture vorhanden?
-  const hasTex = !!(target.texture?.valid || target.shader?.texture?.valid || target.texture?.baseTexture?.valid);
-  if (!hasTex) {
-    PIXI.Ticker.shared.addOnce(() => applyMaskToToken(token, S));
-    return;
-  }
+  // 2) Texture vorhanden? Falls nein → leise aufgeben.
+  const texValid = !!(target.texture?.valid || target.shader?.texture?.valid || target.texture?.baseTexture?.valid);
+  if (!texValid) return;
 
-  // Masken-Textur laden
+  // 3) Masken-Textur laden
   const maskTex = await loadMaskOnce(S.pathMask);
-  if (!maskTex) {
-    clearMask(token);
-    return;
-  }
+  if (!maskTex) return;
 
-  // Masken-Sprite anlegen (im selben Parent wie das Target!)
-  let maskSprite = token[MASK_FLAG];
+  // 4) Masken-Sprite sicherstellen (im selben Parent wie das Target)
   const parent = target.parent ?? token.mesh ?? token;
+  let maskSprite = token[MASK_FLAG];
 
   if (!maskSprite || maskSprite.parent !== parent) {
     clearMask(token);
@@ -111,33 +97,28 @@ export async function applyMaskToToken(token, S) {
     maskSprite.texture = maskTex;
   }
 
-  // Geometrie: an Target angleichen
-  // Anker/Pivot: robust über Pivot zentrieren, falls kein Anchor existiert
-  const hasAnchor = typeof maskSprite.anchor?.set === "function" && typeof target.anchor?.x === "number";
-  if (hasAnchor) {
+  // 5) Geometrie angleichen (Anchor/Pivot robust)
+  if (target.anchor && typeof target.anchor.x === "number") {
     maskSprite.anchor.set(target.anchor.x, target.anchor.y);
   } else {
-    // auf Mitte zentrieren via Pivot
-    const tb = target.getLocalBounds?.() ?? { width: target.width, height: target.height, x: 0, y: 0 };
-    maskSprite.anchor?.set?.(0); // falls vorhanden, neutralisieren
-    maskSprite.pivot.set(tb.x + tb.width / 2, tb.y + tb.height / 2);
+    // Zentrieren via Pivot
+    const b = target.getLocalBounds?.() ?? { x: 0, y: 0, width: target.width ?? 1, height: target.height ?? 1 };
+    maskSprite.anchor?.set?.(0);
+    maskSprite.pivot.set(b.x + b.width / 2, b.y + b.height / 2);
   }
 
-  // Position/Rotation/Scale angleichen
-  maskSprite.position.copyFrom?.(target.position) ?? maskSprite.position.set(target.x, target.y);
+  // Position/Rotation
+  if (maskSprite.position.copyFrom) maskSprite.position.copyFrom(target.position);
+  else maskSprite.position.set(target.x, target.y);
   maskSprite.rotation = target.rotation;
 
-  // Zielgröße bestimmen
-  const tb = target.getLocalBounds?.() ?? { width: target.width ?? 1, height: target.height ?? 1 };
+  // Skalierung anhand Zielgröße
+  const b = target.getLocalBounds?.() ?? { width: target.width ?? 1, height: target.height ?? 1 };
   const texW = maskTex.width || maskTex.baseTexture?.realWidth || 1;
   const texH = maskTex.height || maskTex.baseTexture?.realHeight || 1;
-  const sx = (tb.width  || 1) / texW;
-  const sy = (tb.height || 1) / texH;
-  maskSprite.scale.set(sx, sy);
+  maskSprite.scale.set((b.width || 1) / texW, (b.height || 1) / texH);
 
-  // WICHTIG: die Maske auf das **Target** setzen (nicht auf token oder mesh)
+  // 6) Maske setzen
   target.mask = maskSprite;
-
-  // merken, welches Target wir gemaskt haben (für sauberes clear)
   token[_GB_MASK_TARGET] = target;
 }
