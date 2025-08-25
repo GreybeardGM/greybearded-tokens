@@ -4,7 +4,7 @@ import { buildSnapshot } from "./settings-snapshot.js";
 
 import { applyFrameToToken } from "./apply-frame.js";
 import { applyMaskToToken, clearMask } from "./apply-mask.js";
-import { buildSnapshot, getGbFrameSettings } from "./settings-snapshot.js";
+import { getGbFrameSettings } from "./settings-snapshot.js";
 
 Hooks.once("ready", () => {
   const mod = game.modules.get("greybearded-tokens");
