@@ -8,13 +8,12 @@ export async function applyFrameToToken(token, S) {
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
   S = S || getGbFrameSettings();
 
-  token.sortableChildren = true;
-  
   const mesh = token.mesh;
   if (!mesh) return;
-  mesh.sortableChildren = true;
-
-  // Overlay-Container sicherstellen (Sibling von mesh)
+  
+  token.sortableChildren = true;
+  
+  // Overlay-Container als Sibling von mesh
   let overlay = token._gbOverlay;
   if (!overlay) {
     overlay = new PIXI.Container();
@@ -22,22 +21,28 @@ export async function applyFrameToToken(token, S) {
     token.addChild(overlay);
     token._gbOverlay = overlay;
   }
+  // Overlay transformiert wie das mesh (damit Größenformeln stimmen)
+  overlay.position.copyFrom(mesh.position);
+  overlay.scale.copyFrom(mesh.scale);
+  overlay.rotation = mesh.rotation;
+  overlay.sortableChildren = true;
   
   // Z-Order: overlay über mesh
   mesh.zIndex = 10;
   overlay.zIndex = 11;
   
-  // vorhandene Frames künftig im OVERLAY suchen/ablegen
+  // 2) Frames IM OVERLAY finden/erzeugen (Migration alter Frames aus mesh)
   let frame1 = overlay.children.find(c => c?._gbFramePrimary === true)
-           || mesh.children.find(c => c?._gbFramePrimary === true); // Migration aus alten Builds
+          || mesh.children.find(c => c?._gbFramePrimary === true);
   if (frame1 && frame1.parent !== overlay) overlay.addChild(frame1);
   
   let frame2 = overlay.children.find(c => c?._gbFrameSecondary === true)
-           || mesh.children.find(c => c?._gbFrameSecondary === true);
+          || mesh.children.find(c => c?._gbFrameSecondary === true);
   if (frame2 && frame2.parent !== overlay) overlay.addChild(frame2);
   
-  // Neue Frames immer im overlay erzeugen:
-  if (!frame1 && S.path1) {
+  // Frame 1
+  if (!frame1) {
+    if (!S.path1) return;
     frame1 = new PIXI.Sprite(PIXI.Texture.from(S.path1));
     frame1._gbFramePrimary = true;
     frame1.name = "gb-frame-1";
@@ -45,6 +50,7 @@ export async function applyFrameToToken(token, S) {
     overlay.addChild(frame1);
   }
   
+  // Frame 2 (optional)
   if (S.secondEnabled && S.path2) {
     if (!frame2) {
       frame2 = new PIXI.Sprite(PIXI.Texture.from(S.path2));
@@ -59,41 +65,40 @@ export async function applyFrameToToken(token, S) {
     frame2 = null;
   }
   
-  // Tints
+  // 3) Tints unverändert
   {
     const t1 = getTintColor(token, S, 1);
     frame1.tint = (t1 != null) ? PIXI.utils.string2hex(t1) : 0xFFFFFF;
-
+  
     if (frame2) {
       const t2 = getTintColor(token, S, 2);
       frame2.tint = (t2 != null) ? PIXI.utils.string2hex(t2) : 0xFFFFFF;
     }
   }
-
-  // Geometrie
+  
+  // 4) Geometrie: jetzt gegen overlay.scale rechnen
   {
     const kW = token.w, kH = token.h;
-    const sx = mesh.scale.x || 1, sy = mesh.scale.y || 1;
+    const sx = overlay.scale.x || 1, sy = overlay.scale.y || 1;
     const tx = Math.abs(token.document.texture?.scaleX ?? 1);
     const ty = Math.abs(token.document.texture?.scaleY ?? 1);
-
+  
     frame1.width  = (kW * tx * (S.scale1 || 1)) / sx;
     frame1.height = (kH * ty * (S.scale1 || 1)) / sy;
     frame1.position.set(0, 0);
-
+  
     if (frame2) {
       frame2.width  = (kW * tx * (S.scale2 || 1)) / sx;
       frame2.height = (kH * ty * (S.scale2 || 1)) / sy;
       frame2.position.set(0, 0);
     }
   }
-
-  // Z-Order
-  const barsZ = mesh.bars?.zIndex ?? 20;
-  frame1.zIndex = barsZ - 1;
-  if (frame2) frame2.zIndex = frame1.zIndex - 1;
-  mesh.sortDirty = true;
-
+  
+  // 5) Z-Order: Primär über Sekundär (im Overlay)
+  frame1.zIndex = 2;           // oben
+  if (frame2) frame2.zIndex = 1; // darunter
+  overlay.sortDirty = true;
+  
   // Maske
   if (S.maskEnabled && S.pathMask) {
     await applyMaskToToken(token, S);
