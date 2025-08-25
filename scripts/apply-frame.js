@@ -1,5 +1,6 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
+import { applyMaskToToken, clearMask } from "./apply-mask.js";
 
 export async function applyFrameToToken(token, S) {
   if (!token || token.destroyed) return;
@@ -14,7 +15,7 @@ export async function applyFrameToToken(token, S) {
   let frame1 = mesh.children.find(c => c?._gbFramePrimary === true);
   let frame2 = mesh.children.find(c => c?._gbFrameSecondary === true);
 
-  // Frame 1 (kein Live-Wechsel der Texturpfade)
+  // Frame 1
   if (!frame1) {
     if (!S.path1) return;
     frame1 = new PIXI.Sprite(PIXI.Texture.from(S.path1));
@@ -24,7 +25,7 @@ export async function applyFrameToToken(token, S) {
     mesh.addChild(frame1);
   }
 
-  // Frame 2 (an/aus per Setting; keine Live-Änderungen)
+  // Frame 2
   if (S.secondEnabled && S.path2) {
     if (!frame2) {
       frame2 = new PIXI.Sprite(PIXI.Texture.from(S.path2));
@@ -39,7 +40,7 @@ export async function applyFrameToToken(token, S) {
     frame2 = null;
   }
 
-  // Tints (ziehen aus S; kein Settings-Neuladen hier)
+  // Tints
   {
     const t1 = getTintColor(token, S, 1);
     frame1.tint = (t1 != null) ? PIXI.utils.string2hex(t1) : 0xFFFFFF;
@@ -73,4 +74,12 @@ export async function applyFrameToToken(token, S) {
   frame1.zIndex = barsZ - 1;
   if (frame2) frame2.zIndex = frame1.zIndex - 1;
   mesh.sortDirty = true;
+
+  // Maske
+  if (S.maskEnabled && S.pathMask) {
+    await applyMaskToToken(token, S);
+  } else {
+    // falls früher mal eine Maske aktiv war, sauber entfernen
+    clearMask(token);
+  }
 }
