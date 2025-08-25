@@ -1,25 +1,50 @@
-// apply-mask.js
-const MASK_FLAG = "_gbMaskSprite";
+// modules/greybearded-tokens/scripts/apply-mask.js
+import { getGbFrameSettings } from "./settings-snapshot.js";
+
+export const MASK_FLAG = "_gbMaskSprite";
 const _GB_MASK_TARGET = Symbol("gbMaskTarget");
 const _GB_MASK_DEBUGGED = Symbol("gbMaskDebugged");
-const MASK_CACHE = new Map();
+const MASK_CACHE = new Map(); // url -> PIXI.Texture
 
-function listChildrenNames(d) {
-  return (d?.children ?? []).map(c => `${c.constructor?.name || "?"}:${c.name || "(unnamed)"}`);
+async function loadMaskOnce(url) {
+  if (!url) return null;
+  const cached = MASK_CACHE.get(url);
+  if (cached?.baseTexture?.valid) return cached;
+
+  let tex;
+  if (PIXI.Assets?.load) {
+    const base = await PIXI.Assets.load(url);
+    tex = new PIXI.Texture(base);
+  } else {
+    tex = PIXI.Texture.from(url);
+    if (!tex.baseTexture.valid) await new Promise(res => tex.baseTexture.once("loaded", res));
+  }
+  MASK_CACHE.set(url, tex);
+  return tex;
 }
 
+export function clearMask(token) {
+  try {
+    const tgt = token?.[_GB_MASK_TARGET];
+    const maskSprite = token?.[MASK_FLAG];
+    if (tgt && tgt.mask === maskSprite) tgt.mask = null;
+    if (maskSprite?.parent) maskSprite.parent.removeChild(maskSprite);
+  } finally {
+    if (token) {
+      token[MASK_FLAG] = null;
+      token[_GB_MASK_TARGET] = null;
+    }
+  }
+}
+
+// Kandidaten: icon → mesh.children → token selbst (falls mit Texture)
 function resolveArtworkTarget(token) {
-  const candidates = [];
+  const list = [];
+  if (token.icon) list.push(token.icon);
+  if (token.mesh?.children?.length) list.push(...token.mesh.children);
+  list.push(token); // Fallback
 
-  // 1) offensichtliche Kandidaten
-  if (token.icon) candidates.push(token.icon);
-  if (token.mesh?.children?.length) candidates.push(...token.mesh.children);
-
-  // 2) Fallback: das Token selbst, wenn es eine gültige Textur trägt
-  candidates.push(token);
-
-  // 3) filtern auf echte Render-Ziele (Sprite/Mesh) mit gültiger Textur
-  const valid = candidates.filter(c => {
+  const valid = list.filter(c => {
     if (!c || !c.renderable || !c.visible) return false;
     if (c._gbFramePrimary || c._gbFrameSecondary) return false;
     const tex = c.texture;
@@ -27,7 +52,6 @@ function resolveArtworkTarget(token) {
     return !!(tex?.valid || meshTex?.valid);
   });
 
-  // zuerst der wahrscheinlich richtige
   return valid[0] ?? null;
 }
 
@@ -37,9 +61,9 @@ export async function applyMaskToToken(token, S) {
 
   if (!S.maskEnabled || !S.pathMask) { clearMask(token); return; }
 
-  // — Debug einmalig pro Token — (hilft uns, die Struktur zu sehen)
+  // Einmalig kleines Debug zur Struktur
   if (!token[_GB_MASK_DEBUGGED]) {
-    const kids = listChildrenNames(token.mesh);
+    const kids = (token.mesh?.children ?? []).map(c => `${c.constructor?.name || "?"}:${c.name || "(unnamed)"}`);
     console.log("GBT mask: mesh children →", kids);
     console.log("GBT mask: token.icon →", token.icon);
     console.log("GBT mask: token has texture →", !!token.texture?.valid);
@@ -49,17 +73,15 @@ export async function applyMaskToToken(token, S) {
   const target = resolveArtworkTarget(token);
   if (!target) return;
 
-  // Textur wirklich da?
   const texValid = !!(target.texture?.valid || target.shader?.texture?.valid || target.texture?.baseTexture?.valid);
   if (!texValid) return;
 
-  // Masken-Textur laden (einmal pro URL)
   const maskTex = await loadMaskOnce(S.pathMask);
   if (!maskTex) return;
 
-  // Maske im selben Parent wie das Target
   const parent = target.parent ?? token.mesh ?? token;
   let maskSprite = token[MASK_FLAG];
+
   if (!maskSprite || maskSprite.parent !== parent) {
     clearMask(token);
     maskSprite = new PIXI.Sprite(maskTex);
@@ -70,7 +92,7 @@ export async function applyMaskToToken(token, S) {
     maskSprite.texture = maskTex;
   }
 
-  // Geometrie angleichen (Anchor wenn vorhanden, sonst Pivot via Bounds)
+  // Anchor/Pivot
   if (target.anchor && typeof target.anchor.x === "number") {
     maskSprite.anchor.set(target.anchor.x, target.anchor.y);
   } else {
@@ -90,19 +112,7 @@ export async function applyMaskToToken(token, S) {
   const texH = maskTex.height || maskTex.baseTexture?.realHeight || 1;
   maskSprite.scale.set((b.width || 1) / texW, (b.height || 1) / texH);
 
-  // Hier unterscheiden wir je nach Typ das Mask-Property:
-  // In Pixi v7 wird .mask auf DisplayObject unterstützt, aber wenn es zickt,
-  // versuchen wir .mask auf dem "Container" vs. direkt auf dem Objekt.
-  try {
-    target.mask = maskSprite;     // üblich
-  } catch (e) {
-    try {
-      (target.parent ?? parent).mask = maskSprite; // Fallback
-    } catch (_) {
-      console.warn("GBT mask: could not apply mask to target", target, e);
-      return;
-    }
-  }
-
+  // Maske setzen (direkt aufs Render-Target)
+  target.mask = maskSprite;
   token[_GB_MASK_TARGET] = target;
 }
