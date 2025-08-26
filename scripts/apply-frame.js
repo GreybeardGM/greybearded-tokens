@@ -29,7 +29,7 @@ export async function applyFrameToToken(token, S) {
   
   // Z-Order: overlay über mesh
   mesh.zIndex = 10;
-  overlay.zIndex = 11;
+  overlay.zIndex = (token.bars?.zIndex ?? mesh.bars?.zIndex ?? 20) - 1;
   
   // 2) Frames IM OVERLAY finden/erzeugen (Migration alter Frames aus mesh)
   let frame1 = overlay.children.find(c => c?._gbFramePrimary === true)
@@ -95,8 +95,8 @@ export async function applyFrameToToken(token, S) {
   }
   
   // 5) Z-Order: Primär über Sekundär (im Overlay)
-  frame1.zIndex = 2;           // oben
-  if (frame2) frame2.zIndex = 1; // darunter
+  frame1.zIndex = 1;           // oben
+  if (frame2) frame2.zIndex = 0; // darunter
   overlay.sortDirty = true;
   
   // Maske
