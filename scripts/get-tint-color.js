@@ -6,6 +6,8 @@ import { getPlayerColor } from "./get-player-color.js";
  * - Nutzt ausschließlich den übergebenen Settings-Snapshot S (kein internes Laden).
  * - which = 1 → verwendet S.tintMode1 / S.usePlayerColor1
  * - which = 2 → verwendet S.tintMode2 / S.usePlayerColor2
+ * Unterstützte Tint-Modes:
+ *   - "NoTint" | "Unicolor" | "Advanced" | "Disposition" | "custom"
  *
  * @param {Token} token
  * @param {object} S             Settings-Snapshot aus getGbFrameSettings()
@@ -21,6 +23,34 @@ export function getTintColor(token, S, which) {
 
   const usePlayerColor = which === 1 ? !!S.usePlayerColor1 : !!S.usePlayerColor2;
   const tintMode       = which === 1 ? (S.tintMode1 || "Disposition") : (S.tintMode2 || "Disposition");
+
+  // 0) Helper: beliebige Eingaben zu "#rrggbb" normalisieren
+  const normalizeToHex = (val) => {
+    if (val == null) return null;
+
+    // Numeric (inkl. Number-Objekte)
+    if (typeof val === "number" || val instanceof Number) {
+      const n = Number(val);
+      if (!Number.isFinite(n)) return null;
+      const clamped = Math.max(0, Math.min(0xFFFFFF, Math.floor(n)));
+      return "#" + clamped.toString(16).padStart(6, "0");
+    }
+
+    if (typeof val === "string") {
+      const s = val.trim();
+      // "#rrggbb" oder "rrggbb"
+      const m = s.match(/^#?([0-9a-fA-F]{6})$/);
+      if (m) return "#" + m[1].toLowerCase();
+    }
+
+    // Optional: [r,g,b]
+    if (Array.isArray(val) && val.length === 3) {
+      const [r, g, b] = val.map((x) => Math.max(0, Math.min(255, Number(x) || 0)));
+      return "#" + ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
+    }
+
+    return null;
+  };
 
   // 1) Optional zuerst: Spielerfarbe
   if (usePlayerColor) {
@@ -43,6 +73,14 @@ export function getTintColor(token, S, which) {
     case "Advanced":
       // Platzhalter: hier kann später erweiterte Logik rein (Flags, Zustände, Tags, etc.)
       return defaultColor;
+
+    case "custom":
+    case "Custom": {
+      // Farbe aus Token-Flag lesen und normalisieren
+      const raw = token?.document?.getFlag?.("greybearded-tokens", "customTint");
+      const hex = normalizeToHex(raw);
+      return hex ?? defaultColor;
+    }
 
     case "Disposition":
     default: {
