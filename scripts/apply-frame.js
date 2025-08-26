@@ -22,7 +22,7 @@ export async function applyFrameToToken(token, S) {
     token._gbOverlay = overlay;
   }
   // Overlay transformiert wie das mesh (damit Größenformeln stimmen)
-  //overlay.position.copyFrom(mesh.position);
+  overlay.position.set(token.w / 2, token.h / 2);
   overlay.scale.copyFrom(mesh.scale);
   overlay.rotation = mesh.rotation;
   overlay.sortableChildren = true;
