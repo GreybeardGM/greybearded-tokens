@@ -10,11 +10,19 @@ export async function applyFrameToToken(token, S) {
 
   const mesh = token.mesh;
   if (!mesh) return;
-  mesh.sortableChildren = true;
 
-  // ── vorhandene Frames (im mesh) ──
-  let frame1 = mesh.children.find(c => c?._gbFramePrimary === true);
-  let frame2 = mesh.children.find(c => c?._gbFrameSecondary === true);
+  // ── Parent für die Frames: token.border (unmaskiert, folgt Bewegung) ──
+  const framesParent = token.border ?? token;   // Border ist ein Container des Tokens
+  framesParent.sortableChildren = true;
+
+  // ── evtl. falsch platzierte alte Frames aus mesh ins framesParent migrieren ──
+  for (const ch of mesh.children.slice()) {
+    if (ch?._gbFramePrimary || ch?._gbFrameSecondary) framesParent.addChild(ch);
+  }
+
+  // ── vorhandene Frames unter framesParent suchen ──
+  let frame1 = framesParent.children.find(c => c?._gbFramePrimary === true);
+  let frame2 = framesParent.children.find(c => c?._gbFrameSecondary === true);
 
   // ── Frame 1 ──
   if (!frame1) {
@@ -23,7 +31,7 @@ export async function applyFrameToToken(token, S) {
     frame1._gbFramePrimary = true;
     frame1.name = "gb-frame-1";
     frame1.anchor.set(0.5);
-    mesh.addChild(frame1);
+    framesParent.addChild(frame1);
   }
 
   // ── Frame 2 (optional) ──
@@ -33,7 +41,7 @@ export async function applyFrameToToken(token, S) {
       frame2._gbFrameSecondary = true;
       frame2.name = "gb-frame-2";
       frame2.anchor.set(0.5);
-      mesh.addChild(frame2);
+      framesParent.addChild(frame2);
     }
   } else if (frame2) {
     frame2.parent?.removeChild(frame2);
@@ -52,10 +60,10 @@ export async function applyFrameToToken(token, S) {
     }
   }
 
-  // ── Geometrie (gegen mesh.scale gerechnet; Position immer 0/0, Anchor 0.5) ──
+  // ── Geometrie: Breite/Höhe wie gehabt, nur gegen framesParent.scale rechnen ──
   {
     const kW = token.w, kH = token.h;
-    const sx = mesh.scale.x || 1, sy = mesh.scale.y || 1;
+    const sx = framesParent.scale?.x || 1, sy = framesParent.scale?.y || 1;
     const tx = Math.abs(token.document.texture?.scaleX ?? 1);
     const ty = Math.abs(token.document.texture?.scaleY ?? 1);
 
@@ -70,15 +78,14 @@ export async function applyFrameToToken(token, S) {
     }
   }
 
-  // ── Z-Order: Primär über Sekundär ──
-  const barsZ = mesh.bars?.zIndex ?? 20;
-  frame1.zIndex = barsZ - 1;       // oben
-  if (frame2) frame2.zIndex = frame1.zIndex - 1; // darunter
-  mesh.sortDirty = true;
+  // ── Reihenfolge: Primär über Sekundär ──
+  frame1.zIndex = 2;
+  if (frame2) frame2.zIndex = 1;
+  framesParent.sortDirty = true;
 
-  // ── Maske auf das mesh ──
+  // ── Maske NUR aufs mesh ──
   if (S.maskEnabled && S.pathMask) {
-    await applyMaskToToken(token, S); // parent=mesh, target=mesh, renderable=false
+    await applyMaskToToken(token, S);   // setzt mesh.mask = (unsichtbare) Maske
   } else {
     clearMask(token);
   }
