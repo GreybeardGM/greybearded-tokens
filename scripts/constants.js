@@ -4,6 +4,7 @@ export const MOD_ID = "greybearded-tokens";
 export const TINT_CHOICES = {
   Disposition: "Disposition",
   Unicolor: "Unicolor",
+  Custom: "Custom",
   Advanced: "Advanced",
   NoTint: "NoTint"
 };
