@@ -8,38 +8,40 @@ export async function applyFrameToToken(token, S) {
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) return;
   S = S || getGbFrameSettings();
 
+  // --- Overlay als Sibling von mesh einrichten ---
   const mesh = token.mesh;
   if (!mesh) return;
   
-  token.sortableChildren = true;
+  const parent = mesh.parent;                 // ⬅️ WICHTIG: gleicher Parent wie mesh
+  parent.sortableChildren = true;
   
-  // Overlay-Container als Sibling von mesh
   let overlay = token._gbOverlay;
-  if (!overlay) {
+  if (!overlay || overlay.parent !== parent) {
+    // ggf. alten Overlay-Container ablösen
+    if (overlay?.parent) overlay.parent.removeChild(overlay);
     overlay = new PIXI.Container();
     overlay.name = "gb-overlay";
-    token.addChild(overlay);
+    parent.addChild(overlay);                 // ⬅️ an mesh.parent anhängen
     token._gbOverlay = overlay;
   }
-  // Overlay transformiert wie das mesh (damit Größenformeln stimmen)
+  
+  // Transform 1:1 kopieren (damit beide im selben Space liegen)
   overlay.position.copyFrom(mesh.position);
   overlay.scale.copyFrom(mesh.scale);
   overlay.rotation = mesh.rotation;
+  if (mesh.pivot) overlay.pivot.copyFrom(mesh.pivot); else overlay.pivot.set(0,0);
+  
   overlay.sortableChildren = true;
-  // Pivot der mesh übernehmen, sonst entsteht ein Offset
-  if (mesh.pivot) overlay.pivot.copyFrom(mesh.pivot); else overlay.pivot.set(0, 0);
+  mesh.zIndex = mesh.zIndex ?? 10;
+  overlay.zIndex = (mesh.zIndex ?? 10) + 1;   // Overlay über dem mesh
   
-  // Z-Order: overlay über mesh
-  mesh.zIndex = 10;
-  overlay.zIndex = 11;
-  
-  // 2) Frames IM OVERLAY finden/erzeugen (Migration alter Frames aus mesh)
+  // --- Frames IM OVERLAY suchen/erzeugen (Migration alter Frames aus mesh/overlay) ---
   let frame1 = overlay.children.find(c => c?._gbFramePrimary === true)
-          || mesh.children.find(c => c?._gbFramePrimary === true);
+          || mesh.children.find(c => c?._gbFramePrimary === true);   // Migration
   if (frame1 && frame1.parent !== overlay) overlay.addChild(frame1);
   
   let frame2 = overlay.children.find(c => c?._gbFrameSecondary === true)
-          || mesh.children.find(c => c?._gbFrameSecondary === true);
+          || mesh.children.find(c => c?._gbFrameSecondary === true); // Migration
   if (frame2 && frame2.parent !== overlay) overlay.addChild(frame2);
   
   // Frame 1
@@ -67,7 +69,7 @@ export async function applyFrameToToken(token, S) {
     frame2 = null;
   }
   
-  // 3) Tints unverändert
+  // Tints
   {
     const t1 = getTintColor(token, S, 1);
     frame1.tint = (t1 != null) ? PIXI.utils.string2hex(t1) : 0xFFFFFF;
@@ -78,7 +80,7 @@ export async function applyFrameToToken(token, S) {
     }
   }
   
-  // 4) Geometrie: jetzt gegen overlay.scale rechnen
+  // Geometrie (gegen overlay.scale rechnen)
   {
     const kW = token.w, kH = token.h;
     const sx = overlay.scale.x || 1, sy = overlay.scale.y || 1;
@@ -96,9 +98,9 @@ export async function applyFrameToToken(token, S) {
     }
   }
   
-  // 5) Z-Order: Primär über Sekundär (im Overlay)
-  frame1.zIndex = 2;           // oben
-  if (frame2) frame2.zIndex = 1; // darunter
+  // Reihenfolge: Primär über Sekundär
+  frame1.zIndex = 2;
+  if (frame2) frame2.zIndex = 1;
   overlay.sortDirty = true;
   
   // Maske
