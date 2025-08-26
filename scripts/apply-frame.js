@@ -26,6 +26,8 @@ export async function applyFrameToToken(token, S) {
   overlay.scale.copyFrom(mesh.scale);
   overlay.rotation = mesh.rotation;
   overlay.sortableChildren = true;
+  // Pivot der mesh übernehmen, sonst entsteht ein Offset
+  if (mesh.pivot) overlay.pivot.copyFrom(mesh.pivot); else overlay.pivot.set(0, 0);
   
   // Z-Order: overlay über mesh
   mesh.zIndex = 10;
