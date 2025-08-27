@@ -1,21 +1,53 @@
-// hover-zoom.js (lokal, leichtgewichtig)
+// hover-zoom.js (robust, multipliziert auf die Foundry-Basisskala)
 
-// Konfig (ggf. später aus Settings-Snapshot holen)
-const HOVER_SCALE = 1.06;      // 1.02–1.10 empfohlen
-const HOVER_MS    = 150;       // 120–180 ms angenehm
+// Konfig
+const HOVER_SCALE = 1.06;
+const HOVER_MS    = 150;
 const EASING      = t => 1 - Math.pow(1 - t, 3); // easeOutCubic
 
-// Hilfsfunktionen: Lesen/Setzen der sichtbaren Skala (Artwork + Overlay)
-function getVisualScale(token) {
-  // Wir nehmen die Mesh-Skala als maßgeblich
-  return token?.mesh?.scale?.x ?? 1.0;
-}
-function setVisualScale(token, s) {
-  if (token?.mesh?.scale) token.mesh.scale.set(s, s);
-  if (token?._gbOverlay?.scale) token._gbOverlay.scale.set(s, s);
+// --- Basisskala cachen & Utilities -----------------------------------------
+function ensureBaseScale(token) {
+  if (!token || token.destroyed) return;
+  const s = token?.mesh?.scale;
+  if (!s) return;
+  if (token._gbBaseScale == null) token._gbBaseScale = { x: s.x, y: s.y };
+  // Overlay anlegen/ausrichten (Sibling des Meshes)
+  if (!token._gbOverlay) {
+    const overlay = new PIXI.Container();
+    overlay.name = "gb-overlay";
+    token.addChild(overlay);
+    token._gbOverlay = overlay;
+  }
+  // Overlay so positionieren/rotieren wie das Mesh
+  token._gbOverlay.position.set(token.w / 2, token.h / 2);
+  token._gbOverlay.rotation = token.mesh.rotation;
+  // WICHTIG: Overlay immer an Mesh-Skala koppeln (kein eigener Basiswert!)
+  token._gbOverlay.scale.copyFrom(token.mesh.scale);
 }
 
-// Tween-Controller am Token speichern, damit wir abbrechen können
+// Sichtbarer Zoomfaktor (1.0 = Basis)
+function getVisualScale(token) {
+  return token?._gbVisualScale ?? 1.0;
+}
+
+// Setzt nur den *Faktor*; die echte Mesh-Skala wird: base * faktor
+function applyVisualScale(token, factor) {
+  if (!token || token.destroyed) return;
+  ensureBaseScale(token);
+  const base = token._gbBaseScale;
+  if (!base) return;
+
+  token._gbVisualScale = factor;
+
+  // Mesh bekommt Basis * Faktor
+  token.mesh.scale.set(base.x * factor, base.y * factor);
+
+  // Overlay direkt an die (neue) Mesh-Skala koppeln (keine eigene Basis halten!)
+  if (token._gbOverlay?.scale) {
+    token._gbOverlay.scale.copyFrom(token.mesh.scale);
+  }
+}
+
 function cancelHoverTween(token) {
   const t = token?._gbHoverTween;
   if (!t) return;
@@ -23,78 +55,62 @@ function cancelHoverTween(token) {
   token._gbHoverTween = null;
 }
 
-// Startet einen einmaligen Tween von aktueller Skala → target
-function tweenScale(token, target, ms = HOVER_MS) {
+// Tween von aktuellem Faktor -> Ziel-Faktor (nicht absolute Meshwerte!)
+function tweenFactor(token, targetFactor, ms = HOVER_MS) {
   cancelHoverTween(token);
   if (!token || token.destroyed) return;
 
-  const startScale = getVisualScale(token);
-  const delta = target - startScale;
-  if (Math.abs(delta) < 0.001) return; // nichts zu tun
+  ensureBaseScale(token);
+  const start = getVisualScale(token);
+  const delta = targetFactor - start;
+  if (Math.abs(delta) < 0.001) return;
 
-  const tState = {
-    start: performance.now(),
-    dur: ms,
-    raf: null
-  };
-  token._gbHoverTween = tState;
+  const state = { startTS: performance.now(), dur: ms, raf: null };
+  token._gbHoverTween = state;
 
   const step = (now) => {
     if (!token || token.destroyed) return cancelHoverTween(token);
-    const elapsed = now - tState.start;
-    const t = Math.min(1, elapsed / tState.dur);
+    const t = Math.min(1, (now - state.startTS) / state.dur);
     const eased = EASING(t);
-    setVisualScale(token, startScale + delta * eased);
-
-    if (t < 1) {
-      tState.raf = requestAnimationFrame(step);
-    } else {
-      cancelHoverTween(token); // fertig
-    }
+    applyVisualScale(token, start + delta * eased);
+    if (t < 1) state.raf = requestAnimationFrame(step);
+    else cancelHoverTween(token);
   };
-
-  tState.raf = requestAnimationFrame(step);
+  state.raf = requestAnimationFrame(step);
 }
 
-// Haupt-Hook: skaliert beim Hovern rein/raus
+// --- Hooks -------------------------------------------------------------------
 Hooks.on("hoverToken", (token, hovered) => {
-  // Nur lokal, rein visuell
   if (!token || token.destroyed) return;
-
-  // Optional: beim Drag kein Hover-Scale
-  if (token._dragging) return;
-
-  const target = hovered ? HOVER_SCALE : 1.0;
-  tweenScale(token, target, HOVER_MS);
+  if (token._dragging) return; // beim Drag nicht zoomen
+  tweenFactor(token, hovered ? HOVER_SCALE : 1.0, HOVER_MS);
 });
 
-// Falls Token verschwindet / wechselt Zustand → zurücksetzen
 Hooks.on("controlToken", (token, controlled) => {
-  // Bei Control-Wechsel sicherheitshalber zurück auf 1
+  // Bei Control-Wechsel: Tween aborten & sauber auf Faktor 1 zurück
   cancelHoverTween(token);
-  setVisualScale(token, 1.0);
+  applyVisualScale(token, 1.0);
 });
 
-Hooks.on("deleteToken", (scene, tokenData, options, userId) => {
-  // defensive cleanup, falls nötig
-  // (Bei echten Canvas-Objects kannst du optional in "destroyToken" zurücksetzen)
+Hooks.on("deleteToken", () => {
+  // nichts nötig, defensiv könnten wir hier Flags löschen
 });
 
 Hooks.on("canvasReady", () => {
-  // Failsafe: Bei Neuladen alle sichtbaren Token normalisieren
+  // Basisskalen erfassen & auf *Faktor* 1.0 zurück (nicht Mesh hart auf 1!)
   for (const t of canvas.tokens.placeables) {
     cancelHoverTween(t);
-    setVisualScale(t, 1.0);
+    ensureBaseScale(t);
+    applyVisualScale(t, 1.0);
   }
 });
 
-// Optional: Beim Drag kein Hover-Zoom (sanft resetten)
+// Beim Drag neutral halten (verhindert klebrige Restfaktoren)
 Hooks.on("updateToken", (doc, changes) => {
   const t = canvas.tokens.get(doc.id);
   if (!t || t.destroyed) return;
   if (changes.x !== undefined || changes.y !== undefined) {
-    // Wird typischerweise beim Drag getriggert → Skala neutral halten
     cancelHoverTween(t);
-    setVisualScale(t, 1.0);
+    applyVisualScale(t, 1.0);
   }
 });
