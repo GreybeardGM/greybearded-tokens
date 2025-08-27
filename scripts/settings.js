@@ -1,8 +1,32 @@
 // settings.js
 import { MOD_ID, TINT_CHOICES } from "./constants.js";
+import { getGbFrameSettings,invalidateGbFrameSettings } from "./settings-snapshot.js";
+import { applyFrameToToken } from "./apply-frame.js";
+
+async function preloadFrameTextures() {
+  const S = getGbFrameSettings();
+  const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
+  if (!paths.length) return;
+
+  if (PIXI.Assets?.load) {
+    await Promise.all(paths.map(p => PIXI.Assets.load(p)));
+  } else {
+    paths.forEach(p => PIXI.Texture.from(p));
+  }
+}
+
+function sweepAllTokenFrames() {
+  const S = getGbFrameSettings();
+  nextTick(() => {
+    for (const t of canvas.tokens.placeables) applyFrameToToken(t, S);
+  });
+}
 
 function requestReload() {
   ui.notifications?.info("Greybearded Tokens: Bitte Oberfläche neu laden (F5), um Änderungen zu übernehmen.");
+  invalidateGbFrameSettings();
+  await preloadFrameTextures();
+  sweepAllTokenFrames();
 }
 
 export function registerSettings() {
