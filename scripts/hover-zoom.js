@@ -4,10 +4,27 @@
 const HOVER_SCALE = 1.06;
 const HOVER_MS    = 150;
 const EASING      = t => 1 - Math.pow(1 - t, 3); // easeOutCubic
+const SELECT_SCALE = 1.08; // oder gleich HOVER_SCALE, Geschmackssache
 
 // --- Neuer Kern: Basis robust rekonstruieren -------------------------------
 function getVisualFactor(token) {
   return token?._gbVisualScale ?? 1.0; // unser Faktor, nicht Foundrys
+}
+
+// +++ NEU: Local Hover-Flag führen, damit controlToken weiß, wohin wir zurück sollen
+function setLocalHover(token, hovered) {
+  if (!token || token.destroyed) return;
+  token._gbIsHovered = !!hovered;
+}
+function isLocalHover(token) {
+  return !!(token && token._gbIsHovered);
+}
+
+// +++ NEU: Ziel-Faktor zentral bestimmen (Selection > Hover > Neutral)
+function computeTargetFactor(token) {
+  if (!token || token.destroyed) return 1.0;
+  if (token.controlled) return SELECT_SCALE;
+  return isLocalHover(token) ? HOVER_SCALE : 1.0;
 }
 
 // Rekonstruiert Basis als mesh.scale / visualFactor (falls möglich)
@@ -119,46 +136,61 @@ function tweenFactor(token, targetFactor, ms = HOVER_MS) {
 }
 
 // --- Hooks -------------------------------------------------------------------
+// Hover: nur lokalen Hover-Status setzen & auf Ziel tweenen
+Hooks.off("hoverToken"); // falls du vorher registriert hast und neu lädst
 Hooks.on("hoverToken", (token, hovered) => {
   if (!token || token.destroyed) return;
-  if (token._dragging) return; // beim Drag nicht zoomen
-  tweenFactor(token, hovered ? HOVER_SCALE : 1.0, HOVER_MS);
+  if (token._dragging) return; // beim Drag weiterhin nicht zoomen
+  setLocalHover(token, hovered);
+  tweenFactor(token, computeTargetFactor(token), HOVER_MS);
 });
 
+// Auswahl: ausgewählt → groß bleiben; abgewählt → auf Hover-oder-1 zurück
+Hooks.off("controlToken");
 Hooks.on("controlToken", (token, controlled) => {
-  // Bei Control-Wechsel: Tween aborten & sauber auf Faktor 1 zurück
+  if (!token || token.destroyed) return;
   cancelHoverTween(token);
-  applyVisualScale(token, 1.0);
+  // Re-basisieren für den Fall, dass Foundry gerade refreshed hat
+  recomputeBaseScale(token);
+  tweenFactor(token, computeTargetFactor(token), HOVER_MS);
 });
 
-Hooks.on("deleteToken", () => {
-  // nichts nötig, defensiv könnten wir hier Flags löschen
-});
-
-Hooks.on("updateToken", (doc, changes) => {
-  const t = canvas.tokens.get(doc.id);
-  if (!t || t.destroyed) return;
-  if (changes.x !== undefined || changes.y !== undefined ||
-      changes.texture !== undefined || changes.width !== undefined || changes.height !== undefined) {
-    cancelHoverTween(t);
-    // Neu basieren, dann auf Faktor 1.0 zurück
-    recomputeBaseScale(t);
-    applyVisualScale(t, 1.0);
-  }
-});
-
+// Canvas-Ready: Status sauber herstellen (z. B. bei Mehrfachauswahl)
+Hooks.off("canvasReady");
 Hooks.on("canvasReady", () => {
   for (const t of canvas.tokens.placeables) {
     cancelHoverTween(t);
+    // Basen kalibrieren
     recomputeBaseScale(t);
-    applyVisualScale(t, 1.0);
+    // Standard: kein Hover, aber Selection könnte true sein
+    if (t.controlled) setLocalHover(t, false);
+    applyVisualScale(t, computeTargetFactor(t)); // kein Tween beim Laden nötig
   }
 });
 
-// Wenn Foundry Tokens refresht (W/H, Texture, Sichtbarkeit etc.)
+// Update: bei Bewegung/Größen-/Texturwechsel defensiv re-basisieren und auf Ziel setzen
+Hooks.off("updateToken");
+Hooks.on("updateToken", (doc, changes) => {
+  const t = canvas.tokens.get(doc.id);
+  if (!t || t.destroyed) return;
+  if (
+    changes.x !== undefined || changes.y !== undefined ||
+    changes.width !== undefined || changes.height !== undefined ||
+    changes.texture !== undefined
+  ) {
+    cancelHoverTween(t);
+    recomputeBaseScale(t);
+    // WICHTIG: nicht hart auf 1.0 zurück, sondern auf Selection/Hover-Ziel!
+    applyVisualScale(t, computeTargetFactor(t));
+  }
+});
+
+// Refresh: wenn Foundry neu rendert, Basis neu bestimmen & Faktor beibehalten
+Hooks.off("refreshToken");
 Hooks.on("refreshToken", (token) => {
-  // Re-basisieren & aktuellen Faktor aus der Mesh-Realität übernehmen
+  if (!token || token.destroyed) return;
   recomputeBaseScale(token);
+  // aktuellen Faktor aus der Realität lesen (falls nötig) und wieder anwenden
   const f = getActualFactorFromMesh(token);
   applyVisualScale(token, f);
 });
