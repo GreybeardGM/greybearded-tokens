@@ -1,10 +1,9 @@
 // settings.js
 import { MOD_ID, TINT_CHOICES } from "./constants.js";
-import { getGbFrameSettings,invalidateGbFrameSettings } from "./settings-snapshot.js";
+import { getGbFrameSettings,buildSnapshot } from "./settings-snapshot.js";
 import { applyFrameToToken } from "./apply-frame.js";
 
-async function preloadFrameTextures() {
-  const S = getGbFrameSettings();
+async function preloadFrameTextures(S) {
   const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
   if (!paths.length) return;
 
@@ -15,8 +14,7 @@ async function preloadFrameTextures() {
   }
 }
 
-function sweepAllTokenFrames() {
-  const S = getGbFrameSettings();
+function sweepAllTokenFrames(S) {
   nextTick(() => {
     for (const t of canvas.tokens.placeables) applyFrameToToken(t, S);
   });
@@ -24,9 +22,9 @@ function sweepAllTokenFrames() {
 
 function requestReload() {
   ui.notifications?.info("Greybearded Tokens: Bitte Oberfläche neu laden (F5), um Änderungen zu übernehmen.");
-  invalidateGbFrameSettings();
-  preloadFrameTextures();
-  sweepAllTokenFrames();
+  const S = buildSnapshot();
+  preloadFrameTextures(S);
+  sweepAllTokenFrames(S);
 }
 
 export function registerSettings() {
