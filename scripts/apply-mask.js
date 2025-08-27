@@ -3,7 +3,6 @@ import { getGbFrameSettings } from "./settings-snapshot.js";
 
 export const MASK_FLAG = "_gbMaskSprite";
 const _GB_MASK_TARGET   = Symbol("gbMaskTarget");
-const _GB_MASK_DEBUGGED = Symbol("gbMaskDebugged");
 const MASK_CACHE = new Map();
 
 async function loadMaskOnce(url) {
@@ -47,15 +46,6 @@ export async function applyMaskToToken(token, S) {
   S ||= getGbFrameSettings();
 
   if (!S.maskEnabled || !S.pathMask) { clearMask(token); return; }
-
-  // Einmaliges Debug zur Struktur
-  if (!token[_GB_MASK_DEBUGGED]) {
-    const kids = (token.mesh?.children ?? []).map(c => `${c.constructor?.name || "?"}:${c.name || "(unnamed)"}`);
-    console.log("GBT mask: mesh children →", kids);
-    console.log("GBT mask: token.icon →", token.icon);
-    console.log("GBT mask: token.mesh? →", !!token.mesh);
-    token[_GB_MASK_DEBUGGED] = true;
-  }
 
   const tp = getTargetAndParent(token);
   if (!tp) return;
