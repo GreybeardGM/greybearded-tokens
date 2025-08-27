@@ -1,6 +1,6 @@
 // settings.js
 import { MOD_ID, TINT_CHOICES } from "./constants.js";
-import { getGbFrameSettings,buildSnapshot } from "./settings-snapshot.js";
+import { buildSnapshot } from "./settings-snapshot.js";
 import { applyFrameToToken } from "./apply-frame.js";
 
 async function preloadFrameTextures(S) {
