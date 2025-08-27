@@ -25,7 +25,7 @@ function sweepAllTokenFrames() {
 function requestReload() {
   ui.notifications?.info("Greybearded Tokens: Bitte Oberfläche neu laden (F5), um Änderungen zu übernehmen.");
   invalidateGbFrameSettings();
-  await preloadFrameTextures();
+  preloadFrameTextures();
   sweepAllTokenFrames();
 }
 
