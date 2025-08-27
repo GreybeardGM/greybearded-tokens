@@ -137,7 +137,6 @@ function tweenFactor(token, targetFactor, ms = HOVER_MS) {
 
 // --- Hooks -------------------------------------------------------------------
 // Hover: nur lokalen Hover-Status setzen & auf Ziel tweenen
-Hooks.off("hoverToken"); // falls du vorher registriert hast und neu lädst
 Hooks.on("hoverToken", (token, hovered) => {
   if (!token || token.destroyed) return;
   if (token._dragging) return; // beim Drag weiterhin nicht zoomen
@@ -146,7 +145,6 @@ Hooks.on("hoverToken", (token, hovered) => {
 });
 
 // Auswahl: ausgewählt → groß bleiben; abgewählt → auf Hover-oder-1 zurück
-Hooks.off("controlToken");
 Hooks.on("controlToken", (token, controlled) => {
   if (!token || token.destroyed) return;
   cancelHoverTween(token);
@@ -156,7 +154,6 @@ Hooks.on("controlToken", (token, controlled) => {
 });
 
 // Canvas-Ready: Status sauber herstellen (z. B. bei Mehrfachauswahl)
-Hooks.off("canvasReady");
 Hooks.on("canvasReady", () => {
   for (const t of canvas.tokens.placeables) {
     cancelHoverTween(t);
@@ -169,7 +166,6 @@ Hooks.on("canvasReady", () => {
 });
 
 // Update: bei Bewegung/Größen-/Texturwechsel defensiv re-basisieren und auf Ziel setzen
-Hooks.off("updateToken");
 Hooks.on("updateToken", (doc, changes) => {
   const t = canvas.tokens.get(doc.id);
   if (!t || t.destroyed) return;
@@ -186,7 +182,6 @@ Hooks.on("updateToken", (doc, changes) => {
 });
 
 // Refresh: wenn Foundry neu rendert, Basis neu bestimmen & Faktor beibehalten
-Hooks.off("refreshToken");
 Hooks.on("refreshToken", (token) => {
   if (!token || token.destroyed) return;
   recomputeBaseScale(token);
