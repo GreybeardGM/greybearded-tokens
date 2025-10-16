@@ -19,13 +19,10 @@ function ensureOverlay(token){
     parent.addChild(c);
     token._gbOverlay = c;
   }
-  // >>> KORREKTUR: Position in Mesh-Lokalkoordinaten
-  const sx = Math.abs(parent.scale.x) || 1;
-  const sy = Math.abs(parent.scale.y) || 1;
-  c.position.set((parent.width / 2) / sx, (parent.height / 2) / sy);
-  // Overlay selbst nicht skalieren
-  c.scale.set(1,1);
-  c.rotation = 0; // Rotation erbt vom Mesh automatisch
+  c.position.set(0, 0);
+  c.pivot.set(0, 0);
+  c.scale.set(1, 1);
+  c.rotation = 0;
   return c;
 }
 
@@ -74,26 +71,25 @@ export async function applyFrameToToken(token, S){
       frame2=null;
     }
 
+    // Geometrie-Block in applyFrameToToken(...)
     const parent = token.mesh ?? token;
     const sx = Math.abs(parent.scale.x) || 1;
     const sy = Math.abs(parent.scale.y) || 1;
-  
-    // Canvas-Pixelgrößen (inkl. Texture-Scale/Token-Scale)
-    const pxW = parent.width;
-    const pxH = parent.height;
-  
-    // In lokale Maße umrechnen
-    const locW = pxW / sx;
-    const locH = pxH / sy;
-  
+    
+    const locW = parent.width  / sx;
+    const locH = parent.height / sy;
+    
+    // Anker hart setzen (falls extern überschrieben)
+    frame1.anchor.set(0.5, 0.5);
     frame1.width  = locW * (S.scale1 || 1);
     frame1.height = locH * (S.scale1 || 1);
-    frame1.position.set(0, 0);
-  
+    frame1.position.set(locW / 2, locH / 2);
+    
     if (frame2) {
+      frame2.anchor.set(0.5, 0.5);
       frame2.width  = locW * (S.scale2 || 1);
       frame2.height = locH * (S.scale2 || 1);
-      frame2.position.set(0, 0);
+      frame2.position.set(locW / 2, locH / 2);
     }
 
     const t1 = getTintColor(token, S, 1);
