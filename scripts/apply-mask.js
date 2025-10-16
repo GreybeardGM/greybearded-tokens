@@ -1,85 +1,101 @@
 // apply-mask.js
 import { getGbFrameSettings } from "./settings-snapshot.js";
 
-export const MASK_FLAG = "_gbMaskSprite";
-const _GB_MASK_TARGET   = Symbol("gbMaskTarget");
-const MASK_CACHE = new Map();
-
-async function loadMaskOnce(url) {
+const TEX_CACHE = new Map();
+async function loadTex(url){
   if (!url) return null;
-  const cached = MASK_CACHE.get(url);
-  if (cached?.baseTexture?.valid) return cached;
-
-  let tex;
-  if (PIXI.Assets?.load) {
-    const base = await PIXI.Assets.load(url);
-    tex = new PIXI.Texture(base);
-  } else {
-    tex = PIXI.Texture.from(url);
-    if (!tex.baseTexture.valid) await new Promise(res => tex.baseTexture.once("loaded", res));
-  }
-  MASK_CACHE.set(url, tex);
+  if (TEX_CACHE.has(url)) return TEX_CACHE.get(url);
+  const tex = await PIXI.Assets.load(url);
+  TEX_CACHE.set(url, tex);
   return tex;
 }
 
-export function clearMask(token) {
-  try {
-    const tgt = token?.[_GB_MASK_TARGET];
-    const maskSprite = token?.[MASK_FLAG];
-    if (tgt && tgt.mask === maskSprite) tgt.mask = null;
-    if (maskSprite?.parent) maskSprite.parent.removeChild(maskSprite);
-  } finally {
-    if (token) {
-      token[MASK_FLAG] = null;
-      token[_GB_MASK_TARGET] = null;
+function findArtSprite(token){
+  const parent = token.mesh ?? token;
+  // Kandidaten: echte Sprites unterhalb des Mesh, aber nicht unser Overlay
+  const cand = (parent.children || []).filter(c =>
+    c instanceof PIXI.Sprite &&
+    c !== token._gbOverlay &&
+    !c._gbFramePrimary &&
+    !c._gbFrameSecondary
+  );
+  // Größten Sprite wählen (robust gegen Systemspezifika)
+  cand.sort((a,b)=> (b.width*b.height) - (a.width*a.height));
+  return cand[0] ?? null;
+}
+
+function ensureMaskSprite(token){
+  const parent = token.mesh ?? token;
+  let m = token._gbMaskSprite;
+  if (!m || m.destroyed){
+    m = new PIXI.Sprite();
+    m.name = "gb-mask-sprite";
+    m.anchor.set(0.5);
+    m.zIndex = -10; // unter dem Artwork, irrelevant für Mask
+    parent.addChild(m);
+    token._gbMaskSprite = m;
+  } else if (m.parent !== parent){
+    m.parent?.removeChild(m);
+    parent.addChild(m);
+  }
+  // Mask-Sprite gehört in Mesh-Lokalsystem
+  m.position.set(0,0);
+  m.scale.set(1,1);
+  m.rotation = 0;
+  return m;
+}
+
+export async function applyMaskToToken(token, S){
+  if (!token || token.destroyed) return;
+  S = S || getGbFrameSettings();
+  if (!S?.maskEnabled || !S?.pathMask) return;
+
+  const parent = token.mesh ?? token;
+  const art = findArtSprite(token);
+  if (!art) return; // nichts zu maskieren
+
+  const tex = await loadTex(S.pathMask);
+  if (!tex) return;
+
+  // Mask-Sprite vorbereiten
+  const mask = ensureMaskSprite(token);
+  mask.texture = tex;
+
+  // Größe im Mesh-Lokalsystem
+  const sx = Math.abs(parent.scale.x) || 1;
+  const sy = Math.abs(parent.scale.y) || 1;
+  const w = parent.width  / sx;
+  const h = parent.height / sy;
+
+  mask.width  = w;
+  mask.height = h;
+  mask.position.set(0,0);
+
+  // Nur das Artwork maskieren – NICHT parent/token
+  art.mask = mask;
+
+  // Sicherheit: Overlay darf niemals maskiert sein
+  if (token._gbOverlay){
+    token._gbOverlay.mask = null;
+    // Falls ein Fremdmodul versehentlich parent.mask gesetzt hat, neutralisiere:
+    if ((parent.mask && parent.mask !== mask) || parent.mask === mask){
+      parent.mask = null;
     }
   }
 }
 
-function getTargetAndParent(token) {
-  if (token.mesh) return { target: token.mesh, parent: token.mesh }; // ⬅️ Parent = mesh!
-  return null;
-}
-
-export async function applyMaskToToken(token, S) {
-  if (!token) return;
-  S ||= getGbFrameSettings();
-
-  if (!S.maskEnabled || !S.pathMask) { clearMask(token); return; }
-
-  const tp = getTargetAndParent(token);
-  if (!tp) return;
-  const { target, parent } = tp;
-
-  // Masken-Sprite (am MESH, nicht am Token!)
-  let maskSprite = token[MASK_FLAG];
-  const maskTex  = await loadMaskOnce(S.pathMask);
-  if (!maskTex) return;
-
-  if (!maskSprite || maskSprite.parent !== parent) {
-    clearMask(token);
-    maskSprite = new PIXI.Sprite(maskTex);
-    maskSprite.name = "gbt-mask";
-    maskSprite.renderable = false;      // nie zeichnen, nur als Maske dienen
-    parent.addChild(maskSprite);        // ⬅️ ans mesh hängen
-    token[MASK_FLAG] = maskSprite;
-  } else if (maskSprite.texture !== maskTex) {
-    maskSprite.texture = maskTex;
+export function clearMask(token){
+  if (!token || token.destroyed) return;
+  const parent = token.mesh ?? token;
+  const art = parent && (parent.children||[]).find(c => c instanceof PIXI.Sprite && !c._gbFramePrimary && !c._gbFrameSecondary && c !== token._gbOverlay);
+  if (art && art.mask){
+    art.mask = null;
   }
-
-  // Geometrie: exakt auf die LocalBounds des mesh legen
-  const b = target.getLocalBounds?.();
-  if (!b || !isFinite(b.width) || !isFinite(b.height) || b.width <= 0 || b.height <= 0) return;
-
-  const texW = maskSprite.texture.width  || maskSprite.texture.baseTexture?.realWidth  || 1;
-  const texH = maskSprite.texture.height || maskSprite.texture.baseTexture?.realHeight || 1;
-
-  maskSprite.anchor?.set?.(0.5, 0.5);
-  maskSprite.position.set(0, 0);        // im mesh-LocalSpace zentriert
-  maskSprite.rotation = 0;
-  maskSprite.scale.set(b.width / texW, b.height / texH);
-
-  // Maske AUF DAS MESH setzen
-  target.mask = maskSprite;
-  token[_GB_MASK_TARGET] = target;
+  if (token._gbMaskSprite){
+    token._gbMaskSprite.parent?.removeChild(token._gbMaskSprite);
+    token._gbMaskSprite.destroy({ children:true, texture:false, baseTexture:false });
+    token._gbMaskSprite = null;
+  }
+  if (token._gbOverlay) token._gbOverlay.mask = null;
+  parent.mask = null;
 }
