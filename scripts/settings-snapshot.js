@@ -1,16 +1,17 @@
 // settings-snapshot.js
-import { MOD_ID } from "./constants.js"; // KEINE SETTING_KEYS MEHR
+import { MOD_ID } from "./constants.js";
 
 let _S = null;
+let _VER = 0;
 
 function num(v, fb = 1)   { const n = Number(v); return Number.isFinite(n) ? n : fb; }
 function bool(v)          { return !!v; }
 function str(v, fb = "")  { return (typeof v === "string" && v.length) ? v : fb; }
 
-function _buildSnapshot() {
+function _readAll() {
   const get = (k) => game.settings.get(MOD_ID, k);
 
-  return {
+  const snap = {
     // Frame 1
     path1:           str(get("path1"), "modules/greybearded-tokens/assets/frame-default.png"),
     scale1:          num(get("scale1"), 1),
@@ -27,7 +28,7 @@ function _buildSnapshot() {
     // Mask
     maskEnabled:     bool(get("maskEnabled")),
     pathMask:        str(get("pathMask"), "modules/greybearded-tokens/assets/mask-round.png"),
-    
+
     // Farben
     defaultColor: str(get("defaultColor"), "#888888"),
     colors: {
@@ -36,21 +37,45 @@ function _buildSnapshot() {
       friendly:  str(get("color-friendly"),  "#5F7A8A"),
       secret:    str(get("color-secret"),    "#6B5E7A"),
       character: str(get("color-character"), "#7F7F7F"),
-    }
+    },
+
+    // Meta
+    version: _VER,
+    snapshotAt: Date.now()
   };
+
+  return snap;
 }
 
-/** Lazy + memoized */
+/**
+ * Liefert den aktuellen Snapshot.
+ * Vor `ready`: Live-Fallback ohne Memo (kein verfrühtes Cachen).
+ * Ab `ready` (nach buildSnapshot): memoized Rückgabe.
+ */
 export function getGbFrameSettings() {
-  return _S ?? (_S = _buildSnapshot());
+  if (_S) return _S;
+  if (game?.ready) {
+    // Falls jemand getGbFrameSettings() nach ready aber vor buildSnapshot() ruft:
+    _S = _readAll();
+    _S.version = ++_VER;
+    _S.snapshotAt = Date.now();
+    return _S;
+  }
+  // Vor ready: live lesen, NICHT cachen
+  return _readAll();
 }
 
+/**
+ * Erzwingt Neuaufbau und Memoisierung. Zu `ready`/`canvasReady` aufrufen.
+ */
 export function buildSnapshot() {
-  _S = _buildSnapshot();
+  _S = _readAll();
+  _S.version = ++_VER;
+  _S.snapshotAt = Date.now();
   return _S;
 }
 
-/** Nur für Tests/Reloads notwendig */
+/** Optionales manuelles Invalidieren (Tests/Reloads) */
 export function invalidateGbFrameSettings() {
   _S = null;
 }
