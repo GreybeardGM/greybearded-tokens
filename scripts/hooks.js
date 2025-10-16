@@ -3,9 +3,8 @@ import { getGbFrameSettings, buildSnapshot } from "./settings-snapshot.js";
 import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
 import { applyFrameToToken } from "./apply-frame.js";
 
-function nextTick(fn) {
-  // robuster gegen späte Filter/Masken
-  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(fn, 0)));
+function nextTick(fn){
+  requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(fn,0)));
 }
 
 async function preloadFrameTextures() {
@@ -24,14 +23,14 @@ function sweepAllTokenFrames() {
 
 export function registerRenderingHooks() {
   // immer aktiv
-  Hooks.on("drawToken", (token) => {
-    const S = getGbFrameSettings();
-    nextTick(() => applyFrameToToken(token, S));
+  Hooks.on("drawToken",    t=>{ 
+    const S=getGbFrameSettings(); 
+    nextTick(()=>applyFrameToToken(t,S));
   });
-
-  Hooks.on("refreshToken", (token) => {
-    const S = getGbFrameSettings();
-    nextTick(() => applyFrameToToken(token, S));
+  
+  Hooks.on("refreshToken", t=>{
+    const S=getGbFrameSettings();
+    nextTick(()=>applyFrameToToken(t,S));
   });
 
   Hooks.on("updateToken", (doc, change) => {
