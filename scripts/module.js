@@ -1,25 +1,31 @@
+// module.js
 import { registerSettings } from "./settings.js";
 import { registerRenderingHooks } from "./hooks.js";
-import { buildSnapshot } from "./settings-snapshot.js";
-
+import { buildSnapshot, getGbFrameSettings } from "./settings-snapshot.js";
 import { applyFrameToToken } from "./apply-frame.js";
 import { applyMaskToToken, clearMask } from "./apply-mask.js";
-import { getGbFrameSettings } from "./settings-snapshot.js";
 
 Hooks.once("init", () => {
   registerSettings();
-  registerRenderingHooks();
+  registerRenderingHooks(); // Hooks früh registrieren
 });
 
 Hooks.once("ready", () => {
-  buildSnapshot(); // jetzt sind persistierte Settings sicher geladen
+  buildSnapshot(); // Settings jetzt sicher
   const mod = game.modules.get("greybearded-tokens");
-  mod.api = { applyFrameToToken, applyMaskToToken, clearMask, buildSnapshot, getGbFrameSettings };
+  mod.api = {
+    applyFrameToToken,
+    applyMaskToToken,
+    clearMask,
+    buildSnapshot,
+    getGbFrameSettings
+  };
   console.log("GBT api ready:", Object.keys(mod.api));
 });
 
 Hooks.on("canvasReady", () => {
-  buildSnapshot(); // falls Welt/Scene-spezifische Settings/Fallbacks
+  // Szene-/Weltwechsel: Snapshot auffrischen
+  buildSnapshot();
 });
 
 // Optional: bei Settings-Änderung Snapshot erneuern
