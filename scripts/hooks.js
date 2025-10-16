@@ -27,22 +27,17 @@ function sweepAllTokenFrames() {
 }
 
 export function registerRenderingHooks() {
-  Hooks.once("ready", async () => {
-    rebuildPlayerColorSnapshot();
-    if (canvas?.ready) {
-      await preloadFrameTextures();
-      sweepAllTokenFrames();
-    }
-  });
+  // 0) Sofort registrieren – diese Funktion aus einem Hooks.once("init") o.ä. heraus aufrufen
+  let registered = false;
+  if (registered) return; registered = true;
 
-  Hooks.on("canvasReady", async () => {
-    if (!canvas?.ready) return;
-    rebuildPlayerColorSnapshot();
-    await preloadFrameTextures();
-    sweepAllTokenFrames();
-  });
-
+  // 1) Immer aktive Listener
   Hooks.on("drawToken", (token) => {
+    const S = getGbFrameSettings();
+    nextTick(() => applyFrameToToken(token, S));
+  });
+
+  Hooks.on("refreshToken", (token) => {
     const S = getGbFrameSettings();
     nextTick(() => applyFrameToToken(token, S));
   });
@@ -55,7 +50,6 @@ export function registerRenderingHooks() {
     applyFrameToToken(token, S);
   });
 
-  // PlayerColor-Snapshot aktuell halten (Settings-Snapshot bleibt unverändert)
   Hooks.on("updateUser", (user, change) => {
     if (!change) return;
     if ("color" in change || "character" in change) {
@@ -63,14 +57,23 @@ export function registerRenderingHooks() {
       if (canvas?.ready) sweepAllTokenFrames();
     }
   });
-  Hooks.on("createUser", () => {
-    rebuildPlayerColorSnapshot();
-    if (canvas?.ready) sweepAllTokenFrames();
-  });
-  Hooks.on("deleteUser", () => {
-    rebuildPlayerColorSnapshot();
-    if (canvas?.ready) sweepAllTokenFrames();
+  Hooks.on("createUser", () => { rebuildPlayerColorSnapshot(); if (canvas?.ready) sweepAllTokenFrames(); });
+  Hooks.on("deleteUser", () => { rebuildPlayerColorSnapshot(); if (canvas?.ready) sweepAllTokenFrames(); });
+
+  // 2) Spätere Canvas-Lebenszyklen
+  Hooks.on("canvasReady", async () => {
+    await preloadFrameTextures();
+    sweepAllTokenFrames();
   });
 
-  console.log("✅⭕ Greybearded Token Frames: Hooks registered (Snapshot memoized in settings-snapshot).");
+  // 3) Aufholen, falls wir zu spät kamen
+  //    -> wenn bei Registrierung das Canvas schon fertig ist, sofort preload + sweep
+  (async () => {
+    if (canvas?.ready) {
+      await preloadFrameTextures();
+      sweepAllTokenFrames();
+    }
+  })();
+
+  console.log("✅⭕ Greybearded Token Frames: Hooks registered.");
 }
