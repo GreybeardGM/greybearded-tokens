@@ -7,20 +7,25 @@ const TEX_CACHE = new Map();
 async function loadTex(url){ if(!url) return null; if(TEX_CACHE.has(url)) return TEX_CACHE.get(url); const tex = await PIXI.Assets.load(url); TEX_CACHE.set(url, tex); return tex; }
 
 function ensureOverlay(token){
-  const parent = token.mesh ?? token;              // >>> an mesh andocken
+  const parent = token.mesh ?? token;
   parent.sortableChildren = true;
   let c = token._gbOverlay;
-  if (!c || c.parent !== parent) {                 // >>> falsche Elternschaft heilen
+  if (!c || c.parent !== parent) {
     if (c?.parent) c.parent.removeChild(c);
     c = new PIXI.Container();
     c.name = "gb-overlay";
     c.sortableChildren = true;
-    c.zIndex = 10000;                              // hoch, über Effekten/HUDs
+    c.zIndex = 10000;
     parent.addChild(c);
     token._gbOverlay = c;
   }
-  // keine Scale/Rotation-Kopierakrobatik mehr
-  c.position.set((token.w||token.width)/2, (token.h||token.height)/2);
+  // >>> KORREKTUR: Position in Mesh-Lokalkoordinaten
+  const sx = Math.abs(parent.scale.x) || 1;
+  const sy = Math.abs(parent.scale.y) || 1;
+  c.position.set((parent.width / 2) / sx, (parent.height / 2) / sy);
+  // Overlay selbst nicht skalieren
+  c.scale.set(1,1);
+  c.rotation = 0; // Rotation erbt vom Mesh automatisch
   return c;
 }
 
@@ -69,18 +74,26 @@ export async function applyFrameToToken(token, S){
       frame2=null;
     }
 
-    const kW = token.w ?? token.width, kH = token.h ?? token.height;
-    const tx = Math.abs(token.document.texture?.scaleX ?? 1);
-    const ty = Math.abs(token.document.texture?.scaleY ?? 1);
-
-    frame1.width  = kW * tx * (S.scale1 || 1);
-    frame1.height = kH * ty * (S.scale1 || 1);
-    frame1.position.set(0,0);
-
-    if (frame2){
-      frame2.width  = kW * tx * (S.scale2 || 1);
-      frame2.height = kH * ty * (S.scale2 || 1);
-      frame2.position.set(0,0);
+    const parent = token.mesh ?? token;
+    const sx = Math.abs(parent.scale.x) || 1;
+    const sy = Math.abs(parent.scale.y) || 1;
+  
+    // Canvas-Pixelgrößen (inkl. Texture-Scale/Token-Scale)
+    const pxW = parent.width;
+    const pxH = parent.height;
+  
+    // In lokale Maße umrechnen
+    const locW = pxW / sx;
+    const locH = pxH / sy;
+  
+    frame1.width  = locW * (S.scale1 || 1);
+    frame1.height = locH * (S.scale1 || 1);
+    frame1.position.set(0, 0);
+  
+    if (frame2) {
+      frame2.width  = locW * (S.scale2 || 1);
+      frame2.height = locH * (S.scale2 || 1);
+      frame2.position.set(0, 0);
     }
 
     const t1 = getTintColor(token, S, 1);
