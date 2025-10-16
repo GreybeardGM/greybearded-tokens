@@ -1,9 +1,10 @@
 // hooks.js
-import { getGbFrameSettings } from "./settings-snapshot.js";
+import { getGbFrameSettings, buildSnapshot } from "./settings-snapshot.js";
 import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
 import { applyFrameToToken } from "./apply-frame.js";
 
 function nextTick(fn) {
+  // robuster gegen späte Filter/Masken
   requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(fn, 0)));
 }
 
@@ -11,12 +12,7 @@ async function preloadFrameTextures() {
   const S = getGbFrameSettings();
   const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
   if (!paths.length) return;
-
-  if (PIXI.Assets?.load) {
-    await Promise.all(paths.map(p => PIXI.Assets.load(p)));
-  } else {
-    paths.forEach(p => PIXI.Texture.from(p));
-  }
+  await Promise.all(paths.map((p) => PIXI.Assets.load(p)));
 }
 
 function sweepAllTokenFrames() {
@@ -27,11 +23,7 @@ function sweepAllTokenFrames() {
 }
 
 export function registerRenderingHooks() {
-  // 0) Sofort registrieren – diese Funktion aus einem Hooks.once("init") o.ä. heraus aufrufen
-  let registered = false;
-  if (registered) return; registered = true;
-
-  // 1) Immer aktive Listener
+  // immer aktiv
   Hooks.on("drawToken", (token) => {
     const S = getGbFrameSettings();
     nextTick(() => applyFrameToToken(token, S));
@@ -60,20 +52,22 @@ export function registerRenderingHooks() {
   Hooks.on("createUser", () => { rebuildPlayerColorSnapshot(); if (canvas?.ready) sweepAllTokenFrames(); });
   Hooks.on("deleteUser", () => { rebuildPlayerColorSnapshot(); if (canvas?.ready) sweepAllTokenFrames(); });
 
-  // 2) Spätere Canvas-Lebenszyklen
+  // späte Lebenszyklen
   Hooks.on("canvasReady", async () => {
-    await preloadFrameTextures();
+    rebuildPlayerColorSnapshot();
+    buildSnapshot();                // gültige Settings sicherstellen
+    await preloadFrameTextures();   // erst nach Snapshot
     sweepAllTokenFrames();
   });
 
-  // 3) Aufholen, falls wir zu spät kamen
-  //    -> wenn bei Registrierung das Canvas schon fertig ist, sofort preload + sweep
-  (async () => {
+  Hooks.once("ready", async () => {
+    rebuildPlayerColorSnapshot();
     if (canvas?.ready) {
+      buildSnapshot();
       await preloadFrameTextures();
       sweepAllTokenFrames();
     }
-  })();
+  });
 
   console.log("✅⭕ Greybearded Token Frames: Hooks registered.");
 }
