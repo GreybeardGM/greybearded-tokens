@@ -4,7 +4,7 @@ import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
 import { applyFrameToToken } from "./apply-frame.js";
 
 function nextTick(fn) {
-  requestAnimationFrame(() => requestAnimationFrame(fn));
+  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(fn, 0)));
 }
 
 async function preloadFrameTextures() {
