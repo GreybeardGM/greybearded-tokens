@@ -7,7 +7,7 @@ const TEX_CACHE = new Map();
 async function loadTex(url){ if(!url) return null; if(TEX_CACHE.has(url)) return TEX_CACHE.get(url); const tex = await PIXI.Assets.load(url); TEX_CACHE.set(url, tex); return tex; }
 
 function ensureOverlay(token){
-  const parent = token.mesh ?? token;
+  const parent = token; // <<< WICHTIG: Sibling von mesh
   parent.sortableChildren = true;
 
   let c = token._gbOverlay;
@@ -20,11 +20,14 @@ function ensureOverlay(token){
     parent.addChild(c);
     token._gbOverlay = c;
   }
-  // Mesh-Lokalsystem: Ursprung = Mitte → Overlay bleibt bei (0,0)
-  c.position.set(0, 0);
-  c.pivot.set(0, 0);
-  c.scale.set(1, 1);
+  // Zentrum: Position = mesh.position (mesh-Ursprung ist Mitte)
+  const m = token.mesh ?? token;
+  c.position.copyFrom(m.position);
+  c.pivot.set(0,0);
+  c.scale.set(1,1);
   c.rotation = 0;
+  // Niemals maskieren lassen
+  c.mask = null;
   return c;
 }
 
