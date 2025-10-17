@@ -76,35 +76,25 @@ export async function applyFrameToToken(token, S){
       frame2=null;
     }
 
-    const parent = token.mesh ?? token;
-    const sx = Math.abs(parent.scale.x) || 1;
-    const sy = Math.abs(parent.scale.y) || 1;
-  
-    // Texture-/Flip-Skalierung des Tokens berücksichtigen
-    const tx = Math.abs(token.document.texture?.scaleX ?? 1);
-    const ty = Math.abs(token.document.texture?.scaleY ?? 1);
-  
-    // Zielgröße in Canvas-Pixeln (sichtbare Token-Größe)
-    const targetW = (token.w ?? parent.width)  * tx;
-    const targetH = (token.h ?? parent.height) * ty;
-  
-    // In Mesh-Lokalkoordinaten umrechnen (Eltern-Skalierung kompensieren)
-    const locW = (targetW * (S.scale1 || 1)) / sx;
-    const locH = (targetH * (S.scale1 || 1)) / sy;
-  
+    // nach Erzeugung/Übernahme der Sprites:
+    const w = token.w ?? (token.mesh?.width || 0);
+    const h = token.h ?? (token.mesh?.height || 0);
+    
     frame1.anchor.set(0.5, 0.5);
-    frame1.width  = locW;
-    frame1.height = locH;
+    frame1.width  = w * (S.scale1 || 1);
+    frame1.height = h * (S.scale1 || 1);
     frame1.position.set(0, 0);
-  
+    
     if (frame2) {
-      const locW2 = (targetW * (S.scale2 || 1)) / sx;
-      const locH2 = (targetH * (S.scale2 || 1)) / sy;
       frame2.anchor.set(0.5, 0.5);
-      frame2.width  = locW2;
-      frame2.height = locH2;
+      frame2.width  = w * (S.scale2 || 1);
+      frame2.height = h * (S.scale2 || 1);
       frame2.position.set(0, 0);
     }
+    
+    frame1.zIndex = 1;
+    if (frame2) frame2.zIndex = 0;
+    token._gbOverlay.sortDirty = true;
 
     const t1 = getTintColor(token, S, 1);
     frame1.tint = t1 != null ? PIXI.utils.string2hex(t1) : 0xFFFFFF;
@@ -112,10 +102,6 @@ export async function applyFrameToToken(token, S){
       const t2 = getTintColor(token, S, 2);
       frame2.tint = t2 != null ? PIXI.utils.string2hex(t2) : 0xFFFFFF;
     }
-
-    frame1.zIndex = 1;
-    if (frame2) frame2.zIndex = 0;
-    overlay.sortDirty = true;
 
     if (S.maskEnabled && S.pathMask) await applyMaskToToken(token, S);
     else clearMask(token);
