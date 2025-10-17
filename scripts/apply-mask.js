@@ -10,26 +10,9 @@ async function loadTex(url){
   return tex;
 }
 
-function getArtSprite(token){
-  const mesh = token.mesh ?? token;
-  // Primär: Foundry V12/V13 Artwork-Sprite
-  if (mesh?.icon instanceof PIXI.Sprite) return mesh.icon;
-
-  // Fallback: größter Sprite unterhalb mesh, aber nicht unsere Overlays
-  const sprites = (mesh?.children || []).filter(c =>
-    c instanceof PIXI.Sprite &&
-    c !== token._gbOverlay &&
-    !c._gbFramePrimary &&
-    !c._gbFrameSecondary &&
-    c.name !== "gb-mask-sprite"
-  );
-  if (!sprites.length) return null;
-  sprites.sort((a,b)=> (b.width*b.height) - (a.width*a.height));
-  return sprites[0];
-}
-
-function ensureMaskSibling(token, art){
-  const parent = art.parent;
+function ensureMaskSibling(token){
+  // Maske als Sibling von mesh, also Kind von token (wie das Overlay)
+  const parent = token;
   let m = token._gbMaskSprite;
   if (!m || m.destroyed){
     m = new PIXI.Sprite();
@@ -40,6 +23,11 @@ function ensureMaskSibling(token, art){
     m.parent?.removeChild(m);
     parent.addChild(m);
   }
+  // nie das Overlay als Parent
+  if (token._gbOverlay && m.parent === token._gbOverlay){
+    token._gbOverlay.removeChild(m);
+    parent.addChild(m);
+  }
   return m;
 }
 
@@ -48,57 +36,42 @@ export async function applyMaskToToken(token, S){
   S = S || getGbFrameSettings();
   if (!S?.maskEnabled || !S?.pathMask) return;
 
-  const art = getArtSprite(token);
-  if (!art) return;
-
-  const tex = await loadTex(S.pathMask);
+  const mesh = token.mesh ?? token;
+  const tex  = await loadTex(S.pathMask);
   if (!tex) return;
 
-  const mask = ensureMaskSibling(token, art);
+  const mask = ensureMaskSibling(token);
   mask.texture = tex;
 
-  // Lokalsystem des Artwork-Sprites exakt spiegeln
-  // (kein zusätzliches Skalieren/Dividieren)
-  const ax = art.anchor?.x ?? 0.5;
-  const ay = art.anchor?.y ?? 0.5;
-  mask.anchor.set(ax, ay);
+  // Geometrie im Token-KS: Zentrum = mesh.position
+  const w = token.w ?? mesh.width;
+  const h = token.h ?? mesh.height;
 
-  // Größe/Position im selben Parent-KS
-  mask.width  = art.width;
-  mask.height = art.height;
-  mask.position.set(art.position.x, art.position.y);
-  mask.rotation = art.rotation;
+  mask.anchor.set(0.5, 0.5);
+  mask.position.copyFrom(mesh.position);
+  mask.rotation = 0;
+  mask.scale.set(1,1);
+  mask.width  = w;
+  mask.height = h;
 
-  // Sicherheit: keine globale/Parent-Maskierung mehr
-  const mesh = token.mesh ?? token;
-  if (mesh.mask) mesh.mask = null;
-  if (token._gbOverlay?.mask) token._gbOverlay.mask = null;
+  // Nur das mesh maskieren
+  mesh.mask = mask;
 
-  // Nur das Artwork maskieren
-  art.mask = mask;
+  // Sicherheit: Overlay nie maskieren
+  if (token._gbOverlay) token._gbOverlay.mask = null;
 }
 
 export function clearMask(token){
   if (!token || token.destroyed) return;
   const mesh = token.mesh ?? token;
 
-  // Artwork-Maske lösen
-  const art = mesh?.icon instanceof PIXI.Sprite ? mesh.icon : null;
-  if (art && art.mask) art.mask = null;
+  if (mesh.mask) mesh.mask = null;
 
-  // Fallback: ggf. größte Sprite-Maske entfernen
-  if (!art){
-    for (const c of (mesh?.children || [])){
-      if (c instanceof PIXI.Sprite && c.mask) c.mask = null;
-    }
-  }
-
-  // Mask-Sprite entfernen, Frame-Overlay nie maskieren
   if (token._gbMaskSprite){
     token._gbMaskSprite.parent?.removeChild(token._gbMaskSprite);
     token._gbMaskSprite.destroy({ children:true, texture:false, baseTexture:false });
     token._gbMaskSprite = null;
   }
+
   if (token._gbOverlay) token._gbOverlay.mask = null;
-  mesh.mask = null;
 }
