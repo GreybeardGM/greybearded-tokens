@@ -27,11 +27,13 @@ export function registerRenderingHooks() {
     const S=getGbFrameSettings(); 
     nextTick(()=>applyFrameToToken(t,S));
   });
-  
+
+  /*
   Hooks.on("refreshToken", t=>{
     const S=getGbFrameSettings();
     nextTick(()=>applyFrameToToken(t,S));
   });
+  */
 
   Hooks.on("updateToken", (doc, change) => {
     if (!("disposition" in (change ?? {}))) return;
