@@ -106,4 +106,50 @@ export async function applyFrameToToken(token, S) {
     // falls früher mal eine Maske aktiv war, sauber entfernen
     clearMask(token);
   }
+
+  // --- Nameplate stylen (Font mitskalieren, Y statisch am unteren Rand) ---
+  {
+    // 1) Label holen (Foundry v13: TokenMesh.nameplate ist PIXI.Text)
+    const label = mesh?.nameplate ?? token.nameplate;
+    if (label) {
+      // 2) Basiswerte
+      const basePx = 22; // dein gewünschter Basiswert
+  
+      // Token-"Größe" (Quadrate) + Texture-Scaling (wie bei deinen Frames)
+      const wSquares = token.document.width  ?? 1;
+      const hSquares = token.document.height ?? 1;
+      const sizeFactor = Math.max(wSquares, hSquares);
+  
+      const tx = Math.abs(token.document.texture?.scaleX ?? 1);
+      const ty = Math.abs(token.document.texture?.scaleY ?? 1);
+      const textureScale = Math.max(tx, ty);
+  
+      // Endgültige Fontgröße:
+      // - skaliert mit Token-Größe (2x2 => ~doppelt)
+      // - multipliziert mit Texture-Scale (falls du einzelne Tokens per texture scale vergrößerst)
+      const fontPx = Math.max(8, Math.round(basePx * sizeFactor * textureScale));
+      label.style.fontSize = fontPx;
+  
+      // Optional: Stil wie gehabt (du kannst deine Farben/Shadow hier belassen)
+      // label.style.fill = "#ffffff";
+      // label.style.stroke = "#000000";
+      // label.style.strokeThickness = Math.ceil(fontPx / 8);
+  
+      // 3) Anker und X-Zentrierung (sicherstellen, dass es mittig sitzt)
+      //    Anchor (0.5, 0): X mittig, Y = Toplinie des Textes
+      label.anchor?.set?.(0.5, 0);
+      label.x = 0;
+  
+      // 4) Y-Position ABSOLUT an die Unterkante legen (keine kumulierte Verschiebung)
+      //    token.h ist die unskalierte Token-Höhe in lokalen Koordinaten des Mesh (Center-Anchor).
+      //    Da der Nameplate-Container mit dem Mesh mitskaliert, setzen wir die Position
+      //    in Lokalkoordinaten: +token.h/2 bringt uns an die Unterkante, +padding hebt etwas ab.
+      const padding = Math.max(2, Math.round(fontPx * 0.15)); // 10–20% der Fontgröße als Luft
+      label.y = (token.h / 2) + padding;
+  
+      // 5) Render aktualisieren (falls nötig)
+      label.dirty = true; // oder label.updateText?.();
+    }
+  }
 }
+
