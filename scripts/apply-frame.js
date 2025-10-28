@@ -144,8 +144,8 @@ export async function applyFrameToToken(token, S) {
       //    token.h ist die unskalierte Token-Höhe in lokalen Koordinaten des Mesh (Center-Anchor).
       //    Da der Nameplate-Container mit dem Mesh mitskaliert, setzen wir die Position
       //    in Lokalkoordinaten: +token.h/2 bringt uns an die Unterkante, +padding hebt etwas ab.
-      const padding = Math.max(2, Math.round(fontPx * 0.15)); // 10–20% der Fontgröße als Luft
-      label.y = (token.h + padding) * ty;
+      const padding = Math.max(2, Math.round(fontPx * 0.10)); // 10–20% der Fontgröße als Luft
+      label.y = token.h + padding;
   
       // 5) Render aktualisieren (falls nötig)
       label.dirty = true; // oder label.updateText?.();
