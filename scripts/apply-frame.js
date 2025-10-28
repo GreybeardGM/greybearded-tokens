@@ -113,7 +113,7 @@ export async function applyFrameToToken(token, S) {
     const label = mesh?.nameplate ?? token.nameplate;
     if (label) {
       // 2) Basiswerte
-      const basePx = 22; // dein gewünschter Basiswert
+      const basePx = 11; // dein gewünschter Basiswert
   
       // Token-"Größe" (Quadrate) + Texture-Scaling (wie bei deinen Frames)
       const wSquares = token.document.width  ?? 1;
@@ -138,14 +138,14 @@ export async function applyFrameToToken(token, S) {
       // 3) Anker und X-Zentrierung (sicherstellen, dass es mittig sitzt)
       //    Anchor (0.5, 0): X mittig, Y = Toplinie des Textes
       label.anchor?.set?.(0.5, 0);
-      label.x = 0;
+      // label.x = 0;
   
       // 4) Y-Position ABSOLUT an die Unterkante legen (keine kumulierte Verschiebung)
       //    token.h ist die unskalierte Token-Höhe in lokalen Koordinaten des Mesh (Center-Anchor).
       //    Da der Nameplate-Container mit dem Mesh mitskaliert, setzen wir die Position
       //    in Lokalkoordinaten: +token.h/2 bringt uns an die Unterkante, +padding hebt etwas ab.
       const padding = Math.max(2, Math.round(fontPx * 0.15)); // 10–20% der Fontgröße als Luft
-      label.y = (token.h / 2) + padding;
+      label.y = (token.h) + padding;
   
       // 5) Render aktualisieren (falls nötig)
       label.dirty = true; // oder label.updateText?.();
