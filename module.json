@@ -5,10 +5,13 @@
   "version": "0.1.0",
   "description": "Adds scalable, tintable token overlays",
   "author": "GreybeardGM",
-  "esmodules": ["scripts/module.js"],
+  "esmodules": [
+    "scripts/module.js",
+    "token-tools.js"
+  ],
   "compatibility": {
-    "minimum": "12",
-    "verified": "12.999"
+    "minimum": "13",
+    "verified": "13.343"
   },
   "url": "https://github.com/GreybeardGM/greybearded-tokens",
   "manifest": "https://raw.githubusercontent.com/GreybeardGM/greybearded-tokens/main/module.json",
