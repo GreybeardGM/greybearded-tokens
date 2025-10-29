@@ -21,3 +21,11 @@ export const FONT_CHOICES = {
   "Times": "Times",
   "Times New Roman": "Times New Roman"
 };
+
+export const DEFAULT_COLORS = {
+  "color-hostile":   "#993333",
+  "color-neutral":   "#B7A789",
+  "color-friendly":  "#5F7A8A",
+  "color-secret":    "#6B5E7A",
+  "color-character": "#7F7F7F",
+};
