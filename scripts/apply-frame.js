@@ -115,36 +115,44 @@ export async function applyFrameToToken(token, S) {
 
   // 7) Nameplate stylen (Font mitskalieren, Y statisch am unteren Rand)
   if (NP?.enabled) {
-    const label = mesh?.nameplate ?? token.nameplate; // PIXI.Text
-    if (label) {
+    // In V13 ist nameplate meist ein Container mit .text (PIXI.Text)
+    const np = mesh?.nameplate ?? token.nameplate;
+    const txt = np?.text ?? np; // falls es kein Container ist, txt==np (PIXI.Text)
+  
+    if (np && txt && txt.style) {
       // Schriftgröße
       const basePx = Number(NP.baseFontSize ?? 22) || 22;
       let fontPx = basePx;
+  
       const tx = Math.abs(token.document.texture?.scaleX ?? 1);
       const ty = Math.abs(token.document.texture?.scaleY ?? 1);
-      
+  
       if (NP.scaleWithToken) {
         const wSquares = token.document.width  ?? 1;
         const hSquares = token.document.height ?? 1;
         const sizeFactor = Math.max(wSquares, hSquares);
-
         const textureScale = Math.max(tx, ty);
         fontPx = Math.max(8, Math.round(basePx * sizeFactor * textureScale));
       }
-
-      label.style.fontSize = fontPx;
-      if (NP.fontFamily) label.style.fontFamily = NP.fontFamily;
-
-      // Farbe gemäß Nameplate-TintMode/-Defaults
+  
+      // Stil auf dem Textobjekt
+      txt.style.fontSize = fontPx;
+      if (NP.fontFamily) txt.style.fontFamily = NP.fontFamily;
+  
       const nt = getTintColor(token, S, NP);
-      if (nt != null) label.style.fill = nt;
-
-      // Anker & Position
-      label.anchor?.set?.(0.5, 0);
+      if (nt != null) txt.style.fill = nt;
+  
+      // Anchor/Mitte am Text; X NICHT auf 0 setzen (dein Offset bleibt korrekt)
+      txt.anchor?.set?.(0.5, 0);
+  
+      // Position auf dem Container setzen (damit Backdrop/HitArea mitwandern)
       const padding = Math.max(2, Math.round(fontPx * 0.10));
-      label.y = (token.h * (1+ty)/2) + padding;
-
-      label.dirty = true; // re-render Text
+      np.y = (token.h * (1 + ty) / 2) + padding;
+  
+      // Render aktualisieren
+      txt.updateText?.();
+      txt.dirty = true;
     }
   }
+
 }
