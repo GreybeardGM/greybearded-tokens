@@ -9,7 +9,11 @@ function nextTick(fn){
 
 async function preloadFrameTextures() {
   const S = getGbFrameSettings();
-  const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
+  const paths = [
+    S?.frame1?.path,
+    (S?.frame2?.enabled ? S?.frame2?.path : null)
+  ].filter(Boolean);
+
   if (!paths.length) return;
   await Promise.all(paths.map((p) => PIXI.Assets.load(p)));
 }
@@ -23,14 +27,14 @@ function sweepAllTokenFrames() {
 
 export function registerRenderingHooks() {
   // immer aktiv
-  Hooks.on("drawToken",    t=>{ 
-    const S=getGbFrameSettings(); 
-    nextTick(()=>applyFrameToToken(t,S));
+  Hooks.on("drawToken", (t) => { 
+    const S = getGbFrameSettings(); 
+    nextTick(() => applyFrameToToken(t, S));
   });
 
-  Hooks.on("refreshToken", t=>{
-    const S=getGbFrameSettings();
-    nextTick(()=>applyFrameToToken(t,S));
+  Hooks.on("refreshToken", (t) => {
+    const S = getGbFrameSettings();
+    nextTick(() => applyFrameToToken(t, S));
   });
 
   Hooks.on("updateToken", (doc, change) => {
