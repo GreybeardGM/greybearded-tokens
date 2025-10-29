@@ -178,17 +178,6 @@ export function registerSettings() {
     onChange: requestReload
   });
 
-  game.settings.register(MOD_ID, "nameplateBaseFontSize", {
-    name: "Nameplate: Basisschriftgröße (px)",
-    hint: "Ausgangspunkt für die Schriftgröße. Kann optional mit Tokengröße/Scaling multipliziert werden.",
-    scope: "world",
-    config: true,
-    type: Number,
-    default: 22,
-    range: { min: 6, max: 96, step: 1 },
-    onChange: requestReload
-  });
-
   game.settings.register(MOD_ID, "nameplateFontFamily", {
     name: "Nameplate: Schriftart",
     hint: "Wähle eine Schriftart, die für Nameplates verwendet wird. Nur sichere Fonts werden angeboten.",
@@ -200,14 +189,34 @@ export function registerSettings() {
     onChange: requestReload
   });
 
-  // NEU: Individuelle Default-Farbe für Nameplates
-  game.settings.register(MOD_ID, "nameplateDefaultColor", {
-    name: "Nameplate: Standardfarbe",
-    hint: "Wird verwendet, wenn keine andere Einfärbemethode greift (z. B. Unicolor).",
+  game.settings.register(MOD_ID, "nameplateBaseFontSize", {
+    name: "Nameplate: Basisschriftgröße (px)",
+    hint: "Ausgangspunkt für die Schriftgröße. Kann optional mit Tokengröße/Scaling multipliziert werden.",
     scope: "world",
     config: true,
-    type: String,
-    default: "#ffffff",
+    type: Number,
+    default: 22,
+    range: { min: 6, max: 96, step: 1 },
+    onChange: requestReload
+  });
+
+  game.settings.register(MOD_ID, "nameplateScaleWithToken", {
+    name: "Nameplate skaliert mit Token",
+    hint: "Skaliert die Schriftgröße zusätzlich mit Token-Größe und Texture-Scale.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: requestReload
+  });
+
+  game.settings.register(MOD_ID, "nameplateUsePlayerColor", {
+    name: "Nameplate benutzt Spielerfarbe.",
+    hint: "Verwendet die Farbe des Spielers, falls vorhanden. Sonst Fallback auf Einfärbemethode.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
     onChange: requestReload
   });
 
@@ -221,14 +230,14 @@ export function registerSettings() {
     default: "Unicolor",
     onChange: requestReload
   });
-
-  game.settings.register(MOD_ID, "nameplateScaleWithToken", {
-    name: "Nameplate skaliert mit Token",
-    hint: "Skaliert die Schriftgröße zusätzlich mit Token-Größe und Texture-Scale.",
+  
+  game.settings.register(MOD_ID, "nameplateDefaultColor", {
+    name: "Nameplate: Standardfarbe",
+    hint: "Wird verwendet, wenn keine andere Einfärbemethode greift (z. B. Unicolor).",
     scope: "world",
     config: true,
-    type: Boolean,
-    default: true,
+    type: String,
+    default: "#ffffff",
     onChange: requestReload
   });
 
