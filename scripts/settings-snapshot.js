@@ -1,5 +1,5 @@
 // settings-snapshot.js
-import { MOD_ID } from "./constants.js";
+import { MOD_ID, DEFAULT_COLORS } from "./constants.js";
 
 let _S = null;
 let _VER = 0;
@@ -12,40 +12,53 @@ function _readAll() {
   const get = (k) => game.settings.get(MOD_ID, k);
 
   const snap = {
-    // Frame 1
-    path1:           str(get("path1"), "modules/greybearded-tokens/assets/frame-default.png"),
-    scale1:          num(get("scale1"), 1),
-    tintMode1:       str(get("tintMode1"), "Disposition"),
-    usePlayerColor1: bool(get("usePlayerColor1")),
-
-    // Frame 2
-    secondEnabled:   bool(get("secondEnabled")),
-    path2:           str(get("path2"), "modules/greybearded-tokens/assets/frame-secondary.png"),
-    scale2:          num(get("scale2"), 1),
-    tintMode2:       str(get("tintMode2"), "Unicolor"),
-    usePlayerColor2: bool(get("usePlayerColor2")),
-
-    // Mask
-    maskEnabled:     bool(get("maskEnabled")),
-    pathMask:        str(get("pathMask"), "modules/greybearded-tokens/assets/mask-round.png"),
-
-    // Farben
-    defaultColor: str(get("defaultColor"), "#888888"),
-    colors: {
-      hostile:   str(get("color-hostile"),   "#993333"),
-      neutral:   str(get("color-neutral"),   "#B7A789"),
-      friendly:  str(get("color-friendly"),  "#5F7A8A"),
-      secret:    str(get("color-secret"),    "#6B5E7A"),
-      character: str(get("color-character"), "#7F7F7F"),
+    // ── Frame 1 (NEU: gruppiert) ─────────────────────────────────────────────
+    frame1: {
+      path:           str(get("path1"), "modules/greybearded-tokens/assets/frame-default.png"),
+      scale:          num(get("scale1"), 1),
+      tintMode:       str(get("tintMode1"), "Disposition"),
+      usePlayerColor: bool(get("usePlayerColor1"))
     },
 
-    // Meta
+    // ── Frame 2 (NEU: gruppiert) ─────────────────────────────────────────────
+    frame2: {
+      enabled:        bool(get("secondEnabled")),
+      path:           str(get("path2"), "modules/greybearded-tokens/assets/frame-secondary.png"),
+      scale:          num(get("scale2"), 1),
+      tintMode:       str(get("tintMode2"), "Unicolor"),
+      usePlayerColor: bool(get("usePlayerColor2"))
+    },
+
+    // ── Mask (NEU: gruppiert) ────────────────────────────────────────────────
+    mask: {
+      enabled:  bool(get("maskEnabled")),
+      path:     str(get("pathMask"), "modules/greybearded-tokens/assets/mask-round.png")
+    },
+
+    // ── Farben (Fallbacks aus DEFAULT_COLORS) ────────────────────────────────
+    colors: {
+      default:   str(get("color-default"),       DEFAULT_COLORS.default),
+      hostile:   str(get("color-hostile"),       DEFAULT_COLORS.hostile),
+      neutral:   str(get("color-neutral"),       DEFAULT_COLORS.neutral),
+      friendly:  str(get("color-friendly"),      DEFAULT_COLORS.friendly),
+      secret:    str(get("color-secret"),        DEFAULT_COLORS.secret),
+      character: str(get("color-character"),     DEFAULT_COLORS.character)
+    },
+
+    // ── Nameplates (bereits gruppiert) ───────────────────────────────────────
+    nameplate: {
+      enabled:        bool(get("nameplateEnabled")),
+      baseFontSize:   num(get("nameplateBaseFontSize"), 22),     // px
+      fontFamily:     str(get("nameplateFontFamily"), "Signika"),
+      defaultColor:   str(get("nameplateDefaultColor"), "#ffffff"),
+      tintMode:       str(get("nameplateTintMode"), "Unicolor"),
+      scaleWithToken: bool(get("nameplateScaleWithToken"))
+    },
+
+    // ── Meta ─────────────────────────────────────────────────────────────────
     version: _VER,
     snapshotAt: Date.now()
   };
-
-  return snap;
-}
 
 /**
  * Liefert den aktuellen Snapshot.
@@ -55,19 +68,15 @@ function _readAll() {
 export function getGbFrameSettings() {
   if (_S) return _S;
   if (game?.ready) {
-    // Falls jemand getGbFrameSettings() nach ready aber vor buildSnapshot() ruft:
     _S = _readAll();
     _S.version = ++_VER;
     _S.snapshotAt = Date.now();
     return _S;
   }
-  // Vor ready: live lesen, NICHT cachen
   return _readAll();
 }
 
-/**
- * Erzwingt Neuaufbau und Memoisierung. Zu `ready`/`canvasReady` aufrufen.
- */
+/** Erzwingt Neuaufbau und Memoisierung. */
 export function buildSnapshot() {
   _S = _readAll();
   _S.version = ++_VER;
