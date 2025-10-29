@@ -156,6 +156,80 @@ export function registerSettings() {
     onChange: requestReload
   });  
   
+  // ── Nameplates ──────────────────────────────────────────────────────────────
+  game.settings.register(MOD_ID, "nameplateEnabled", {
+    name: "Nameplate-Styling aktivieren",
+    hint: "Wenn aktiv, werden Nameplates gemäß Modul-Stil angepasst (Schrift, Farbe, Skalierung).",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+    onChange: requestReload
+  });
+  
+  game.settings.register(MOD_ID, "nameplateBaseFontSize", {
+    name: "Nameplate: Basisschriftgröße (px)",
+    hint: "Ausgangspunkt für die Schriftgröße. Kann optional mit Tokengröße/Scaling multipliziert werden.",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 22,
+    range: { min: 6, max: 96, step: 1 },
+    onChange: requestReload
+  });
+  
+  game.settings.register(MOD_ID, "nameplateFontFamily", {
+    name: "Nameplate: Schriftart",
+    hint: "Wähle eine Schriftart, die für Nameplates verwendet wird. Nur sichere Fonts werden angeboten.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      "Arial": "Arial",
+      "Amiri": "Amiri",
+      "Bruno Ace": "Bruno Ace",
+      "Courier": "Courier",
+      "Courier New": "Courier New",
+      "Modesto Condensed": "Modesto Condensed",
+      "Signika": "Signika",
+      "Times": "Times",
+      "Times New Roman": "Times New Roman"
+    },
+    default: "Signika",
+    onChange: requestReload
+  });
+  
+  game.settings.register(MOD_ID, "nameplateDefaultColor", {
+    name: "Nameplate: Standardfarbe",
+    hint: "Wird verwendet, wenn keine andere Einfärbemethode greift (z. B. Unicolor oder Fallback).",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "#ffffff",
+    onChange: requestReload
+  });
+  
+  game.settings.register(MOD_ID, "nameplateTintMode", {
+    name: "Nameplate: Einfärbemethode",
+    hint: "Identisch zu den Rahmen-Optionen. Bestimmt, wie die Nameplate eingefärbt wird.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: TINT_CHOICES,   // z. B. { Disposition, Unicolor, ActorType, PlayerColor, ... }
+    default: "Unicolor",
+    onChange: requestReload
+  });
+  
+  game.settings.register(MOD_ID, "nameplateScaleWithToken", {
+    name: "Nameplate skaliert mit Token",
+    hint: "Skaliert die Schriftgröße zusätzlich mit Token-Größe und Texture-Scale.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: requestReload
+  });
+  
   // ── Disposition-Farben ──────────────────────────────────────────────────────
   const colors = {
     "color-hostile":   "#993333",
