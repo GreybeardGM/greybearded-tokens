@@ -23,7 +23,6 @@ export const FONT_CHOICES = {
 };
 
 export const DEFAULT_COLORS = {
-  "default":   "#7F7F7F",
   "hostile":   "#993333",
   "neutral":   "#B7A789",
   "friendly":  "#5F7A8A",
