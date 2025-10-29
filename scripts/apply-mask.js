@@ -2,7 +2,7 @@
 import { getGbFrameSettings } from "./settings-snapshot.js";
 
 export const MASK_FLAG = "_gbMaskSprite";
-const _GB_MASK_TARGET   = Symbol("gbMaskTarget");
+const _GB_MASK_TARGET = Symbol("gbMaskTarget");
 const MASK_CACHE = new Map();
 
 async function loadMaskOnce(url) {
@@ -37,7 +37,7 @@ export function clearMask(token) {
 }
 
 function getTargetAndParent(token) {
-  if (token.mesh) return { target: token.mesh, parent: token.mesh }; // ⬅️ Parent = mesh!
+  if (token.mesh) return { target: token.mesh, parent: token.mesh }; // Parent = mesh
   return null;
 }
 
@@ -45,29 +45,34 @@ export async function applyMaskToToken(token, S) {
   if (!token) return;
   S ||= getGbFrameSettings();
 
-  if (!S.maskEnabled || !S.pathMask) { clearMask(token); return; }
+  // NEU: nur noch gruppierte Settings
+  const enabled = !!S?.mask?.enabled;
+  const path    = S?.mask?.path;
+
+  if (!enabled || !path) { clearMask(token); return; }
 
   const tp = getTargetAndParent(token);
   if (!tp) return;
   const { target, parent } = tp;
 
-  // Masken-Sprite (am MESH, nicht am Token!)
+  // Masken-Textur laden/holen
   let maskSprite = token[MASK_FLAG];
-  const maskTex  = await loadMaskOnce(S.pathMask);
+  const maskTex  = await loadMaskOnce(path);
   if (!maskTex) return;
 
+  // Sprite erstellen/umbauen
   if (!maskSprite || maskSprite.parent !== parent) {
     clearMask(token);
     maskSprite = new PIXI.Sprite(maskTex);
     maskSprite.name = "gbt-mask";
     maskSprite.renderable = false;      // nie zeichnen, nur als Maske dienen
-    parent.addChild(maskSprite);        // ⬅️ ans mesh hängen
+    parent.addChild(maskSprite);        // ans mesh hängen
     token[MASK_FLAG] = maskSprite;
   } else if (maskSprite.texture !== maskTex) {
     maskSprite.texture = maskTex;
   }
 
-  // Geometrie: exakt auf die LocalBounds des mesh legen
+  // Geometrie exakt auf die LocalBounds des mesh legen
   const b = target.getLocalBounds?.();
   if (!b || !isFinite(b.width) || !isFinite(b.height) || b.width <= 0 || b.height <= 0) return;
 
@@ -79,7 +84,7 @@ export async function applyMaskToToken(token, S) {
   maskSprite.rotation = 0;
   maskSprite.scale.set(b.width / texW, b.height / texH);
 
-  // Maske AUF DAS MESH setzen
+  // Maske auf das Mesh setzen
   target.mask = maskSprite;
   token[_GB_MASK_TARGET] = target;
 }
