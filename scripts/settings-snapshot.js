@@ -53,7 +53,7 @@ function _readAll() {
       enabled:        bool(get("nameplateEnabled")),
       baseFontSize:   num(get("nameplateBaseFontSize"), 22),
       fontFamily:     str(get("nameplateFontFamily"), "Signika"),
-      // Bevorzugt dediziertes Setting; fällt auf Legacy-Global zurück
+      usePlayerColor: bool(get("nameplateUsePlayerColor")),
       defaultColor:   str(get("nameplateDefaultColor"), "#888888" ),
       tintMode:       str(get("nameplateTintMode"), "Unicolor"),
       scaleWithToken: bool(get("nameplateScaleWithToken"))
