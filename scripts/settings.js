@@ -28,16 +28,6 @@ function requestReload() {
 }
 
 export function registerSettings() {
-  // ── Basis ───────────────────────────────────────────────────────────────────
-  game.settings.register(MOD_ID, "defaultColor", {
-    name: "Standardfarbe für Rahmen",
-    hint: "Wird genutzt, wenn kein anderer Farbmodus greift.",
-    scope: "world",
-    config: true,
-    type: String,
-    default: "#888888"
-  });
-
   // ── Rahmen 1 ────────────────────────────────────────────────────────────────
   game.settings.register(MOD_ID, "path1", {
     name: "Standardbild für Tokenrahmen (Rahmen 1)",
@@ -221,8 +211,8 @@ export function registerSettings() {
   });
   
   // ── Disposition-Farben ──────────────────────────────────────────────────────
-  for (const [key, def] of Object.entries(DEFAULT_COLORS)) {
-    const label = key.replace("color-", "");
+  for (const [label, def] of Object.entries(DEFAULT_COLORS)) {
+    const key = "color-" + label;
     game.settings.register(MOD_ID, key, {
       name: `Farbe für ${label}`,
       hint: `Rahmenfarbe für ${label === "character" ? "Spielercharaktere" : `Disposition: ${label}`}`,
