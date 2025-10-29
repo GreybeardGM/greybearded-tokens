@@ -11,7 +11,7 @@
   ],
   "compatibility": {
     "minimum": "13",
-    "verified": "13.343"
+    "verified": "13.350"
   },
   "url": "https://github.com/GreybeardGM/greybearded-tokens",
   "manifest": "https://raw.githubusercontent.com/GreybeardGM/greybearded-tokens/main/module.json",
