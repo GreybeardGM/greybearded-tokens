@@ -64,24 +64,6 @@ function _readAll() {
     snapshotAt: Date.now()
   };
 
-  // ── Übergangs-Aliase (BC) – entfernen, sobald Code migriert ist ───────────
-  snap.path1           = snap.frame1.path;
-  snap.scale1          = snap.frame1.scale;
-  snap.tintMode1       = snap.frame1.tintMode;
-  snap.usePlayerColor1 = snap.frame1.usePlayerColor;
-
-  snap.secondEnabled   = snap.frame2.enabled;
-  snap.path2           = snap.frame2.path;
-  snap.scale2          = snap.frame2.scale;
-  snap.tintMode2       = snap.frame2.tintMode;
-  snap.usePlayerColor2 = snap.frame2.usePlayerColor;
-
-  snap.maskEnabled     = snap.mask.enabled;
-  snap.pathMask        = snap.mask.path;
-
-  // Historischer Alias – zeigt nun auf Frame 1 Default
-  snap.defaultColor    = snap.frame1.defaultColor;
-
   return snap;
 }
 
