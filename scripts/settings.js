@@ -71,6 +71,17 @@ export function registerSettings() {
     onChange: requestReload
   });
 
+  // NEU: Individuelle Default-Farbe für Rahmen 1
+  game.settings.register(MOD_ID, "frame1DefaultColor", {
+    name: "Rahmen 1: Standardfarbe",
+    hint: "Wird bei Unicolor/Advanced oder als Fallback genutzt, wenn keine Spielerfarbe greift.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: (DEFAULT_COLORS?.default ?? DEFAULT_COLORS?.defaultColor ?? "#888888"),
+    onChange: requestReload
+  });
+
   // ── Rahmen 2 ────────────────────────────────────────────────────────────────
   game.settings.register(MOD_ID, "secondEnabled", {
     name: "Zweiten Rahmen aktivieren",
@@ -124,10 +135,20 @@ export function registerSettings() {
     onChange: requestReload
   });
 
+  game.settings.register(MOD_ID, "frame2DefaultColor", {
+    name: "Rahmen 2: Standardfarbe",
+    hint: "Wird bei Unicolor/Advanced oder als Fallback genutzt, wenn keine Spielerfarbe greift.",
+    scope: "world",
+    config: true,
+    type: String,
+    default: (DEFAULT_COLORS?.default ?? DEFAULT_COLORS?.defaultColor ?? "#888888"),
+    onChange: requestReload
+  });
+
   // ── Maske ───────────────────────────────────────────────────────────────────
   game.settings.register(MOD_ID, "maskEnabled", {
     name: "Maskierung aktivieren",
-    hint: "Aktiviert eine Alpha-Maske, die auf das Token-Artwork angewendet wird (z. B. runde/abgerundete Tokens).",
+    hint: "Aktiviert eine Alpha-Maske, die auf das Token-Artwork angewendet wird (z. B. runde/abgerundete Tokens).",
     scope: "world",
     config: true,
     type: Boolean,
@@ -145,7 +166,7 @@ export function registerSettings() {
     filePicker: "image",
     onChange: requestReload
   });  
-  
+
   // ── Nameplates ──────────────────────────────────────────────────────────────
   game.settings.register(MOD_ID, "nameplateEnabled", {
     name: "Nameplate-Styling aktivieren",
@@ -156,7 +177,7 @@ export function registerSettings() {
     default: false,
     onChange: requestReload
   });
-  
+
   game.settings.register(MOD_ID, "nameplateBaseFontSize", {
     name: "Nameplate: Basisschriftgröße (px)",
     hint: "Ausgangspunkt für die Schriftgröße. Kann optional mit Tokengröße/Scaling multipliziert werden.",
@@ -167,7 +188,7 @@ export function registerSettings() {
     range: { min: 6, max: 96, step: 1 },
     onChange: requestReload
   });
-  
+
   game.settings.register(MOD_ID, "nameplateFontFamily", {
     name: "Nameplate: Schriftart",
     hint: "Wähle eine Schriftart, die für Nameplates verwendet wird. Nur sichere Fonts werden angeboten.",
@@ -178,28 +199,29 @@ export function registerSettings() {
     default: "Signika",
     onChange: requestReload
   });
-  
+
+  // NEU: Individuelle Default-Farbe für Nameplates
   game.settings.register(MOD_ID, "nameplateDefaultColor", {
     name: "Nameplate: Standardfarbe",
-    hint: "Wird verwendet, wenn keine andere Einfärbemethode greift (z. B. Unicolor oder Fallback).",
+    hint: "Wird verwendet, wenn keine andere Einfärbemethode greift (z. B. Unicolor).",
     scope: "world",
     config: true,
     type: String,
     default: "#ffffff",
     onChange: requestReload
   });
-  
+
   game.settings.register(MOD_ID, "nameplateTintMode", {
     name: "Nameplate: Einfärbemethode",
     hint: "Identisch zu den Rahmen-Optionen. Bestimmt, wie die Nameplate eingefärbt wird.",
     scope: "world",
     config: true,
     type: String,
-    choices: TINT_CHOICES,   // z. B. { Disposition, Unicolor, ActorType, PlayerColor, ... }
+    choices: TINT_CHOICES,
     default: "Unicolor",
     onChange: requestReload
   });
-  
+
   game.settings.register(MOD_ID, "nameplateScaleWithToken", {
     name: "Nameplate skaliert mit Token",
     hint: "Skaliert die Schriftgröße zusätzlich mit Token-Größe und Texture-Scale.",
@@ -209,7 +231,7 @@ export function registerSettings() {
     default: true,
     onChange: requestReload
   });
-  
+
   // ── Disposition-Farben ──────────────────────────────────────────────────────
   for (const [label, def] of Object.entries(DEFAULT_COLORS)) {
     const key = "color-" + label;
@@ -225,3 +247,4 @@ export function registerSettings() {
 
   console.log("✅⭕ Greybearded Token Frames: Settings registered.");
 }
+
