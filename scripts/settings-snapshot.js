@@ -11,19 +11,15 @@ function str(v, fb = "")  { return (typeof v === "string" && v.length) ? v : fb;
 function _readAll() {
   const get = (k) => game.settings.get(MOD_ID, k);
 
-  // Robuster Default für "default"-Farbe aus constants
-  const DEFAULT_COLOR_GLOBAL =
-    DEFAULT_COLORS?.default ??
-    DEFAULT_COLORS?.defaultColor ??
-    "#888888";
-
   const snap = {
     // ── Frame 1 ──────────────────────────────────────────────────────────────
     frame1: {
       path:           str(get("path1"), "modules/greybearded-tokens/assets/frame-default.png"),
       scale:          num(get("scale1"), 1),
       tintMode:       str(get("tintMode1"), "Disposition"),
-      usePlayerColor: bool(get("usePlayerColor1"))
+      usePlayerColor: bool(get("usePlayerColor1")),
+      // Neuer, dedizierter Default; fällt auf Legacy-Global zurück
+      defaultColor:   str(get("frame1DefaultColor"), "#888888" )
     },
 
     // ── Frame 2 ──────────────────────────────────────────────────────────────
@@ -32,7 +28,9 @@ function _readAll() {
       path:           str(get("path2"), "modules/greybearded-tokens/assets/frame-secondary.png"),
       scale:          num(get("scale2"), 1),
       tintMode:       str(get("tintMode2"), "Unicolor"),
-      usePlayerColor: bool(get("usePlayerColor2"))
+      usePlayerColor: bool(get("usePlayerColor2")),
+      // Neuer, dedizierter Default; fällt auf Legacy-Global zurück
+      defaultColor:   str(get("frame2DefaultColor"), "#888888" )
     },
 
     // ── Mask ─────────────────────────────────────────────────────────────────
@@ -41,9 +39,8 @@ function _readAll() {
       path:     str(get("pathMask"), "modules/greybearded-tokens/assets/mask-round.png")
     },
 
-    // ── Farben (mit BC für defaultColor vs color-default) ────────────────────
+    // ── Farben (ohne 'default') ──────────────────────────────────────────────
     colors: {
-      default:   str(get("color-default") ?? get("defaultColor"), DEFAULT_COLOR_GLOBAL),
       hostile:   str(get("color-hostile"),   DEFAULT_COLORS?.hostile   ?? "#993333"),
       neutral:   str(get("color-neutral"),   DEFAULT_COLORS?.neutral   ?? "#B7A789"),
       friendly:  str(get("color-friendly"),  DEFAULT_COLORS?.friendly  ?? "#5F7A8A"),
@@ -56,7 +53,8 @@ function _readAll() {
       enabled:        bool(get("nameplateEnabled")),
       baseFontSize:   num(get("nameplateBaseFontSize"), 22),
       fontFamily:     str(get("nameplateFontFamily"), "Signika"),
-      defaultColor:   str(get("nameplateDefaultColor"), "#ffffff"),
+      // Bevorzugt dediziertes Setting; fällt auf Legacy-Global zurück
+      defaultColor:   str(get("nameplateDefaultColor"), "#888888" ),
       tintMode:       str(get("nameplateTintMode"), "Unicolor"),
       scaleWithToken: bool(get("nameplateScaleWithToken"))
     },
@@ -66,7 +64,7 @@ function _readAll() {
     snapshotAt: Date.now()
   };
 
-  // (Optional) Übergangs-Aliase – entfernen, sobald alles umgestellt ist
+  // ── Übergangs-Aliase (BC) – entfernen, sobald Code migriert ist ───────────
   snap.path1           = snap.frame1.path;
   snap.scale1          = snap.frame1.scale;
   snap.tintMode1       = snap.frame1.tintMode;
@@ -81,7 +79,8 @@ function _readAll() {
   snap.maskEnabled     = snap.mask.enabled;
   snap.pathMask        = snap.mask.path;
 
-  snap.defaultColor    = snap.colors.default;
+  // Historischer Alias – zeigt nun auf Frame 1 Default
+  snap.defaultColor    = snap.frame1.defaultColor;
 
   return snap;
 }
