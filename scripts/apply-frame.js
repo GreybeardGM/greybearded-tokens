@@ -115,11 +115,12 @@ export async function applyFrameToToken(token, S) {
 
   // 7) Nameplate stylen (Font mitskalieren, Y statisch am unteren Rand)
   if (NP?.enabled) {
-    // In V13 ist nameplate meist ein Container mit .text (PIXI.Text)
-    const np = mesh?.nameplate ?? token.nameplate;
-    const txt = np?.text ?? np; // falls es kein Container ist, txt==np (PIXI.Text)
+    const label = token.nameplate; // V13: direkt der PIXI.Text
+    if (label && label.style) {
+      // Sichtbarstellen, falls Refresh gerade getoggelt hat
+      label.visible = true;
+      label.renderable = true;
   
-    if (np && txt && txt.style) {
       // Schriftgröße
       const basePx = Number(NP.baseFontSize ?? 22) || 22;
       let fontPx = basePx;
@@ -135,23 +136,23 @@ export async function applyFrameToToken(token, S) {
         fontPx = Math.max(8, Math.round(basePx * sizeFactor * textureScale));
       }
   
-      // Stil auf dem Textobjekt
-      txt.style.fontSize = fontPx;
-      if (NP.fontFamily) txt.style.fontFamily = NP.fontFamily;
+      // Stil direkt am Text setzen
+      label.style.fontSize = fontPx;
+      if (NP.fontFamily) label.style.fontFamily = NP.fontFamily;
   
       const nt = getTintColor(token, S, NP);
-      if (nt != null) txt.style.fill = nt;
+      if (nt != null) label.style.fill = nt;
   
-      // Anchor/Mitte am Text; X NICHT auf 0 setzen (dein Offset bleibt korrekt)
-      txt.anchor?.set?.(0.5, 0);
+      // Anker; X NICHT anfassen (dein Offsetting bleibt erhalten)
+      label.anchor?.set?.(0.5, 0);
   
-      // Position auf dem Container setzen (damit Backdrop/HitArea mitwandern)
+      // Deine bestätigte Y-Formel beibehalten
       const padding = Math.max(2, Math.round(fontPx * 0.10));
-      np.y = (token.h * (1 + ty) / 2) + padding;
+      label.y = (token.h * (1 + ty) / 2) + padding;
   
-      // Render aktualisieren
-      txt.updateText?.();
-      txt.dirty = true;
+      // Force reflow/texture rebuild
+      label.updateText?.();
+      label.dirty = true;
     }
   }
 
