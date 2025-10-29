@@ -1,5 +1,5 @@
 // settings.js
-import { MOD_ID, TINT_CHOICES } from "./constants.js";
+import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_COLORS } from "./constants.js";
 import { buildSnapshot } from "./settings-snapshot.js";
 import { applyFrameToToken } from "./apply-frame.js";
 
@@ -184,17 +184,7 @@ export function registerSettings() {
     scope: "world",
     config: true,
     type: String,
-    choices: {
-      "Arial": "Arial",
-      "Amiri": "Amiri",
-      "Bruno Ace": "Bruno Ace",
-      "Courier": "Courier",
-      "Courier New": "Courier New",
-      "Modesto Condensed": "Modesto Condensed",
-      "Signika": "Signika",
-      "Times": "Times",
-      "Times New Roman": "Times New Roman"
-    },
+    choices: FONT_CHOICES,
     default: "Signika",
     onChange: requestReload
   });
@@ -231,15 +221,7 @@ export function registerSettings() {
   });
   
   // ── Disposition-Farben ──────────────────────────────────────────────────────
-  const colors = {
-    "color-hostile":   "#993333",
-    "color-neutral":   "#B7A789",
-    "color-friendly":  "#5F7A8A",
-    "color-secret":    "#6B5E7A",
-    "color-character": "#7F7F7F",
-  };
-
-  for (const [key, def] of Object.entries(colors)) {
+  for (const [key, def] of Object.entries(DEFAULT_COLORS)) {
     const label = key.replace("color-", "");
     game.settings.register(MOD_ID, key, {
       name: `Farbe für ${label}`,
