@@ -1,11 +1,19 @@
 // token-tools.js
-
 Hooks.on('getSceneControlButtons', (controls) => {
-  const tokenCtl = controls.find(c => c.name === 'token');
+  // VTT-Varianten abfangen: Array | {controls:[...]} | sonst
+  const sets = Array.isArray(controls) ? controls : controls?.controls ?? [];
+  if (!Array.isArray(sets) || !sets.length) return;
+
+  // "token" vs. "tokens" absichern
+  const tokenCtl = sets.find(c => c?.name === 'token' || c?.name === 'tokens');
   if (!tokenCtl) return;
 
   const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
-  const currSize = (td) => Math.max(Number(td.width) || 1, Number(td.height) || 1);
+  const currSize = (td) => {
+    const w = Number(td.width) || 1;
+    const h = Number(td.height) || 1;
+    return Math.max(w, h, 1);
+  };
 
   // direction: -1 = verkleinern (ceil), +1 = vergrößern (floor)
   const adjustToken = async (tokenDoc, direction) => {
@@ -17,6 +25,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
   };
 
   const runOnSelection = async (direction) => {
+    if (!game.user.isGM) return; // doppelt absichern
     const docs = canvas.tokens.controlled.map(t => t.document);
     if (!docs.length) return;
     await Promise.all(docs.map(td => adjustToken(td, direction)));
