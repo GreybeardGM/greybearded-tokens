@@ -7,7 +7,7 @@
   "author": "GreybeardGM",
   "esmodules": [
     "scripts/module.js",
-    "token-tools.js"
+    "scripts/token-tools.js"
   ],
   "compatibility": {
     "minimum": "13",
