@@ -71,17 +71,17 @@ async function promptSyncDialog(actor, oldSrc, newImg) {
     const content = `
       <div style="max-width:100%; overflow:hidden;">
         <p>${game.i18n.localize("GBT.Sync.DialogText")}</p>
-        <div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0.6rem;">
-          <div style="min-width:0;">
+        <div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px;">
+          <div>
             <label><strong>${game.i18n.localize("GBT.Sync.ActorPortrait")}</strong></label>
-            <div style="max-height:140px; overflow:hidden; border:1px solid #888; border-radius:4px; padding:4px;">
+            <div style="border:1px solid #888; border-radius:4px; padding:4px;">
               <img src="${newImg}" style="max-width:100%; height:auto; display:block; object-fit:contain;">
             </div>
             <code style="display:block; font-size:0.8em; overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(newImg)}</code>
           </div>
-          <div style="min-width:0;">
+          <div>
             <label><strong>${game.i18n.localize("GBT.Sync.ProtoToken")}</strong></label>
-            <div style="max-height:140px; overflow:hidden; border:1px solid #888; border-radius:4px; padding:4px;">
+            <div style="border:1px solid #888; border-radius:4px; padding:4px;">
               <img src="${oldSrc ?? ""}" style="max-width:100%; height:auto; display:block; object-fit:contain;">
             </div>
             <code style="display:block; font-size:0.8em; overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(oldSrc ?? "")}</code>
