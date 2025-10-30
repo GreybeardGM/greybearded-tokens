@@ -2,7 +2,7 @@
 // Minimal-invasives Sidecar-Skript für Actor→Prototype-Token Bild-Sync.
 // Core v12+, keine Abhängigkeiten vom Rest deines Moduls.
 
-const MOD_ID = "greybearded-tokens";              // bleibt dein Modul
+import { MOD_ID } from "./constants.js";
 const SETTING_KEY = "portraitSyncMode";           // neue Einstellung
 const SYNC_MODES = { ALWAYS: "always", DIALOG: "dialog", NOTHING: "nothing" };
 
