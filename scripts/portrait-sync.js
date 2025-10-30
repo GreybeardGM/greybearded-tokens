@@ -31,7 +31,7 @@ Hooks.on("updateActor", async (actor, changed, options, userId) => {
     if (!("img" in changed)) return;                 // nichts zu tun, wenn Portrait unverändert
     const mode = game.settings.get(MOD_ID, SETTING_KEY);
     if (mode === SYNC_MODES.NOTHING) return;
-    if (!game.user.isGM) return;                     // nur ein GM führt aus
+    // if (!game.user.isGM) return;                     // nur ein GM führt aus
 
     const newImg = actor.img;                        // bereits persistierter Wert
     if (!newImg) return;
