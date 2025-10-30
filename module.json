@@ -5,6 +5,10 @@
   "version": "0.1.0",
   "description": "Adds scalable, tintable token overlays",
   "author": "GreybeardGM",
+  "languages": [
+    { "lang": "en", "name": "English", "path": "lang/en.json" },
+    { "lang": "de", "name": "Deutsch", "path": "lang/de.json" }
+  ],
   "esmodules": ["scripts/module.js","scripts/token-tools.js","scripts/portrait-sync.js"],
   "compatibility": {
     "minimum": "12",
