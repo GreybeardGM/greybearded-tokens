@@ -1,0 +1,14 @@
+{
+  "GBT.Sync.Name": "Porträt → Prototyp-Token Sync",
+  "GBT.Sync.Hint": "Lege fest, wie das Actor-Porträt mit dem Prototyp-Token-Bild synchronisiert wird, wenn sich das Porträt ändert.",
+  "GBT.Sync.ChoiceAlways": "Immer synchronisieren",
+  "GBT.Sync.ChoiceDialog": "Nachfragen (Dialog)",
+  "GBT.Sync.ChoiceNothing": "Nichts tun",
+  "GBT.Sync.DialogTitle": "Prototyp-Token-Bild synchronisieren?",
+  "GBT.Sync.DialogText": "Das Porträt des Actors hat sich geändert. Soll das Prototyp-Token-Bild angepasst werden?",
+  "GBT.Sync.ActorPortrait": "Actor-Porträt",
+  "GBT.Sync.ProtoToken": "Prototyp-Token",
+  "GBT.Sync.ButtonSync": "Synchronisieren",
+  "GBT.Sync.ButtonCancel": "Abbrechen",
+  "GBT.Sync.DoneInfo": "Prototyp-Token-Bild für {name} synchronisiert."
+}
