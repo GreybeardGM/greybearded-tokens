@@ -3,20 +3,20 @@
 // Core v12+, keine Abhängigkeiten vom Rest deines Moduls.
 
 import { MOD_ID } from "./constants.js";
-const SETTING_KEY = "portraitSyncMode";           // neue Einstellung
+const SETTING_KEY = "portraitSyncMode";
 const SYNC_MODES = { ALWAYS: "always", DIALOG: "dialog", NOTHING: "nothing" };
 
 Hooks.once("init", () => {
   game.settings.register(MOD_ID, SETTING_KEY, {
-    name: game.i18n.localize("GBT.Sync.Name"),
-    hint: game.i18n.localize("GBT.Sync.Hint"),
+    name: "GBT.Sync.Name",          // <-- Key, nicht localize(...)
+    hint: "GBT.Sync.Hint",
     scope: "world",
     config: true,
     type: String,
     choices: {
-      [SYNC_MODES.ALWAYS]: game.i18n.localize("GBT.Sync.ChoiceAlways"),
-      [SYNC_MODES.DIALOG]: game.i18n.localize("GBT.Sync.ChoiceDialog"),
-      [SYNC_MODES.NOTHING]: game.i18n.localize("GBT.Sync.ChoiceNothing")
+      [SYNC_MODES.ALWAYS]: "GBT.Sync.ChoiceAlways", // <-- Keys
+      [SYNC_MODES.DIALOG]: "GBT.Sync.ChoiceDialog",
+      [SYNC_MODES.NOTHING]: "GBT.Sync.ChoiceNothing"
     },
     default: SYNC_MODES.DIALOG
   });
@@ -69,22 +69,22 @@ async function promptSyncDialog(actor, oldSrc, newImg) {
   return new Promise((resolve) => {
     const title = game.i18n.localize("GBT.Sync.DialogTitle");
     const content = `
-      <div style="display:grid; gap:0.6rem;">
+      <div style="max-width:100%; overflow:hidden;">
         <p>${game.i18n.localize("GBT.Sync.DialogText")}</p>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem;">
-          <div>
+        <div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0.6rem;">
+          <div style="min-width:0;">
             <label><strong>${game.i18n.localize("GBT.Sync.ActorPortrait")}</strong></label>
             <div style="max-height:140px; overflow:hidden; border:1px solid #888; border-radius:4px; padding:4px;">
-              <img src="${newImg}" style="max-width:100%; max-height:130px; object-fit:contain;">
+              <img src="${newImg}" style="max-width:100%; height:auto; display:block; object-fit:contain;">
             </div>
-            <code style="font-size:0.8em;">${escapeHtml(newImg)}</code>
+            <code style="display:block; font-size:0.8em; overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(newImg)}</code>
           </div>
-          <div>
+          <div style="min-width:0;">
             <label><strong>${game.i18n.localize("GBT.Sync.ProtoToken")}</strong></label>
             <div style="max-height:140px; overflow:hidden; border:1px solid #888; border-radius:4px; padding:4px;">
-              <img src="${oldSrc ?? ""}" style="max-width:100%; max-height:130px; object-fit:contain;">
+              <img src="${oldSrc ?? ""}" style="max-width:100%; height:auto; display:block; object-fit:contain;">
             </div>
-            <code style="font-size:0.8em;">${escapeHtml(oldSrc ?? "")}</code>
+            <code style="display:block; font-size:0.8em; overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(oldSrc ?? "")}</code>
           </div>
         </div>
       </div>
