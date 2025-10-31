@@ -1,6 +1,5 @@
 // modules/greybearded-tokens/scripts/token-tools.js
-// GM-only. Kompatibel mit neuer Objekt-API (controls.tokens.tools)
-// und älterer Array-API (controls[].tools[]).
+// Zwei Größen-Buttons + drittes Tool: disableFrame-Flag per ausgewähltem Token toggeln (GM-only).
 
 Hooks.on('getSceneControlButtons', (controls) => {
   const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
@@ -14,11 +13,25 @@ Hooks.on('getSceneControlButtons', (controls) => {
     await tokenDoc.update({ width: next, height: next });
   };
 
-  const runOnSelection = async (direction) => {
+  const runOnSelectionSize = async (direction) => {
     if (!game.user.isGM) return;
     const docs = canvas.tokens.controlled.map(t => t.document);
     if (!docs.length) return;
     await Promise.all(docs.map(td => adjustToken(td, direction)));
+  };
+
+  const runToggleDisableFrame = async () => {
+    if (!game.user.isGM) return;
+    const docs = canvas.tokens.controlled.map(t => t.document);
+    if (!docs.length) return;
+
+    // Pro Token invertieren: true -> false, false/undefined -> true
+    await Promise.all(docs.map(async (td) => {
+      const cur = !!(await td.getFlag('greybearded-tokens', 'disableFrame'));
+      const next = !cur;
+      // setFlag statt unsetFlag für deterministisches Verhalten
+      await td.setFlag('greybearded-tokens', 'disableFrame', next);
+    }));
   };
 
   const shrinkTool = {
@@ -27,8 +40,8 @@ Hooks.on('getSceneControlButtons', (controls) => {
     icon: 'fa-solid fa-down-left-and-up-right-to-center',
     button: true,
     visible: () => game.user.isGM,
-    onClick: () => runOnSelection(-1),
-    onChange: () => runOnSelection(-1) // neue API verwendet teils onChange
+    onClick: () => runOnSelectionSize(-1),
+    onChange: () => runOnSelectionSize(-1)
   };
 
   const growTool = {
@@ -37,26 +50,38 @@ Hooks.on('getSceneControlButtons', (controls) => {
     icon: 'fa-solid fa-up-right-and-down-left-from-center',
     button: true,
     visible: () => game.user.isGM,
-    onClick: () => runOnSelection(1),
-    onChange: () => runOnSelection(1)
+    onClick: () => runOnSelectionSize(1),
+    onChange: () => runOnSelectionSize(1)
   };
 
-  // Neuer Pfad (Foundry V13+): Objektstruktur
+  const toggleFrameTool = {
+    name: 'gbToggleFrame',
+    title: 'Frame-Flag toggeln',
+    icon: 'fa-solid fa-vector-square',
+    button: true,
+    visible: () => game.user.isGM,
+    onClick: () => runToggleDisableFrame(),
+    onChange: () => runToggleDisableFrame()
+  };
+
+  // Neuer Objekt-Pfad (Foundry V13+)
   const tokObj = controls?.tokens ?? controls?.token;
   if (tokObj && typeof tokObj.tools === 'object' && !Array.isArray(tokObj.tools)) {
-    const orderBase = Object.keys(tokObj.tools).length;
-    shrinkTool.order = orderBase + 1;
-    growTool.order = orderBase + 2;
-    tokObj.tools[shrinkTool.name] = shrinkTool;
-    tokObj.tools[growTool.name] = growTool;
+    const base = Object.keys(tokObj.tools).length;
+    shrinkTool.order = base + 1;
+    growTool.order   = base + 2;
+    toggleFrameTool.order = base + 3;
+    tokObj.tools[shrinkTool.name]   = shrinkTool;
+    tokObj.tools[growTool.name]     = growTool;
+    tokObj.tools[toggleFrameTool.name] = toggleFrameTool;
     return;
   }
 
-  // Älterer Pfad: Arraystruktur
+  // Älterer Array-Pfad
   const sets = Array.isArray(controls) ? controls : [];
   const tokenCtl = sets.find(c => c?.name === 'token' || c?.name === 'tokens');
   if (tokenCtl) {
     tokenCtl.tools ??= [];
-    tokenCtl.tools.push(shrinkTool, growTool);
+    tokenCtl.tools.push(shrinkTool, growTool, toggleFrameTool);
   }
 });
