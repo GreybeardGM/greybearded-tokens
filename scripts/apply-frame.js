@@ -148,8 +148,8 @@ function updateNameplate(token, S, tx, ty) {
   const label = token?.nameplate;
   if (!label || !label.style) return;
 
-  label.visible = true;
-  label.renderable = true;
+  //label.visible = true;
+  //label.renderable = true;
 
   const basePx = Number(NP.baseFontSize ?? 22) || 22;
   let fontPx = basePx;
