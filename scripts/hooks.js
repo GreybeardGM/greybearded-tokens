@@ -21,34 +21,30 @@ async function preloadFrameTextures() {
 function sweepAllTokenFrames() {
   const S = getGbFrameSettings();
   nextTick(() => {
-    for (const t of canvas.tokens.placeables) applyFrameToToken(t, S);
+    for (const t of canvas.tokens.placeables) {
+      if (!t._gb) t._gb = {};
+      if (t._gb.frameScheduled) continue;
+      t._gb.frameScheduled = true;
+      nextTick(async () => {
+        try { await applyFrameToToken(t, S); }
+        finally { t._gb.frameScheduled = false; }
+      });
+    }
   });
 }
 
 export function registerRenderingHooks() {
-  // immer aktiv
-
-  /*
-  Hooks.on("drawToken", (t) => { 
-    const S = getGbFrameSettings(); 
-    nextTick(() => applyFrameToToken(t, S));
-  });
-  */
   
   Hooks.on("refreshToken", (t) => {
+    if (!t?._gb) t._gb = {};
+    if (t._gb.frameScheduled) return;
+    t._gb.frameScheduled = true;   // ✅ echte Reservation
     const S = getGbFrameSettings();
-    nextTick(() => applyFrameToToken(t, S));
+    nextTick(async () => {
+      try { await applyFrameToToken(t, S); }
+      finally { t._gb.frameScheduled = false; } // ✅ Flag NUR hier zurücksetzen
+    });
   });
-
-  /*
-  Hooks.on("updateToken", (doc, change) => {
-    if (!("disposition" in (change ?? {}))) return;
-    const token = doc?.object;
-    if (!token || !canvas?.ready) return;
-    const S = getGbFrameSettings();
-    applyFrameToToken(token, S);
-  });
-  */
 
   Hooks.on("updateUser", (user, change) => {
     if (!change) return;
@@ -67,17 +63,6 @@ export function registerRenderingHooks() {
     await preloadFrameTextures();   // erst nach Snapshot
     //sweepAllTokenFrames();
   });
-
-  /*
-  Hooks.once("ready", async () => {
-    rebuildPlayerColorSnapshot();
-    if (canvas?.ready) {
-      buildSnapshot();
-      await preloadFrameTextures();
-      sweepAllTokenFrames();
-    }
-  });
-  */
   
   console.log("✅⭕ Greybearded Token Frames: Hooks registered.");
 }
