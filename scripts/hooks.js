@@ -16,14 +16,14 @@ async function preloadFrameTextures() {
 
 function sweepAllTokenFrames() {
   const S = getGbFrameSettings();
-  for (const t of canvas.tokens.placeables) await updateFrame(t, S);
+  for (const t of canvas.tokens.placeables) updateFrame(t, S);
 }
 
 export function registerRenderingHooks() {
   
   Hooks.on("refreshToken", (t) => {
     const S = getGbFrameSettings();
-    await updateFrame(t, S);
+    updateFrame(t, S);
   });
 
   Hooks.on("updateUser", (user, change) => {
