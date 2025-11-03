@@ -15,7 +15,7 @@ function ensureGbNS(token) {
   if (!("maskSprite" in gb)) gb.maskSprite = null;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
-  if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
+  //if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
 
   return gb;
 }
@@ -137,31 +137,21 @@ function updateNameplate(token, S, tx, ty) {
     fontPx = Math.max(8, Math.round(basePx * sizeFactor * textureScale));
   }
 
+  /*
   if (!gb.npPrev.anchored && label.anchor?.set) {
     label.anchor.set(0.5, 0);
     gb.npPrev.anchored = true;
   }
+  */
 
-  const nextFamily = NP.fontFamily || label.style.fontFamily;
-  const nextFill   = getTintColor(token, S, NP) ?? label.style.fill;
-
-  const sizeChanged   = gb.npPrev.size   !== fontPx;
-  const familyChanged = gb.npPrev.family !== nextFamily;
-  const fillChanged   = gb.npPrev.fill   !== nextFill;
-
-  if (sizeChanged)   label.style.fontSize = fontPx;
-  if (familyChanged) label.style.fontFamily = nextFamily;
-  if (fillChanged)   label.style.fill = nextFill;
+  label.style.fontSize = fontPx;
+  label.style.fontFamily = nextFamily;
+  label.style.fill = nextFill;
 
   const padding = Math.max(2, Math.round(fontPx * 0.10));
   label.y = (token.h * (1 + ty) / 2) + padding;
 
-  if (sizeChanged || familyChanged || fillChanged) {
-    gb.npPrev.size = fontPx;
-    gb.npPrev.family = nextFamily;
-    gb.npPrev.fill = nextFill;
-    label.updateText?.();
-  }
+  label.updateText?.();
 }
 
 /* =========================
