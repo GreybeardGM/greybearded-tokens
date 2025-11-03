@@ -1,11 +1,7 @@
 // hooks.js
 import { getGbFrameSettings, buildSnapshot } from "./settings-snapshot.js";
 import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
-import { applyFrameToToken } from "./apply-frame.js";
-
-function nextTick(fn){
-  requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(fn,0)));
-}
+import { updateFrame } from "./apply-frame.js";
 
 async function preloadFrameTextures() {
   const S = getGbFrameSettings();
@@ -20,30 +16,14 @@ async function preloadFrameTextures() {
 
 function sweepAllTokenFrames() {
   const S = getGbFrameSettings();
-  nextTick(() => {
-    for (const t of canvas.tokens.placeables) {
-      if (!t._gb) t._gb = {};
-      if (t._gb.frameScheduled) continue;
-      t._gb.frameScheduled = true;
-      nextTick(async () => {
-        try { await applyFrameToToken(t, S); }
-        finally { t._gb.frameScheduled = false; }
-      });
-    }
-  });
+  for (const t of canvas.tokens.placeables) await updateFrame(t, S);
 }
 
 export function registerRenderingHooks() {
   
   Hooks.on("refreshToken", (t) => {
-    if (!t?._gb) t._gb = {};
-    if (t._gb.frameScheduled) return;
-    t._gb.frameScheduled = true;   // ✅ echte Reservation
     const S = getGbFrameSettings();
-    nextTick(async () => {
-      try { await applyFrameToToken(t, S); }
-      finally { t._gb.frameScheduled = false; } // ✅ Flag NUR hier zurücksetzen
-    });
+    await updateFrame(t, S);
   });
 
   Hooks.on("updateUser", (user, change) => {
