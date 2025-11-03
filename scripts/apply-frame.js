@@ -69,14 +69,10 @@ function destroyMaskIfAny(token) {
   }
   gb.maskTarget = null;
 
-  if (gb.maskSprite) {
-    try { gb.maskSprite.destroy({ children: true, texture: false, baseTexture: false }); } catch (_e) {}
-  }
+  try { gb.maskSprite?.destroy?.({ children: true, texture: false, baseTexture: false }); } catch {}
   gb.maskSprite = null;
 
-  if (gb.maskHolder) {
-    try { gb.maskHolder.destroy({ children: true }); } catch (_e) {}
-  }
+  try { gb.maskHolder?.destroy?.({ children: true }); } catch {}
   gb.maskHolder = null;
 
   gb.maskApplied = false;
@@ -89,58 +85,44 @@ async function attachMaskIfNeeded(token, S) {
   const gb = ensureGbNS(token);
   const M = S?.mask;
   if (!M?.enabled || !M?.path) {
-    // Falls Setting abgeschaltet wurde: säubern
     if (gb.maskApplied) destroyMaskIfAny(token);
     return;
   }
-  if (gb.maskApplied) return; // bereits gesetzt
+  if (gb.maskApplied) return;
 
   const mesh = token?.mesh;
   if (!mesh) return;
 
-  // Quelle stabil
+  // Quelle stabilisieren
   await waitForMeshReady(token);
 
-  // Masken-Textur laden u. warten bis valid
-  const maskSprite = new PIXI.Sprite(PIXI.Texture.from(M.path));
-  if (!maskSprite.texture.valid) await onceValid(maskSprite.texture);
+  // Masken-Textur laden
+  const tex = PIXI.Texture.from(M.path);
+  if (!tex.valid) await onceValid(tex);
 
-  // Harte Unsichtbarkeit: niemals in einen Draw-Batch geraten
-  maskSprite.visible = false;
-  maskSprite.renderable = false;
-  maskSprite.alpha = 0.0;
-  // Markiere als Maske (hilft einigen Pixi 7 Pfaden)
-  maskSprite.isMask = true;
+  // Masken-Sprite vorbereiten (sichtbar/renderbar lassen!)
+  const maskSprite = new PIXI.Sprite(tex);
+  maskSprite.name = "gb-mask-sprite";
+  // Wichtig: NICHT visible=false / renderable=false setzen
+  // NICHT alpha=0 setzen, NICHT in unsichtbaren Holder packen
 
-  // Nicht rendernder Holder verhindert jegliches "Zwischenframe-Zeichnen"
-  const holder = new PIXI.Container();
-  holder.name = "gb-mask-holder";
-  holder.visible = false;
-  holder.renderable = false;
-
-  // Holder & Sprite an selbe Transform-Hierarchie wie das Mesh hängen
+  // In denselben Parent wie das Mesh hängen
   const parent = mesh.parent ?? token;
-  parent.addChild(holder);
-  holder.addChild(maskSprite);
+  parent.addChild(maskSprite);
 
-  // Auf Token-Bounds skalieren (lokales Koordinatensystem des Mesh annehmen)
-  // Annahme: Token-Mesh ist zentriert (Foundry default)
-  const w = mesh.width;
-  const h = mesh.height;
-
-  maskSprite.anchor?.set?.(0.5);
+  // Auf Token-Bounds zentrieren
+  const w = mesh.width, h = mesh.height;
+  if (maskSprite.anchor?.set) maskSprite.anchor.set(0.5);
   maskSprite.position.set(mesh.x ?? 0, mesh.y ?? 0);
-  maskSprite.width = w;
+  maskSprite.width  = w;
   maskSprite.height = h;
 
-  // Einen Tick atmen lassen, damit Bounds/WorldTransform sicher stehen
-  await new Promise((r) => requestAnimationFrame(r));
-
-  // Jetzt Maske aktivieren – Sprite bleibt unsichtbar im Holder
+  // WICHTIG: KEIN await/rAF hier dazwischen!
+  // Direkt im selben Tick die Maske aktivieren,
+  // so hat die Sprite keine Chance, einmal "als Inhalt" zu zeichnen.
   mesh.mask = maskSprite;
 
   gb.maskSprite = maskSprite;
-  gb.maskHolder = holder;
   gb.maskTarget = mesh;
   gb.maskApplied = true;
 }
