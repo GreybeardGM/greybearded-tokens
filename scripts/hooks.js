@@ -35,7 +35,7 @@ function sweepAllTokenFrames() {
 
 export function registerRenderingHooks() {
   
-  Hooks.on("drawToken", (t) => {
+  Hooks.on("refreshToken", (t) => {
     if (!t?._gb) t._gb = {};
     if (t._gb.frameScheduled) return;
     t._gb.frameScheduled = true;   // ✅ echte Reservation
