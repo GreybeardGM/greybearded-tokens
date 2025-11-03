@@ -145,8 +145,8 @@ function updateNameplate(token, S, tx, ty) {
   */
 
   label.style.fontSize = fontPx;
-  label.style.fontFamily = nextFamily;
-  label.style.fill = nextFill;
+  label.style.fontFamily = NP.fontFamily;
+  label.style.fill = getTintColor(token, S, NP);
 
   const padding = Math.max(2, Math.round(fontPx * 0.10));
   label.y = (token.h * (1 + ty) / 2) + padding;
