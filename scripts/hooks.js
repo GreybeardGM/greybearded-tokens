@@ -37,6 +37,7 @@ export function registerRenderingHooks() {
     nextTick(() => applyFrameToToken(t, S));
   });
 
+  /*
   Hooks.on("updateToken", (doc, change) => {
     if (!("disposition" in (change ?? {}))) return;
     const token = doc?.object;
@@ -44,6 +45,7 @@ export function registerRenderingHooks() {
     const S = getGbFrameSettings();
     applyFrameToToken(token, S);
   });
+  */
 
   Hooks.on("updateUser", (user, change) => {
     if (!change) return;
@@ -63,6 +65,7 @@ export function registerRenderingHooks() {
     sweepAllTokenFrames();
   });
 
+  /*
   Hooks.once("ready", async () => {
     rebuildPlayerColorSnapshot();
     if (canvas?.ready) {
@@ -71,6 +74,7 @@ export function registerRenderingHooks() {
       sweepAllTokenFrames();
     }
   });
-
+  */
+  
   console.log("✅⭕ Greybearded Token Frames: Hooks registered.");
 }
