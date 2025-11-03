@@ -27,11 +27,14 @@ function sweepAllTokenFrames() {
 
 export function registerRenderingHooks() {
   // immer aktiv
+
+  /*
   Hooks.on("drawToken", (t) => { 
     const S = getGbFrameSettings(); 
     nextTick(() => applyFrameToToken(t, S));
   });
-
+  */
+  
   Hooks.on("refreshToken", (t) => {
     const S = getGbFrameSettings();
     nextTick(() => applyFrameToToken(t, S));
@@ -62,7 +65,7 @@ export function registerRenderingHooks() {
     rebuildPlayerColorSnapshot();
     buildSnapshot();                // gültige Settings sicherstellen
     await preloadFrameTextures();   // erst nach Snapshot
-    sweepAllTokenFrames();
+    //sweepAllTokenFrames();
   });
 
   /*
