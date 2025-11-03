@@ -127,13 +127,6 @@ async function attachMaskIfNeeded(token, S) {
   const mesh = token?.mesh;
   if (!mesh) return;
 
-  const parent = mesh.parent ?? token;
-  // WICHTIG: Overlay darf nicht unter mesh hängen
-  if (gb.overlay?.parent === mesh) {
-    parent.addChild(gb.overlay);
-    gb.overlay.zIndex = (mesh.zIndex ?? 0) + 10;
-  }
-   
   // Quelle stabilisieren
   await waitForMeshReady(token);
 
