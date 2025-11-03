@@ -39,7 +39,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
     title: 'Token verkleinern (min 1)',
     icon: 'fa-solid fa-down-left-and-up-right-to-center',
     button: true,
-    visible: () => game.user.isGM,
+    visible: game.user.isGM,
     onClick: () => runOnSelectionSize(-1),
     onChange: () => runOnSelectionSize(-1)
   };
@@ -49,7 +49,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
     title: 'Token vergrößern (max 15)',
     icon: 'fa-solid fa-up-right-and-down-left-from-center',
     button: true,
-    visible: () => game.user.isGM,
+    visible: game.user.isGM,
     onClick: () => runOnSelectionSize(1),
     onChange: () => runOnSelectionSize(1)
   };
@@ -59,7 +59,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
     title: 'Frame-Flag toggeln',
     icon: 'fa-solid fa-vector-square',
     button: true,
-    visible: () => game.user.isGM,
+    visible: game.user.isGM,
     onClick: () => runToggleDisableFrame(),
     onChange: () => runToggleDisableFrame()
   };
