@@ -2,7 +2,6 @@
 import { MOD_ID, DEFAULT_COLORS } from "./constants.js";
 
 let _S = null;
-let _VER = 0;
 
 function num(v, fb = 1)   { const n = Number(v); return Number.isFinite(n) ? n : fb; }
 function bool(v)          { return !!v; }
@@ -59,9 +58,6 @@ function _readAll() {
       scaleWithToken: bool(get("nameplateScaleWithToken"))
     },
 
-    // ── Meta ─────────────────────────────────────────────────────────────────
-    version: _VER,
-    snapshotAt: Date.now()
   };
 
   return snap;
@@ -76,8 +72,6 @@ export function getGbFrameSettings() {
   if (_S) return _S;
   if (game?.ready) {
     _S = _readAll();
-    _S.version = ++_VER;
-    _S.snapshotAt = Date.now();
     return _S;
   }
   return _readAll();
@@ -86,8 +80,6 @@ export function getGbFrameSettings() {
 /** Erzwingt Neuaufbau und Memoisierung. */
 export function buildSnapshot() {
   _S = _readAll();
-  _S.version = ++_VER;
-  _S.snapshotAt = Date.now();
   return _S;
 }
 
