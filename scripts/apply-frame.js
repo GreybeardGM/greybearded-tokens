@@ -1,5 +1,6 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
+import { getGbFrameSettings } from "./settings-snapshot.js";
 
 /* =========================
    Konsolidierter Namespace (mit Upgrade/Hydration)
@@ -156,11 +157,12 @@ function updateNameplate(token, S, tx, ty) {
 /* =========================
    Hauptfunktion
    ========================= */
-async function applyFrameToToken(token, S) {
+async function applyFrameToToken(token) {
   if (!token || token.destroyed) return;
   if (!token.scene?.active) return;
 
-  S = S || getGbFrameSettings();
+  // Settings laden
+  const S = getGbFrameSettings();
 
   // Einmalige Reads
   const tx = Math.abs(token?.document?.texture?.scaleX ?? 1);
@@ -274,12 +276,12 @@ function nextTick(fn){
   requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(fn,0)));
 }
 
-export async function updateFrame(token, S) {
+export async function updateFrame(token) {
   if (!token?._gb) token._gb = {};
   if (token._gb.frameScheduled) return;
   token._gb.frameScheduled = true;   // ✅ Reservation
   nextTick(async () => {
-  try { await applyFrameToToken(token, S); }
+  try { await applyFrameToToken(token); }
   finally { token._gb.frameScheduled = false; } // ✅ Flag NUR hier zurücksetzen
   });
 }
