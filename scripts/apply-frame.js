@@ -6,17 +6,18 @@ import { getGbFrameSettings } from "./settings-snapshot.js";
    Konsolidierter Namespace (schlank)
    ========================= */
 function ensureGbNS(token) {
-  if (!token._gb) token._gb = {
-    overlay: null,
-    f1: null,
-    f2: null,
-    maskSprite: null,
-    // Nameplate- und Tint-Deltas, nur um Änderungen zu erkennen
-    npPrev: { size: null, family: null, fill: null, anchored: false },
-    lastTint1: null,
-    lastTint2: null
-  };
-  return token._gb;
+  if (!token._gb) token._gb = { overlay: null, f1: null, f2: null, maskSprite: null, npPrev: { size:null, family:null, fill:null, anchored:false }, lastTint1: null, lastTint2: null };
+
+  const gb = token._gb;
+  if (!("overlay"   in gb)) gb.overlay = null;
+  if (!("f1"        in gb)) gb.f1 = null;
+  if (!("f2"        in gb)) gb.f2 = null;
+  if (!("maskSprite"in gb)) gb.maskSprite = null;
+  if (!("lastTint1" in gb)) gb.lastTint1 = null;
+  if (!("lastTint2" in gb)) gb.lastTint2 = null;
+  if (!gb.npPrev) gb.npPrev = { size:null, family:null, fill:null, anchored:false };
+
+  return gb;
 }
 
 /* =========================
