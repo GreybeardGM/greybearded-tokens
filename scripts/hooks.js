@@ -26,7 +26,7 @@ function sweepAllTokenFrames() {
       if (t._gb.frameScheduled) continue;
       t._gb.frameScheduled = true;
       //nextTick(async () => {
-        try { await applyFrameToToken(t, S); }
+        try { applyFrameToToken(t, S); }
         finally { t._gb.frameScheduled = false; }
       //});
     }
@@ -41,7 +41,7 @@ export function registerRenderingHooks() {
     t._gb.frameScheduled = true;   // ✅ echte Reservation
     const S = getGbFrameSettings();
     //nextTick(async () => {
-      try { await applyFrameToToken(t, S); }
+      try { applyFrameToToken(t, S); }
       finally { t._gb.frameScheduled = false; } // ✅ Flag NUR hier zurücksetzen
     //});
   });
