@@ -46,10 +46,7 @@ function onceValid(tex) {
 async function waitForMeshReady(token) {
   const mesh = token?.mesh;
   if (!mesh) return;
-  // Quelle bereit?
   await onceValid(mesh.texture);
-  // Einen Tick für korrekte Bounds/WorldTransform
-  await new Promise((r) => requestAnimationFrame(r));
 }
 
 /* =========================
@@ -130,30 +127,22 @@ async function attachMaskIfNeeded(token, S) {
   // Quelle stabilisieren
   await waitForMeshReady(token);
 
-  // Masken-Textur laden
-  const tex = PIXI.Texture.from(M.path);
-  if (!tex.valid) await onceValid(tex);
+  // Masken-Textur laden & valid
+  const mTex = PIXI.Texture.from(M.path);
+  if (!mTex.valid) await onceValid(mTex);
+  const maskSprite = new PIXI.Sprite(mTex);
 
-  // Masken-Sprite vorbereiten (sichtbar/renderbar lassen!)
-  const maskSprite = new PIXI.Sprite(tex);
-  maskSprite.name = "gb-mask-sprite";
-  // Wichtig: NICHT visible=false / renderable=false setzen
-  // NICHT alpha=0 setzen, NICHT in unsichtbaren Holder packen
-
-  // In denselben Parent wie das Mesh hängen
+  // In denselben Parent wie mesh einhängen
   const parent = mesh.parent ?? token;
   parent.addChild(maskSprite);
 
-  // Auf Token-Bounds zentrieren
+  // Größe/Position sofort setzen
   const w = mesh.width, h = mesh.height;
   if (maskSprite.anchor?.set) maskSprite.anchor.set(0.5);
   maskSprite.position.set(mesh.x ?? 0, mesh.y ?? 0);
-  maskSprite.width  = w;
-  maskSprite.height = h;
+  maskSprite.width = w; maskSprite.height = h;
 
-  // WICHTIG: KEIN await/rAF hier dazwischen!
-  // Direkt im selben Tick die Maske aktivieren,
-  // so hat die Sprite keine Chance, einmal "als Inhalt" zu zeichnen.
+  // Im selben Tick aktivieren – kein sichtbarer Frame als Inhalt
   mesh.mask = maskSprite;
 
   gb.maskSprite = maskSprite;
@@ -183,8 +172,9 @@ export async function applyFrameToToken(token) {
   // Primärer Frame
   let frame1 = gb.f1;
   if (!frame1 && F1?.enabled && F1?.path) {
-    frame1 = new PIXI.Sprite(PIXI.Texture.from(F1.path));
-    if (!frame1.texture.valid) await onceValid(frame1.texture);
+    const t1 = PIXI.Texture.from(F1.path);
+    if (!t1.valid) await onceValid(t1);
+    frame1 = new PIXI.Sprite(t1);
     frame1.name = "gb-frame-1";
     overlay.addChild(frame1);
     gb.f1 = frame1;
@@ -192,8 +182,9 @@ export async function applyFrameToToken(token) {
   // Sekundärer Frame
   let frame2 = gb.f2;
   if (!frame2 && F2?.enabled && F2?.path) {
-    frame2 = new PIXI.Sprite(PIXI.Texture.from(F2.path));
-    if (!frame2.texture.valid) await onceValid(frame2.texture);
+    const t2 = PIXI.Texture.from(F2.path);
+    if (!t2.valid) await onceValid(t2);
+    frame2 = new PIXI.Sprite(t2);
     frame2.name = "gb-frame-2";
     overlay.addChild(frame2);
     gb.f2 = frame2;
@@ -236,17 +227,6 @@ export async function applyFrameToToken(token) {
 
   // Maske zuletzt und einmalig anlegen
   await attachMaskIfNeeded(token, S);
-
-  console.debug("GB overlay check", {
-    parentSortable: (overlay.parent?.sortableChildren ?? false),
-    meshZ: mesh.zIndex, overlayZ: overlay.zIndex,
-    overlayAlpha: overlay.alpha,
-    overlayMasked: !!overlay.mask,
-    overlayFilters: overlay.filters?.length ?? 0,
-    f1ParentIsOverlay: gb.f1?.parent === overlay,
-    f2ParentIsOverlay: gb.f2?.parent === overlay
-  });
-
 }
 
 /* =========================
