@@ -74,14 +74,13 @@ async function attachMaskIfNeeded(token, S) {
 
    
   const gb = ensureGbNS(token);
+  // Early return paths
+  if (gb.maskApplied) return;
+  gb.maskApplied = true;
   const M = S?.mask;
   if (!M?.enabled || !M?.path) return;
-  if (gb.maskApplied) return; // bereits gesetzt
-
   const mesh = token?.mesh;
   if (!mesh) return;
-
-  // Textur laden
   const tex = await loadMaskOnce(M.path);
   if (!tex) return;
 
@@ -113,7 +112,6 @@ async function attachMaskIfNeeded(token, S) {
 
   console.debug('GB.MASK bound', token.id, { isMask: maskSprite.isMask, meshHasMask: !!mesh.mask });
    
-  gb.maskApplied = true;
   gb.maskSprite  = maskSprite;
   gb.maskTarget  = mesh;
 }
