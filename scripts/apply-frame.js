@@ -3,27 +3,27 @@ import { getTintColor } from "./get-tint-color.js";
 import { getGbFrameSettings } from "./settings-snapshot.js";
 
 /* =========================
-   Konsolidierter Namespace (schlank)
+   Konsolidierter Namespace (mit Upgrade/Hydration)
    ========================= */
 function ensureGbNS(token) {
-  if (!token._gb) token._gb = { overlay: null, f1: null, f2: null, maskSprite: null, npPrev: { size:null, family:null, fill:null, anchored:false }, lastTint1: null, lastTint2: null };
-
+  if (typeof token._gb !== "object" || token._gb === null) token._gb = {};
   const gb = token._gb;
-  if (!("overlay"   in gb)) gb.overlay = null;
-  if (!("f1"        in gb)) gb.f1 = null;
-  if (!("f2"        in gb)) gb.f2 = null;
-  if (!("maskSprite"in gb)) gb.maskSprite = null;
-  if (!("lastTint1" in gb)) gb.lastTint1 = null;
-  if (!("lastTint2" in gb)) gb.lastTint2 = null;
-  if (!gb.npPrev) gb.npPrev = { size:null, family:null, fill:null, anchored:false };
+
+  if (!("overlay"    in gb)) gb.overlay = null;
+  if (!("f1"         in gb)) gb.f1 = null;
+  if (!("f2"         in gb)) gb.f2 = null;
+  if (!("maskSprite" in gb)) gb.maskSprite = null;
+  if (!("lastTint1"  in gb)) gb.lastTint1 = null;
+  if (!("lastTint2"  in gb)) gb.lastTint2 = null;
+  if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
 
   return gb;
 }
 
 /* =========================
-   Masken-Helfer (vereinfacht)
+   Masken-Helfer (V13-pur)
    ========================= */
-const MASK_TEX_CACHE = new Map(); // bewusst ohne Eviction; optional später
+const MASK_TEX_CACHE = new Map();
 
 async function loadMaskOnce(url) {
   if (!url) return null;
@@ -59,25 +59,29 @@ async function attachMaskIfNeeded(token, S) {
   const tex = await loadMaskOnce(M.path);
   if (!tex) return;
 
-  // Maske als Sprite im lokalen Space des Meshes
+  // Maske im lokalen Space des Meshes
   const maskSprite = new PIXI.Sprite(tex);
   maskSprite.name = "gbt-mask";
-  maskSprite.renderable = false; // nur als Maske
+  maskSprite.renderable = false;
   maskSprite.anchor?.set?.(0.5, 0.5);
   maskSprite.position.set(0, 0);
+  maskSprite.rotation = 0;
 
-  // Skalierung einmalig anhand Tokenmaß (konsistenter Maßstab)
-  const kW = token.w || 1;
-  const kH = token.h || 1;
-  const tx = Math.abs(token?.document?.texture?.scaleX ?? 1);
-  const ty = Math.abs(token?.document?.texture?.scaleY ?? 1);
+  mesh.addChild(maskSprite);
+
+  // Skalierung EINMALIG anhand der LocalBounds des Meshes
+  const b = mesh.getLocalBounds?.();
+  if (!b || !isFinite(b.width) || !isFinite(b.height) || b.width <= 0 || b.height <= 0) {
+    maskSprite.parent?.removeChild(maskSprite);
+    maskSprite.destroy({ children: false, texture: false, baseTexture: false });
+    return;
+  }
 
   const texW = maskSprite.texture.width  || maskSprite.texture.baseTexture?.realWidth  || 1;
   const texH = maskSprite.texture.height || maskSprite.texture.baseTexture?.realHeight || 1;
 
-  maskSprite.scale.set((kW * tx) / texW, (kH * ty) / texH);
+  maskSprite.scale.set(b.width / texW, b.height / texH);
 
-  mesh.addChild(maskSprite);
   mesh.mask = maskSprite;
   gb.maskSprite = maskSprite;
 }
@@ -96,19 +100,15 @@ function removeGbFramesIfAny(token) {
   gb.f2 = null;
 }
 
-function upsertOverlayOnMesh(token) {
+function upsertOverlayOnToken(token) {
   const gb = ensureGbNS(token);
   if (gb.overlay) return gb.overlay;
 
-  // Overlay direkt an den Mesh hängen -> keine Spiegelung von Scale/Rotation nötig
-  const mesh = token.mesh;
-  if (!mesh) return null;
-
+  // Overlay am TOKEN, nicht am Mesh (Masken-Isolation)
   const overlay = new PIXI.Container();
   overlay.name = "gb-overlay";
-  overlay.sortableChildren = false; // wir relyen auf Einfügereihenfolge
-  overlay.position.set(0, 0);
-  mesh.addChild(overlay);
+  overlay.sortableChildren = false; // Reihenfolge statt Sorting
+  token.addChild(overlay);
 
   gb.overlay = overlay;
   return overlay;
@@ -137,15 +137,14 @@ function updateNameplate(token, S, tx, ty) {
     fontPx = Math.max(8, Math.round(basePx * sizeFactor * textureScale));
   }
 
-  // Anker nur einmal setzen
   if (!gb.npPrev.anchored && label.anchor?.set) {
     label.anchor.set(0.5, 0);
     gb.npPrev.anchored = true;
   }
 
-  // Änderungen erkennen
   const nextFamily = NP.fontFamily || label.style.fontFamily;
   const nextFill   = getTintColor(token, S, NP) ?? label.style.fill;
+
   const sizeChanged   = gb.npPrev.size   !== fontPx;
   const familyChanged = gb.npPrev.family !== nextFamily;
   const fillChanged   = gb.npPrev.fill   !== nextFill;
@@ -154,7 +153,6 @@ function updateNameplate(token, S, tx, ty) {
   if (familyChanged) label.style.fontFamily = nextFamily;
   if (fillChanged)   label.style.fill = nextFill;
 
-  // Position (Formel bleibt unverändert)
   const padding = Math.max(2, Math.round(fontPx * 0.10));
   label.y = (token.h * (1 + ty) / 2) + padding;
 
@@ -170,19 +168,19 @@ function updateNameplate(token, S, tx, ty) {
    Hauptfunktion
    ========================= */
 export async function applyFrameToToken(token, S) {
-  // Gebündelte Guards
   if (!token || token.destroyed) return;
   if (!token.scene?.active) return;
 
   S = S || getGbFrameSettings();
 
+  // Einmalige Reads
   const tx = Math.abs(token?.document?.texture?.scaleX ?? 1);
   const ty = Math.abs(token?.document?.texture?.scaleY ?? 1);
 
   // 1) Nameplate zuerst
   updateNameplate(token, S, tx, ty);
 
-  // 2) Disable-Flag: Frames & Maske vollständig aufräumen
+  // 2) Disable-Flag: Frames & Maske aufräumen
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) {
     removeGbFramesIfAny(token);
     const gb = ensureGbNS(token);
@@ -190,18 +188,23 @@ export async function applyFrameToToken(token, S) {
     return;
   }
 
-  // 3) Frames auf Overlay (am Mesh) ohne Sorting/Spiegelung
+  // 3) Overlay am TOKEN, Mesh-Eigenschaften spiegeln
   const mesh = token.mesh;
   if (!mesh) return;
 
   const gb = ensureGbNS(token);
-  const overlay = upsertOverlayOnMesh(token);
+  const overlay = upsertOverlayOnToken(token);
   if (!overlay) return;
+
+  // Overlay relativ mittig platzieren und Transformationspfad spiegeln
+  overlay.position.set(token.w / 2, token.h / 2);
+  overlay.scale.copyFrom(mesh.scale);
+  overlay.rotation = mesh.rotation;
 
   const F1 = S.frame1;
   const F2 = S.frame2;
 
-  // Sekundärer Frame zuerst anhängen (liegt unter dem primären)
+  // Sekundär zuerst (liegt unten)
   if (F2?.enabled && F2?.path) {
     if (!gb.f2) {
       const tex2 = PIXI.Texture.from(F2.path);
@@ -209,9 +212,9 @@ export async function applyFrameToToken(token, S) {
       spr2.name = "gb-frame-2";
       spr2._gbFrameSecondary = true;
       spr2.anchor.set(0.5);
-      overlay.addChild(spr2); // zuerst -> unten
+      overlay.addChild(spr2);
       gb.f2 = spr2;
-      gb.lastTint2 = null; // Tint-Delta reset
+      gb.lastTint2 = null;
     }
   } else if (gb.f2) {
     gb.f2.parent?.removeChild(gb.f2);
@@ -220,6 +223,7 @@ export async function applyFrameToToken(token, S) {
     gb.lastTint2 = null;
   }
 
+  // Primär oben
   if (F1?.path) {
     if (!gb.f1) {
       const tex1 = PIXI.Texture.from(F1.path);
@@ -227,21 +231,18 @@ export async function applyFrameToToken(token, S) {
       spr1.name = "gb-frame-1";
       spr1._gbFramePrimary = true;
       spr1.anchor.set(0.5);
-      overlay.addChild(spr1); // nach F2 -> oben
+      overlay.addChild(spr1);
       gb.f1 = spr1;
       gb.lastTint1 = null;
     }
-  } else {
-    // Kein F1 konfiguriert -> ggf. entfernen
-    if (gb.f1) {
-      gb.f1.parent?.removeChild(gb.f1);
-      gb.f1.destroy({ children: true, texture: false, baseTexture: false });
-      gb.f1 = null;
-      gb.lastTint1 = null;
-    }
+  } else if (gb.f1) {
+    gb.f1.parent?.removeChild(gb.f1);
+    gb.f1.destroy({ children: true, texture: false, baseTexture: false });
+    gb.f1 = null;
+    gb.lastTint1 = null;
   }
 
-  // Tints nur setzen, wenn sie sich geändert haben
+  // Tints nur bei Änderung
   if (gb.f1 && F1) {
     const t1str = getTintColor(token, S, F1);
     const t1 = (t1str != null) ? PIXI.utils.string2hex(t1str) : 0xFFFFFF;
@@ -259,19 +260,21 @@ export async function applyFrameToToken(token, S) {
     }
   }
 
-  // Einheitliche Größenlogik (kein Gegenrechnen von mesh.scale nötig)
+  // Größenlogik mit Gegenrechnen der Overlay-Skalierung (wie zuvor)
   const kW = token.w, kH = token.h;
+  const sx = overlay.scale.x || 1, sy = overlay.scale.y || 1;
+
   if (gb.f1 && F1) {
-    gb.f1.width  = kW * tx * (F1.scale || 1);
-    gb.f1.height = kH * ty * (F1.scale || 1);
+    gb.f1.width  = (kW * tx * (F1.scale || 1)) / sx;
+    gb.f1.height = (kH * ty * (F1.scale || 1)) / sy;
     gb.f1.position.set(0, 0);
   }
   if (gb.f2 && F2) {
-    gb.f2.width  = kW * tx * (F2.scale || 1);
-    gb.f2.height = kH * ty * (F2.scale || 1);
+    gb.f2.width  = (kW * tx * (F2.scale || 1)) / sx;
+    gb.f2.height = (kH * ty * (F2.scale || 1)) / sy;
     gb.f2.position.set(0, 0);
   }
 
-  // 4) Maske einmalig anlegen (blockierend beibehalten)
+  // 4) Maske einmalig am Mesh (blockierend beibehalten)
   await attachMaskIfNeeded(token, S);
 }
