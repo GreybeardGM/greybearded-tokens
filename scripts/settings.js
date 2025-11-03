@@ -1,7 +1,7 @@
 // settings.js
 import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_COLORS } from "./constants.js";
 import { buildSnapshot } from "./settings-snapshot.js";
-import { applyFrameToToken } from "./apply-frame.js";
+import { updateFrame } from "./apply-frame.js";
 
 async function preloadFrameTextures(S) {
   const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
@@ -15,9 +15,7 @@ async function preloadFrameTextures(S) {
 }
 
 function sweepAllTokenFrames(S) {
-  nextTick(() => {
-    for (const t of canvas.tokens.placeables) applyFrameToToken(t, S);
-  });
+  for (const t of canvas.tokens.placeables) updateFrame(t, S);
 }
 
 function requestReload() {
