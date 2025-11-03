@@ -67,12 +67,6 @@ function clearMaskInline(token) {
 }
 
 async function attachMaskIfNeeded(token, S) {
-   
-   console.debug('GB.MASK begin', token.id, { hasMeshMask: !!token.mesh.mask });
-   console.debug('GB.MASK children pre', token.id, token.mesh.parent.children.filter(c => c.name==='gbt-mask').length);
-   console.debug('GB.MASK gbRef pre', !!token._gb?.maskSprite);
-
-   
   const gb = ensureGbNS(token);
   // Early return paths
   if (gb.maskApplied) return;
@@ -109,9 +103,6 @@ async function attachMaskIfNeeded(token, S) {
   maskSprite.scale.set(b.width / texW, b.height / texH);
 
   mesh.mask = maskSprite;
-
-  console.debug('GB.MASK bound', token.id, { isMask: maskSprite.isMask, meshHasMask: !!mesh.mask });
-   
   gb.maskSprite  = maskSprite;
   gb.maskTarget  = mesh;
 }
