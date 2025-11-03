@@ -1,5 +1,5 @@
 // modules/greybearded-tokens/scripts/token-tools.js
-// Zwei Größen-Buttons + drittes Tool: disableFrame-Flag per ausgewähltem Token toggeln (GM-only).
+import { updateFrame } from "./apply-frame.js";
 
 Hooks.on('getSceneControlButtons', (controls) => {
   const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
@@ -31,6 +31,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
       const next = !cur;
       // setFlag statt unsetFlag für deterministisches Verhalten
       await td.setFlag('greybearded-tokens', 'disableFrame', next);
+      updateFrame(td);
     }));
   };
 
