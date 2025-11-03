@@ -2,6 +2,21 @@
 import { getTintColor } from "./get-tint-color.js";
 import { getGbFrameSettings } from "./settings-snapshot.js";
 
+function setupFrameSprite(sprite, w, h, cx, cy, z, tint) {
+  if (sprite.anchor?.set) sprite.anchor.set(0.5);
+  sprite.position.set(cx, cy);
+  sprite.width = w;
+  sprite.height = h;
+
+  sprite.zIndex = z;
+  sprite.alpha = 1.0;
+  sprite.tint = (tint ?? 0xFFFFFF) >>> 0;
+  sprite.blendMode = PIXI.BLEND_MODES.NORMAL;
+  sprite.mask = null;
+  sprite.filters = null;
+  sprite.cacheAsBitmap = false;
+}
+
 /* =========================
    Interner Namespace je Token
    ========================= */
@@ -42,18 +57,37 @@ async function waitForMeshReady(token) {
    ========================= */
 function ensureOverlay(token) {
   const gb = ensureGbNS(token);
-  if (gb.overlay && gb.overlay.parent) return gb.overlay;
-
-  const mesh = token.mesh;
+  const mesh = token?.mesh;
   if (!mesh) return null;
+
+  // Parent ist das Container-Element, das auch das Mesh hält
+  const parent = mesh.parent ?? token;
+  // Wichtig: Parent sortiert nach zIndex
+  parent.sortableChildren = true;
+
+  if (gb.overlay && gb.overlay.parent === parent) return gb.overlay;
+
+  // ggf. altes Overlay sauber entsorgen
+  if (gb.overlay?.parent) {
+    try { gb.overlay.destroy({ children: true }); } catch {}
+  }
 
   const overlay = new PIXI.Container();
   overlay.name = "gb-overlay";
   overlay.sortableChildren = true;
 
-  // Unter dem Token-Mesh anhängen, aber ÜBER dem Artwork zeichnen
-  // In Foundry VTT V13 hängt das Mesh selbst bereits im Token Container:
-  (mesh.parent ?? token).addChild(overlay);
+  // Overlay als GESCHWISTER vom Mesh einhängen (nicht in mesh!)
+  parent.addChild(overlay);
+
+  // Overlay deutlich über das Mesh heben
+  overlay.zIndex = (mesh.zIndex ?? 0) + 10;
+
+  // Sicherheitsnetze
+  overlay.alpha = 1.0;
+  overlay.mask = null;
+  overlay.filters = null;
+  overlay.cacheAsBitmap = false;
+  overlay.eventMode = "none"; // kein HitTest
 
   gb.overlay = overlay;
   return overlay;
@@ -93,6 +127,13 @@ async function attachMaskIfNeeded(token, S) {
   const mesh = token?.mesh;
   if (!mesh) return;
 
+  const parent = mesh.parent ?? token;
+  // WICHTIG: Overlay darf nicht unter mesh hängen
+  if (gb.overlay?.parent === mesh) {
+    parent.addChild(gb.overlay);
+    gb.overlay.zIndex = (mesh.zIndex ?? 0) + 10;
+  }
+   
   // Quelle stabilisieren
   await waitForMeshReady(token);
 
@@ -175,34 +216,30 @@ export async function applyFrameToToken(token) {
     gb.f2 = frame2 = null;
   }
 
-  // Maße des Token-Mesh als Referenz
-  const w = mesh.width;
-  const h = mesh.height;
-
   // Disposition-/Custom-Tint
   const tint1 = F1?.tint ?? getTintColor?.(token, "primary");
   const tint2 = F2?.tint ?? getTintColor?.(token, "secondary");
 
-  // Frames positionieren (zentriert) und skalieren
-  if (frame2) {
-    frame2.anchor?.set?.(0.5);
-    frame2.position.set(mesh.x ?? 0, mesh.y ?? 0);
-    frame2.width  = w * (F2.scale ?? 1);
-    frame2.height = h * (F2.scale ?? 1);
-    frame2.tint = tint2 ?? 0xFFFFFF;
-    frame2.zIndex = 0;
-  }
+   // Frames positionieren (zentriert) und skalieren
+   const w = mesh.width;
+   const h = mesh.height;
+   const cx = mesh.x ?? 0;
+   const cy = mesh.y ?? 0;
+   
+   // sekundär zuerst, dann primär, damit primär "oben" liegt
+   if (frame2) {
+      const scale2 = F2?.scale ?? 1;
+      setupFrameSprite(frame2, w*scale2, h*scale2, cx, cy, 1, (F2?.tint));
+      overlay.addChild(frame2); // sicherstellen, dass Parent Overlay ist
+   }
+   
+   if (frame1) {
+      const scale1 = F1?.scale ?? 1;
+      setupFrameSprite(frame1, w*scale1, h*scale1, cx, cy, 2, (F1?.tint));
+      overlay.addChild(frame1);
+   }
 
-  if (frame1) {
-    frame1.anchor?.set?.(0.5);
-    frame1.position.set(mesh.x ?? 0, mesh.y ?? 0);
-    frame1.width  = w * (F1.scale ?? 1);
-    frame1.height = h * (F1.scale ?? 1);
-    frame1.tint = tint1 ?? 0xFFFFFF;
-    frame1.zIndex = 1;
-  }
-
-  overlay.sortDirty = true;
+   overlay.sortDirty = true;
 
   // Maske zuletzt und einmalig anlegen
   await attachMaskIfNeeded(token, S);
