@@ -25,10 +25,10 @@ function sweepAllTokenFrames() {
       if (!t._gb) t._gb = {};
       if (t._gb.frameScheduled) continue;
       t._gb.frameScheduled = true;
-      nextTick(async () => {
+      //nextTick(async () => {
         try { await applyFrameToToken(t, S); }
         finally { t._gb.frameScheduled = false; }
-      });
+      //});
     }
   });
 }
@@ -40,10 +40,10 @@ export function registerRenderingHooks() {
     if (t._gb.frameScheduled) return;
     t._gb.frameScheduled = true;   // ✅ echte Reservation
     const S = getGbFrameSettings();
-    nextTick(async () => {
+    //nextTick(async () => {
       try { await applyFrameToToken(t, S); }
       finally { t._gb.frameScheduled = false; } // ✅ Flag NUR hier zurücksetzen
-    });
+    //});
   });
 
   Hooks.on("updateUser", (user, change) => {
