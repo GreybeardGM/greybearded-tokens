@@ -243,6 +243,17 @@ export async function applyFrameToToken(token) {
 
   // Maske zuletzt und einmalig anlegen
   await attachMaskIfNeeded(token, S);
+
+  console.debug("GB overlay check", {
+    parentSortable: (overlay.parent?.sortableChildren ?? false),
+    meshZ: mesh.zIndex, overlayZ: overlay.zIndex,
+    overlayAlpha: overlay.alpha,
+    overlayMasked: !!overlay.mask,
+    overlayFilters: overlay.filters?.length ?? 0,
+    f1ParentIsOverlay: gb.f1?.parent === overlay,
+    f2ParentIsOverlay: gb.f2?.parent === overlay
+  });
+
 }
 
 /* =========================
