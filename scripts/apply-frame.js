@@ -70,7 +70,6 @@ async function attachMaskIfNeeded(token, S) {
   const gb = ensureGbNS(token);
   // Early return paths
   if (gb.maskApplied) return;
-  gb.maskApplied = true;
   const M = S?.mask;
   if (!M?.enabled || !M?.path) return;
   const mesh = token?.mesh;
@@ -105,6 +104,7 @@ async function attachMaskIfNeeded(token, S) {
   mesh.mask = maskSprite;
   gb.maskSprite  = maskSprite;
   gb.maskTarget  = mesh;
+  gb.maskApplied = true;
 }
 
 /* =========================
