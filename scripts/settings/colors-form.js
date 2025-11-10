@@ -18,17 +18,16 @@ export class ColorsForm extends HbsApp {
     tag: "form"
   };
 
-  static PARTS = {
-    body: {
-      template: "modules/greybearded-tokens/templates/colors-form.hbs",
-      getData: async () => {
-        const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
-        return {
-          rows: ROLES.map((r) => ({ role: r, value: cur?.[r] ?? DEFAULT_COLORS[r] ?? "#000000" }))
-        };
-      }
-    }
-  };
+  // Einfach: ein Template, Daten aus getData()
+  get template() {
+    return "modules/greybearded-tokens/templates/colors-form.hbs";
+  }
+  async getData() {
+    const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
+    return {
+      rows: ROLES.map((r) => ({ role: r, value: cur?.[r] ?? DEFAULT_COLORS[r] ?? "#000000" }))
+    };
+  }
 
   /** DOM-Events verdrahten */
   activateListeners(html) {
