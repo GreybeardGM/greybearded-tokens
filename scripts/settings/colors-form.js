@@ -1,16 +1,15 @@
 // settings/colors-form.js
-const { ApplicationV2: AppV2, HandlebarsApplicationMixin: HBM, FormApplicationMixin: FM } =
-  foundry.applications.api;
+const AppV2 = (globalThis.ApplicationV2 ?? foundry.applications.api.ApplicationV2);
+const Hbm    = foundry.applications.api.HandlebarsApplicationMixin;
 
 import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
 import { buildSnapshot } from "../settings-snapshot.js";
 import { updateFrame } from "../apply-frame.js";
 
 const ROLES = ["hostile", "neutral", "friendly", "secret", "character"];
-const HEX = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
+const HEX   = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
 
-// Mixin-Kette wie in der Community-Doku
-export class ColorsForm extends FM(HBM(AppV2)) {
+export class ColorsForm extends Hbm(AppV2) {
   static DEFAULT_OPTIONS = {
     id: "gb-colors-form",
     window: { title: "Greybearded Tokens — Colors", icon: "fas fa-palette" },
@@ -19,16 +18,17 @@ export class ColorsForm extends FM(HBM(AppV2)) {
     tag: "form"
   };
 
+  // HandlebarsApplicationMixin rendert über PARTS
   static PARTS = {
     body: {
       template: "modules/greybearded-tokens/templates/colors-form.hbs",
-      // KORREKTE SIGNATUR: (app, part, options) → data
+      // Signatur: (app, part, options) => data
       getData: (_app, _part, _opts) => {
         let cur;
         try { cur = game.settings.get(MOD_ID, "colors"); } catch { cur = null; }
         const base = (cur && typeof cur === "object") ? cur : DEFAULT_COLORS;
 
-        const rows = ROLES.map(r => {
+        const rows = ROLES.map((r) => {
           const v = base?.[r];
           const val = (typeof v === "string" && HEX.test(v)) ? v : (DEFAULT_COLORS?.[r] ?? "#000000");
           return { role: r, value: val };
@@ -40,7 +40,7 @@ export class ColorsForm extends FM(HBM(AppV2)) {
   };
 
   activateListeners(root) {
-    // Text <-> Color sync
+    // Text <-> Color Sync
     for (const r of ROLES) {
       const txt = root.querySelector(`input[name="${r}-text"]`);
       const clr = root.querySelector(`input[name="${r}-color"]`);
