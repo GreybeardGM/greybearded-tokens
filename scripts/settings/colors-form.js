@@ -5,7 +5,7 @@ import { buildSnapshot } from "../settings-snapshot.js";
 const ROLES = ["hostile", "neutral", "friendly", "secret", "character"];
 const HEX = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
 
-export class ColorsForm extends ApplicationV2 {
+export class ColorsForm extends foundry.applications.api.ApplicationV2 {
   static DEFAULT_OPTIONS = {
     id: "gb-colors-form",
     window: { title: "Greybearded Tokens — Colors", icon: "fas fa-palette" },
