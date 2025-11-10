@@ -1,13 +1,13 @@
 // settings/colors-form.js
 import { invalidateGbFrameSettings } from "../settings-snapshot.js";
-import { Mod_ID, DEFAULT_COLORS } from "../constants.js";
+import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
 
 export class ColorsForm extends Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "gb-colors-form",
       title: "Colors",
-      template: null,   // kein eigenes Template – wir nutzen DialogV2
+      template: null,
       width: 480,
       popOut: false
     });
