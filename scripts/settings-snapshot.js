@@ -38,14 +38,15 @@ function _readAll() {
       path:     str(get("pathMask"), "modules/greybearded-tokens/assets/mask-round.png")
     },
 
-    // ── Farben (ohne 'default') ──────────────────────────────────────────────
-    colors: {
-      hostile:   str(get("color-hostile"),   DEFAULT_COLORS?.hostile   ?? "#993333"),
-      neutral:   str(get("color-neutral"),   DEFAULT_COLORS?.neutral   ?? "#B7A789"),
-      friendly:  str(get("color-friendly"),  DEFAULT_COLORS?.friendly  ?? "#5F7A8A"),
-      secret:    str(get("color-secret"),    DEFAULT_COLORS?.secret    ?? "#6B5E7A"),
-      character: str(get("color-character"), DEFAULT_COLORS?.character ?? "#7F7F7F")
-    },
+    // ── Colors (gruppiert) ──────────────────────────────────────────────────
+    colors: (() => {
+      try {
+        const v = game.settings.get(MOD_ID, "colors");
+        return (v && typeof v === "object") ? v : DEFAULT_COLORS;
+      } catch {
+        return DEFAULT_COLORS;
+      }
+    })()
 
     // ── Nameplates ───────────────────────────────────────────────────────────
     nameplate: {
