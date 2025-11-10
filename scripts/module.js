@@ -10,15 +10,7 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   buildSnapshot(); // Settings jetzt sicher
-  const mod = game.modules.get("greybearded-tokens");
-  mod.api = {
-    applyFrameToToken,
-    applyMaskToToken,
-    clearMask,
-    buildSnapshot,
-    getGbFrameSettings
-  };
-  console.log("GBT api ready:", Object.keys(mod.api));
+  console.log("GBT ready");
 });
 
 Hooks.on("canvasReady", () => {
