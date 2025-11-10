@@ -38,16 +38,6 @@ function _readAll() {
       path:     str(get("pathMask"), "modules/greybearded-tokens/assets/mask-round.png")
     },
 
-    // ── Colors (gruppiert) ──────────────────────────────────────────────────
-    colors: (() => {
-      try {
-        const v = game.settings.get(MOD_ID, "colors");
-        return (v && typeof v === "object") ? v : DEFAULT_COLORS;
-      } catch {
-        return DEFAULT_COLORS;
-      }
-    })()
-
     // ── Nameplates ───────────────────────────────────────────────────────────
     nameplate: {
       enabled:        bool(get("nameplateEnabled")),
@@ -59,6 +49,16 @@ function _readAll() {
       scaleWithToken: bool(get("nameplateScaleWithToken"))
     },
 
+    // ── Colors (gruppiert) ──────────────────────────────────────────────────
+    colors: (() => {
+      try {
+        const v = game.settings.get(MOD_ID, "colors");
+        return (v && typeof v === "object") ? v : DEFAULT_COLORS;
+      } catch {
+        return DEFAULT_COLORS;
+      }
+    })()
+  
   };
 
   return snap;
