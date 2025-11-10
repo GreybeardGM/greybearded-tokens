@@ -240,18 +240,22 @@ export function registerSettings() {
   });
 
   // ── Disposition-Farben ──────────────────────────────────────────────────────
-  for (const [label, def] of Object.entries(DEFAULT_COLORS)) {
-    const key = "color-" + label;
-    game.settings.register(MOD_ID, key, {
-      name: `Farbe für ${label}`,
-      hint: `Rahmenfarbe für ${label === "character" ? "Spielercharaktere" : `Disposition: ${label}`}`,
-      scope: "world",
-      config: true,
-      type: String,
-      default: def
-    });
-  }
-
+  game.settings.register(MOD_ID, "colors", {
+    name: "Grouped Colors",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: DEFAULT_COLORS
+  });
+  
+  game.settings.registerMenu(MOD_ID, "colorsMenu", {
+    name: "Colors",
+    label: "Configure Colors",
+    icon: "fas fa-palette",
+    type: ColorsForm,   // Klasse kommt später
+    restricted: true
+  });
+  
   console.log("✅⭕ Greybearded Token Frames: Settings registered.");
 }
 
