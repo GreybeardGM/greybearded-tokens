@@ -1,71 +1,71 @@
-// scripts/settings/colors-form.js
+// settings/colors-form.js
+const AppV2 = globalThis.ApplicationV2 ?? foundry.applications.api.ApplicationV2;
+const HbsApp = foundry.applications.api.HandlebarsApplicationMixin(AppV2);
+
 import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
 import { buildSnapshot } from "../settings-snapshot.js";
+import { updateFrame } from "../apply-frame.js";
 
 const ROLES = ["hostile", "neutral", "friendly", "secret", "character"];
 const HEX = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
 
-export class ColorsForm extends foundry.applications.api.ApplicationV2 {
+export class ColorsForm extends HbsApp {
   static DEFAULT_OPTIONS = {
     id: "gb-colors-form",
     window: { title: "Greybearded Tokens — Colors", icon: "fas fa-palette" },
-    tag: "form",
     classes: ["gb-colors-form"],
-    position: { width: 520 }
+    position: { width: 520 },
+    tag: "form"
   };
 
-  /** Template mit Text+Color pro Rolle */
-  get template() {
-    return "modules/greybearded-tokens/templates/colors-form.hbs";
-  }
+  static PARTS = {
+    body: {
+      template: "modules/greybearded-tokens/templates/colors-form.hbs",
+      getData: async () => {
+        const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
+        return {
+          rows: ROLES.map((r) => ({ role: r, value: cur?.[r] ?? DEFAULT_COLORS[r] ?? "#000000" }))
+        };
+      }
+    }
+  };
 
-  /** Daten fürs Template */
-  async _prepareContext(_options) {
-    const current = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
-    const rows = ROLES.map((r) => {
-      const val = current?.[r] ?? DEFAULT_COLORS[r] ?? "#000000";
-      return { role: r, value: val };
-    });
-    return { rows };
-  }
-
-  /** Event-Handler */
-  _onRender(_context, _options) {
-    // Text und Color gegenseitig synchron halten
+  /** DOM-Events verdrahten */
+  activateListeners(html) {
+    // Text & Color gegenseitig synchron halten
     for (const r of ROLES) {
-      const txt = this.element.querySelector(`input[name="${r}-text"]`);
-      const clr = this.element.querySelector(`input[name="${r}-color"]`);
+      const txt = html.querySelector(`input[name="${r}-text"]`);
+      const clr = html.querySelector(`input[name="${r}-color"]`);
       if (!txt || !clr) continue;
-
-      txt.addEventListener("input", () => {
-        if (HEX.test(txt.value)) clr.value = txt.value;
-      });
-      clr.addEventListener("input", () => {
-        if (HEX.test(clr.value)) txt.value = clr.value;
-      });
+      txt.addEventListener("input", () => { if (HEX.test(txt.value)) clr.value = txt.value; });
+      clr.addEventListener("input", () => { if (HEX.test(clr.value)) txt.value = clr.value; });
     }
 
-    // Save-Button
-    this.element.querySelector('button[type="submit"]')
-      ?.addEventListener("click", (ev) => this.#onSubmit(ev));
+    html.querySelector('[data-action="cancel"]')?.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      this.close();
+    });
+
+    html.querySelector('[data-action="save"]')?.addEventListener("click", (ev) => this.#onSave(ev));
   }
 
-  async #onSubmit(ev) {
+  async #onSave(ev) {
     ev.preventDefault();
-
+    const root = this.element;
     const next = {};
     for (const r of ROLES) {
-      const txt = this.element.querySelector(`input[name="${r}-text"]`)?.value?.trim();
-      const clr = this.element.querySelector(`input[name="${r}-color"]`)?.value?.trim();
-      next[r] = HEX.test(txt) ? txt
-              : HEX.test(clr) ? clr
-              : (DEFAULT_COLORS[r] ?? "#000000");
+      const t = root.querySelector(`input[name="${r}-text"]`)?.value?.trim();
+      const c = root.querySelector(`input[name="${r}-color"]`)?.value?.trim();
+      next[r] = HEX.test(t) ? t : (HEX.test(c) ? c : (DEFAULT_COLORS[r] ?? "#000000"));
     }
 
     await game.settings.set(MOD_ID, "colors", next);
 
     // Sofort anwenden
-    buildSnapshot();
+    const S = buildSnapshot();
+    if (canvas?.tokens?.placeables?.length) {
+      for (const t of canvas.tokens.placeables) updateFrame(t, S);
+    }
 
     this.close();
   }
