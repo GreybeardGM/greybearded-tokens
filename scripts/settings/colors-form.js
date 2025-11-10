@@ -1,5 +1,5 @@
 // settings.js — ColorsForm: DialogV2.input-Implementierung
-import { invalidateGbFrameSettings } from "./settings-snapshot.js"; // Pfad ggf. anpassen
+import { invalidateGbFrameSettings } from "../settings-snapshot.js"; // Pfad ggf. anpassen
 // MOD_ID und DEFAULT_COLORS importierst du bereits in deiner Datei
 
 export class ColorsForm extends Application {
