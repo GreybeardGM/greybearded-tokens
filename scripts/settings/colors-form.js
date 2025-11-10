@@ -1,77 +1,72 @@
-// settings/colors-form.js
-import { invalidateGbFrameSettings } from "../settings-snapshot.js";
+// modules/greybearded-tokens/settings/colors-form.js
 import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
+import { buildSnapshot } from "../settings-snapshot.js";
 
-export class ColorsForm extends Application {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "gb-colors-form",
-      title: "Colors",
-      template: null,
-      width: 480,
-      popOut: false
-    });
+const ROLES = ["hostile", "neutral", "friendly", "secret", "character"];
+const HEX = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
+
+export class ColorsForm extends ApplicationV2 {
+  static DEFAULT_OPTIONS = {
+    id: "gb-colors-form",
+    window: { title: "Greybearded Tokens — Colors", icon: "fas fa-palette" },
+    tag: "form",
+    classes: ["gb-colors-form"],
+    position: { width: 520 }
+  };
+
+  /** Template mit Text+Color pro Rolle */
+  get template() {
+    return "modules/greybearded-tokens/templates/colors-form.hbs";
   }
 
-  async render(force = false, options = {}) {
-    // Aktuellen Stand holen
-    const roles = ["hostile", "neutral", "friendly", "secret", "character"];
-    const current = (() => {
-      try { return game.settings.get(MOD_ID, "colors") || DEFAULT_COLORS; }
-      catch { return DEFAULT_COLORS; }
-    })();
-
-    // Felder: je Rolle Text + Color-Picker
-    const fields = [];
-    for (const r of roles) {
+  /** Daten fürs Template */
+  async _prepareContext(_options) {
+    const current = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
+    const rows = ROLES.map((r) => {
       const val = current?.[r] ?? DEFAULT_COLORS[r] ?? "#000000";
-      fields.push({
-        type: "text",
-        name: `${r}Text`,
-        label: r, // Label links
-        value: val,
-        required: true
-      });
-      fields.push({
-        type: "color",
-        name: `${r}Pick`,
-        label: "", // kein zweites Label in der Zeile
-        value: val
-      });
-    }
-
-    // Dialog anzeigen
-    const { form, button } = await DialogV2.input({
-      window: { title: "Greybearded Tokens — Colors" },
-      buttons: [
-        { label: "Cancel", action: "cancel" },
-        { label: "Save",   action: "save" }
-      ],
-      content: "", // keine zusätzliche Beschreibung
-      form: { fields }
+      return { role: r, value: val };
     });
+    return { rows };
+  }
 
-    if (button !== "save") return super.render(force, options);
+  /** Event-Handler */
+  _onRender(_context, _options) {
+    // Text und Color gegenseitig synchron halten
+    for (const r of ROLES) {
+      const txt = this.element.querySelector(`input[name="${r}-text"]`);
+      const clr = this.element.querySelector(`input[name="${r}-color"]`);
+      if (!txt || !clr) continue;
 
-    // Validierung und Zusammenführen
-    const isHex = (v) => typeof v === "string" && /^#([0-9a-f]{6}|[0-9a-f]{8})$/i.test(v);
+      txt.addEventListener("input", () => {
+        if (HEX.test(txt.value)) clr.value = txt.value;
+      });
+      clr.addEventListener("input", () => {
+        if (HEX.test(clr.value)) txt.value = clr.value;
+      });
+    }
+
+    // Save-Button
+    this.element.querySelector('button[type="submit"]')
+      ?.addEventListener("click", (ev) => this.#onSubmit(ev));
+  }
+
+  async #onSubmit(ev) {
+    ev.preventDefault();
+
     const next = {};
-    for (const r of roles) {
-      const t = form[`${r}Text`];
-      const c = form[`${r}Pick`];
-      next[r] = isHex(t) ? t : (isHex(c) ? c : (current?.[r] ?? DEFAULT_COLORS[r]));
+    for (const r of ROLES) {
+      const txt = this.element.querySelector(`input[name="${r}-text"]`)?.value?.trim();
+      const clr = this.element.querySelector(`input[name="${r}-color"]`)?.value?.trim();
+      next[r] = HEX.test(txt) ? txt
+              : HEX.test(clr) ? clr
+              : (DEFAULT_COLORS[r] ?? "#000000");
     }
 
-    // Schreiben + Snapshot invalidieren
     await game.settings.set(MOD_ID, "colors", next);
-    invalidateGbFrameSettings();
 
-    // Optional: sanfter Repaint, falls du dafür bereits eine Utility hast
-    // (Nicht zwingend – deine bestehende Hook-Kette auf Snapshot-Invalidierung reicht.)
-    if (globalThis.sweepAllTokenFrames instanceof Function) {
-      try { globalThis.sweepAllTokenFrames(); } catch (_) {}
-    }
+    // Sofort anwenden
+    buildSnapshot();
 
-    return super.render(force, options);
+    this.close();
   }
 }
