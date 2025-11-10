@@ -22,13 +22,23 @@ export class ColorsForm extends HbsApp {
   static PARTS = {
     body: {
       template: "modules/greybearded-tokens/templates/colors-form.hbs",
-      // getData MUSS hier definiert sein; KEIN globales getData benutzen
       getData: () => {
-        const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
-        // Fallback sichert 5 Zeilen, auch wenn Setting leer ist
-        return {
-          rows: ROLES.map((r) => ({ role: r, value: cur?.[r] ?? DEFAULT_COLORS[r] ?? "#000000" }))
-        };
+        let cur;
+        try {
+          cur = game.settings.get(MOD_ID, "colors");
+        } catch (_) {
+          cur = null;
+        }
+        // Harte Defaults, falls irgendwas fehlt/undefined ist
+        const base = (cur && typeof cur === "object") ? cur : DEFAULT_COLORS;
+        const rows = ROLES.map((r) => {
+          const v = base?.[r];
+          const val = (typeof v === "string" && /^#([0-9a-f]{6}|[0-9a-f]{8})$/i.test(v))
+            ? v
+            : (DEFAULT_COLORS?.[r] ?? "#000000");
+          return { role: r, value: val };
+        });
+        return { rows };
       }
     }
   };
