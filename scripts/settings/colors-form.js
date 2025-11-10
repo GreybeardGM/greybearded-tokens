@@ -18,34 +18,36 @@ export class ColorsForm extends HbsApp {
     tag: "form"
   };
 
-  // Einfach: ein Template, Daten aus getData()
-  get template() {
-    return "modules/greybearded-tokens/templates/colors-form.hbs";
-  }
-  async getData() {
-    const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
-    return {
-      rows: ROLES.map((r) => ({ role: r, value: cur?.[r] ?? DEFAULT_COLORS[r] ?? "#000000" }))
-    };
-  }
+  // HandlebarsApplicationMixin rendert ausschließlich über PARTS
+  static PARTS = {
+    body: {
+      template: "modules/greybearded-tokens/templates/colors-form.hbs",
+      // getData MUSS hier definiert sein; KEIN globales getData benutzen
+      getData: () => {
+        const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
+        // Fallback sichert 5 Zeilen, auch wenn Setting leer ist
+        return {
+          rows: ROLES.map((r) => ({ role: r, value: cur?.[r] ?? DEFAULT_COLORS[r] ?? "#000000" }))
+        };
+      }
+    }
+  };
 
-  /** DOM-Events verdrahten */
-  activateListeners(html) {
-    // Text & Color gegenseitig synchron halten
+  activateListeners(root) {
+    // Text <-> Color synchronisieren
     for (const r of ROLES) {
-      const txt = html.querySelector(`input[name="${r}-text"]`);
-      const clr = html.querySelector(`input[name="${r}-color"]`);
+      const txt = root.querySelector(`input[name="${r}-text"]`);
+      const clr = root.querySelector(`input[name="${r}-color"]`);
       if (!txt || !clr) continue;
       txt.addEventListener("input", () => { if (HEX.test(txt.value)) clr.value = txt.value; });
       clr.addEventListener("input", () => { if (HEX.test(clr.value)) txt.value = clr.value; });
     }
 
-    html.querySelector('[data-action="cancel"]')?.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      this.close();
+    // Buttons
+    root.querySelector('[data-action="cancel"]')?.addEventListener("click", (ev) => {
+      ev.preventDefault(); this.close();
     });
-
-    html.querySelector('[data-action="save"]')?.addEventListener("click", (ev) => this.#onSave(ev));
+    root.querySelector('[data-action="save"]')?.addEventListener("click", (ev) => this.#onSave(ev));
   }
 
   async #onSave(ev) {
@@ -60,7 +62,7 @@ export class ColorsForm extends HbsApp {
 
     await game.settings.set(MOD_ID, "colors", next);
 
-    // Sofort anwenden
+    // sofort anwenden
     const S = buildSnapshot();
     if (canvas?.tokens?.placeables?.length) {
       for (const t of canvas.tokens.placeables) updateFrame(t, S);
