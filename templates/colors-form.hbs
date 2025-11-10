@@ -1,0 +1,31 @@
+<form class="gb-colors p-2">
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th style="text-align:left; padding:4px 6px;">Role</th>
+        <th style="text-align:left; padding:4px 6px;">Hex</th>
+        <th style="text-align:left; padding:4px 6px;">Picker</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each rows as |row|}}
+      <tr>
+        <td style="padding:4px 6px; width:30%;">
+          <label for="{{row.role}}-text">{{row.role}}</label>
+        </td>
+        <td style="padding:4px 6px; width:45%;">
+          <input type="text" name="{{row.role}}-text" value="{{row.value}}" placeholder="#RRGGBB" />
+        </td>
+        <td style="padding:4px 6px; width:25%;">
+          <input type="color" name="{{row.role}}-color" value="{{row.value}}" />
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;">
+    <button type="button" class="dialog-button" data-action="cancel">Cancel</button>
+    <button type="submit" class="dialog-button" data-action="save">Save</button>
+  </div>
+</form>
