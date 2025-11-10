@@ -1,4 +1,4 @@
-// modules/greybearded-tokens/settings/colors-form.js
+// scripts/settings/colors-form.js
 import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
 import { buildSnapshot } from "../settings-snapshot.js";
 
