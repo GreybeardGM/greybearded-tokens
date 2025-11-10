@@ -1,7 +1,4 @@
-// settings/colors-form.js
-const AppV2 = (globalThis.ApplicationV2 ?? foundry.applications.api.ApplicationV2);
-const Hbm    = foundry.applications.api.HandlebarsApplicationMixin;
-
+// modules/greybearded-tokens/settings/colors-form.js
 import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
 import { buildSnapshot } from "../settings-snapshot.js";
 import { updateFrame } from "../apply-frame.js";
@@ -9,55 +6,41 @@ import { updateFrame } from "../apply-frame.js";
 const ROLES = ["hostile", "neutral", "friendly", "secret", "character"];
 const HEX   = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
 
-export class ColorsForm extends Hbm(AppV2) {
-  static DEFAULT_OPTIONS = {
-    id: "gb-colors-form",
-    window: { title: "Greybearded Tokens — Colors", icon: "fas fa-palette" },
-    classes: ["gb-colors-form"],
-    position: { width: 520 },
-    tag: "form"
-  };
-
-  // HandlebarsApplicationMixin rendert über PARTS
-  static PARTS = {
-    body: {
+export class ColorsForm extends FormApplication {
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "gb-colors-form",
+      title: "Greybearded Tokens — Colors",
       template: "modules/greybearded-tokens/templates/colors-form.hbs",
-      // Signatur: (app, part, options) => data
-      getData: (_app, _part, _opts) => {
-        let cur;
-        try { cur = game.settings.get(MOD_ID, "colors"); } catch { cur = null; }
-        const base = (cur && typeof cur === "object") ? cur : DEFAULT_COLORS;
+      classes: ["gb-colors-form"],
+      width: 520
+    });
+  }
 
-        const rows = ROLES.map((r) => {
-          const v = base?.[r];
-          const val = (typeof v === "string" && HEX.test(v)) ? v : (DEFAULT_COLORS?.[r] ?? "#000000");
-          return { role: r, value: val };
-        });
+  async getData() {
+    const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
+    const rows = ROLES.map(r => ({
+      role: r,
+      value: (typeof cur?.[r] === "string" && HEX.test(cur[r])) ? cur[r] : (DEFAULT_COLORS[r] ?? "#000000")
+    }));
+    return { rows };
+  }
 
-        return { rows };
-      }
-    }
-  };
-
-  activateListeners(root) {
-    // Text <-> Color Sync
+  activateListeners(html) {
+    super.activateListeners(html);
     for (const r of ROLES) {
-      const txt = root.querySelector(`input[name="${r}-text"]`);
-      const clr = root.querySelector(`input[name="${r}-color"]`);
+      const txt = html.find(`input[name="${r}-text"]`)[0];
+      const clr = html.find(`input[name="${r}-color"]`)[0];
       if (!txt || !clr) continue;
       txt.addEventListener("input", () => { if (HEX.test(txt.value)) clr.value = txt.value; });
       clr.addEventListener("input", () => { if (HEX.test(clr.value)) txt.value = clr.value; });
     }
-
-    root.querySelector('[data-action="cancel"]')?.addEventListener("click", (ev) => {
-      ev.preventDefault(); this.close();
-    });
-    root.querySelector('[data-action="save"]')?.addEventListener("click", (ev) => this.#onSave(ev));
+    html.find('[data-action="cancel"]').on("click", ev => { ev.preventDefault(); this.close(); });
   }
 
-  async #onSave(ev) {
-    ev.preventDefault();
-    const el = this.element;
+  async _updateObject(_event, formData) {
+    // FormApplication liefert flache Map → wir lesen direkt aus dem DOM, um Text+Picker zu mergen
+    const el = this.element[0];
     const next = {};
     for (const r of ROLES) {
       const t = el.querySelector(`input[name="${r}-text"]`)?.value?.trim();
@@ -69,7 +52,5 @@ export class ColorsForm extends Hbm(AppV2) {
 
     const S = buildSnapshot();
     for (const t of canvas.tokens.placeables) updateFrame(t, S);
-
-    this.close();
   }
 }
