@@ -6,9 +6,8 @@
     .fg { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0; }
     .fg label { flex: 0 0 44%; }
     .fg input[type="text"], .fg input[type="number"], .fg select { flex: 1 1 auto; }
-    .hexpair { display:flex; gap:8px; align-items:center; }
-    .hexpair input[type="text"] { width: 120px; }
-    .hexpair input[type="color"] { width: 44px; padding:0; }
+    .input-pair { display:flex; gap:8px; align-items:center; }
+    .input-pair input[type="color"] { padding:0; }
   </style>
 
   <div class="gb-grid">
@@ -18,7 +17,7 @@
 
       <div class="fg">
         <label>Path</label>
-        <div style="display:flex; gap:6px; flex:1;">
+        <div class="input-pair">
           <input type="text" name="frame1-path" value="{{f1.path}}" />
           <button type="button" data-action="fp" data-target="frame1-path"><i class="fas fa-folder-open"></i></button>
         </div>
@@ -45,7 +44,7 @@
 
       <div class="fg">
         <label>Default Color</label>
-        <div class="hexpair">
+        <div class="input-pair">
           <input type="text"  name="frame1-defaultColor-text"  value="{{f1.defaultColor}}" placeholder="#RRGGBB" />
           <input type="color" name="frame1-defaultColor-color" value="{{f1.defaultColor}}" />
         </div>
