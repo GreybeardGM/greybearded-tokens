@@ -1,5 +1,5 @@
 // settings/register.js
-import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_COLORS } from "../constants.js";
+import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_COLORS, DEFAULT_NAMEPLATES } from "../constants.js";
 import { updateFrame } from "../apply-frame.js";
 import { buildSnapshot } from "./snapshot.js";
 import { ColorsForm } from "./colors-form.js";
@@ -167,77 +167,20 @@ export function registerSettings() {
   });  
 
   // ── Nameplates ──────────────────────────────────────────────────────────────
-  game.settings.register(MOD_ID, "nameplateEnabled", {
-    name: "Nameplate-Styling aktivieren",
-    hint: "Wenn aktiv, werden Nameplates gemäß Modul-Stil angepasst (Schrift, Farbe, Skalierung).",
+  game.settings.register(MOD_ID, "nameplate", {
+    name: "Nameplate Settings",
     scope: "world",
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "nameplateFontFamily", {
-    name: "Nameplate: Schriftart",
-    hint: "Wähle eine Schriftart, die für Nameplates verwendet wird. Nur sichere Fonts werden angeboten.",
-    scope: "world",
-    config: true,
-    type: String,
-    choices: FONT_CHOICES,
-    default: "Signika",
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "nameplateBaseFontSize", {
-    name: "Nameplate: Basisschriftgröße (px)",
-    hint: "Ausgangspunkt für die Schriftgröße. Kann optional mit Tokengröße/Scaling multipliziert werden.",
-    scope: "world",
-    config: true,
-    type: Number,
-    default: 22,
-    range: { min: 6, max: 96, step: 1 },
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "nameplateScaleWithToken", {
-    name: "Nameplate skaliert mit Token",
-    hint: "Skaliert die Schriftgröße zusätzlich mit Token-Größe und Texture-Scale.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: true,
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "nameplateUsePlayerColor", {
-    name: "Nameplate benutzt Spielerfarbe.",
-    hint: "Verwendet die Farbe des Spielers, falls vorhanden. Sonst Fallback auf Einfärbemethode.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "nameplateTintMode", {
-    name: "Nameplate: Einfärbemethode",
-    hint: "Identisch zu den Rahmen-Optionen. Bestimmt, wie die Nameplate eingefärbt wird.",
-    scope: "world",
-    config: true,
-    type: String,
-    choices: TINT_CHOICES,
-    default: "Unicolor",
-    onChange: requestReload
+    config: false,
+    type: Object,
+    default: DEFAULT_NAMEPLATES
   });
   
-  game.settings.register(MOD_ID, "nameplateDefaultColor", {
-    name: "Nameplate: Standardfarbe",
-    hint: "Wird verwendet, wenn keine andere Einfärbemethode greift (z. B. Unicolor).",
-    scope: "world",
-    config: true,
-    type: String,
-    default: "#ffffff",
-    onChange: requestReload
+  game.settings.registerMenu(MOD_ID, "nameplateMenu", {
+    name: "Nameplate",
+    label: "Configure Nameplate",
+    icon: "fas fa-font",
+    type: NameplateForm,
+    restricted: true
   });
 
   // ── Disposition-Farben ──────────────────────────────────────────────────────
@@ -251,7 +194,7 @@ export function registerSettings() {
   
   game.settings.registerMenu(MOD_ID, "colorsMenu", {
     name: "Colors",
-    label: "Configure Colors",
+    label: "Disposition Colors",
     icon: "fas fa-palette",
     type: ColorsForm,
     restricted: true
