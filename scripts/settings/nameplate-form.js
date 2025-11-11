@@ -19,13 +19,15 @@ export class NameplateForm extends FormApplication {
   async getData() {
     const cur = (game.settings.get(MOD_ID, "nameplate") ?? {});
     return {
-      enabled:        !!cur.enabled,
-      baseFontSize:   Number.isFinite(cur.baseFontSize) ? cur.baseFontSize : DEFAULT_NAMEPLATES.baseFontSize,
-      fontFamily:     cur.fontFamily ?? DEFAULT_NAMEPLATES.fontFamily,
-      usePlayerColor: !!cur.usePlayerColor,
-      defaultColor:   (typeof cur.defaultColor === "string" && HEX.test(cur.defaultColor)) ? cur.defaultColor : DEFAULT_NAMEPLATES.defaultColor,
-      tintMode:       cur.tintMode ?? DEFAULT_NAMEPLATES.tintMode,
-      scaleWithToken: !!cur.scaleWithToken,
+      enabled:        cur.enabled || DEFAULT_NAMEPLATES.enabled,
+      baseFontSize:   Number.isFinite(Number(formData.baseFontSize)) ? Number(formData.baseFontSize) : DEFAULT_NAMEPLATES.baseFontSize,
+      fontFamily:     String(formData.fontFamily || DEFAULT_NAMEPLATES.fontFamily),
+      usePlayerColor: cur.usePlayerColor || DEFAULT_NAMEPLATES.usePlayerColor,
+      defaultColor:   HEX.test(formData["defaultColor-text"]) ? formData["defaultColor-text"]
+                     : HEX.test(formData["defaultColor-color"]) ? formData["defaultColor-color"]
+                     : DEFAULT_NAMEPLATES.defaultColor,
+      tintMode:       String(formData.tintMode || DEFAULT_NAMEPLATES.tintMode),
+      scaleWithToken: cur.scaleWithToken || DEFAULT_NAMEPLATES.scaleWithToken,
       TINT_CHOICES,
       FONT_CHOICES
     };
