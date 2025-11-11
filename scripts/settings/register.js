@@ -1,5 +1,5 @@
 // settings/register.js
-import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_COLORS, DEFAULT_NAMEPLATES } from "../constants.js";
+import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "../constants.js";
 import { updateFrame } from "../apply-frame.js";
 import { buildSnapshot } from "./snapshot.js";
 import { ColorsForm } from "./colors-form.js";
@@ -28,144 +28,18 @@ function requestReload() {
 }
 
 export function registerSettings() {
-  // ── Rahmen 1 ────────────────────────────────────────────────────────────────
-  game.settings.register(MOD_ID, "path1", {
-    name: "Standardbild für Tokenrahmen (Rahmen 1)",
-    hint: "Pfad zum PNG/SVG-Bild.",
+  // ── Rahmen ─────────────────────────────────────────────────────────────────
+  game.settings.register(MOD_ID, "frames", {
+    name: "Grouped Frames",
     scope: "world",
-    config: true,
-    type: String,
-    default: "modules/greybearded-tokens/assets/frame-default.png",
-    filePicker: "image",
-    onChange: requestReload
+    config: false,
+    type: Object,
+    default: {
+      frame1: DEFAULT_FRAME1,
+      frame2: DEFAULT_FRAME2,
+      mask:   DEFAULT_MASK
+    }
   });
-
-  game.settings.register(MOD_ID, "scale1", {
-    name: "Skalierung (Rahmen 1)",
-    hint: "1 = exakt, 1.05 = größer, 0.95 = kleiner.",
-    scope: "world",
-    config: true,
-    type: Number,
-    default: 1,
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "usePlayerColor1", {
-    name: "Use Player Color (Rahmen 1)",
-    hint: "Wenn verfügbar, nutze die Spielerfarbe. Sonst Fallback auf Tint-Mode.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "tintMode1", {
-    name: "Einfärbemethode (Rahmen 1)",
-    hint: "Bestimmt, wie Rahmen 1 eingefärbt wird (ohne Spielerfarbe).",
-    scope: "world",
-    config: true,
-    type: String,
-    choices: TINT_CHOICES,
-    default: "Disposition",
-    onChange: requestReload
-  });
-
-  // NEU: Individuelle Default-Farbe für Rahmen 1
-  game.settings.register(MOD_ID, "frame1DefaultColor", {
-    name: "Rahmen 1: Standardfarbe",
-    hint: "Wird bei Unicolor/Advanced oder als Fallback genutzt, wenn keine Spielerfarbe greift.",
-    scope: "world",
-    config: true,
-    type: String,
-    default: (DEFAULT_COLORS?.default ?? DEFAULT_COLORS?.defaultColor ?? "#888888"),
-    onChange: requestReload
-  });
-
-  // ── Rahmen 2 ────────────────────────────────────────────────────────────────
-  game.settings.register(MOD_ID, "secondEnabled", {
-    name: "Zweiten Rahmen aktivieren",
-    hint: "Zusätzlichen Rahmen überlagern.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "path2", {
-    name: "Bildpfad für zweiten Rahmen (Rahmen 2)",
-    hint: "Pfad zum PNG/SVG.",
-    scope: "world",
-    config: true,
-    type: String,
-    default: "modules/greybearded-tokens/assets/frame-secondary.png",
-    filePicker: "image",
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "scale2", {
-    name: "Skalierung (Rahmen 2)",
-    hint: "1 = exakt; 1.05 = größer; 0.95 = kleiner.",
-    scope: "world",
-    config: true,
-    type: Number,
-    default: 1,
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "usePlayerColor2", {
-    name: "Use Player Color (Rahmen 2)",
-    hint: "Wenn verfügbar, nutze die Spielerfarbe. Sonst Fallback auf Tint-Mode.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: true,
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "tintMode2", {
-    name: "Einfärbemethode (Rahmen 2)",
-    hint: "Bestimmt, wie Rahmen 2 eingefärbt wird (ohne Spielerfarbe).",
-    scope: "world",
-    config: true,
-    type: String,
-    choices: TINT_CHOICES,
-    default: "Unicolor",
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "frame2DefaultColor", {
-    name: "Rahmen 2: Standardfarbe",
-    hint: "Wird bei Unicolor/Advanced oder als Fallback genutzt, wenn keine Spielerfarbe greift.",
-    scope: "world",
-    config: true,
-    type: String,
-    default: (DEFAULT_COLORS?.default ?? DEFAULT_COLORS?.defaultColor ?? "#888888"),
-    onChange: requestReload
-  });
-
-  // ── Maske ───────────────────────────────────────────────────────────────────
-  game.settings.register(MOD_ID, "maskEnabled", {
-    name: "Maskierung aktivieren",
-    hint: "Aktiviert eine Alpha-Maske, die auf das Token-Artwork angewendet wird (z. B. runde/abgerundete Tokens).",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: requestReload
-  });
-
-  game.settings.register(MOD_ID, "pathMask", {
-    name: "Bildpfad für Maske",
-    hint: "Pfad zu einem PNG/SVG mit Alpha. Weiß = sichtbar, Schwarz = ausgeblendet.",
-    scope: "world",
-    config: true,
-    type: String,
-    default: "modules/greybearded-tokens/assets/mask-round.png",
-    filePicker: "image",
-    onChange: requestReload
-  });  
 
   // ── Nameplates ──────────────────────────────────────────────────────────────
   game.settings.register(MOD_ID, "nameplate", {
