@@ -7,7 +7,19 @@ import { isHex, bindHexPairs } from "./helpers.js";
 const DISPOSITION = ["hostile", "neutral", "friendly", "secret", "character"];
 
 export class ColorsForm extends FormApplication {
-  static get defaultOptions() { /* unverändert */ }
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "gb-colors-form",
+      title: "Greybearded Tokens — Colors",
+      template: "modules/greybearded-tokens/templates/colors-form.hbs",
+      classes: ["gb-colors-form"],
+      width: 520,
+      height: "auto",
+      resizable: true,
+      submitOnChange: false,
+      closeOnSubmit: true
+    });
+  }
 
   async getData() {
     const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
@@ -21,7 +33,8 @@ export class ColorsForm extends FormApplication {
   activateListeners(html) {
     super.activateListeners(html);
     bindHexPairs(html[0] ?? html, DISPOSITION);
-    html.find('[data-action="cancel"]').on("click", ev => { ev.preventDefault(); this.close(); });
+    (html.find?.('[data-action="cancel"]') ?? $(html).find('[data-action="cancel"]'))
+      .on("click", ev => { ev.preventDefault(); this.close(); });
   }
 
   async _updateObject(_event, _formData) {
@@ -37,3 +50,4 @@ export class ColorsForm extends FormApplication {
     if (canvas?.tokens?.placeables?.length) for (const t of canvas.tokens.placeables) updateFrame(t, S);
   }
 }
+
