@@ -1,5 +1,5 @@
 // settings-snapshot.js
-import { MOD_ID, DEFAULT_COLORS } from "./constants.js";
+import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
 
 let _S = null;
 
