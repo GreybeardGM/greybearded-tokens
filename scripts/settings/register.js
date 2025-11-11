@@ -6,40 +6,56 @@ import { ColorsForm } from "./colors-form.js";
 import { NameplateForm } from "./nameplate-form.js";
 import { FramesForm } from "./frames-form.js";
 
-async function preloadFrameTextures(S) {
-  const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
-  if (!paths.length) return;
+/* ---------- Preload-Cache ---------- */
+let _lastPreloaded = new Set();
 
-  if (PIXI.Assets?.load) {
-    await Promise.all(paths.map(p => PIXI.Assets.load(p)));
-  } else {
-    paths.forEach(p => PIXI.Texture.from(p));
+/* Pfade aus dem Snapshot ziehen */
+function _pathsFromSnapshot(S) {
+  const out = [];
+  if (S?.frame1?.path) out.push(S.frame1.path);
+  if (S?.frame2?.enabled && S?.frame2?.path) out.push(S.frame2.path);
+  if (S?.mask?.enabled && S?.mask?.path) out.push(S.mask.path);
+  return [...new Set(out)]; // dedup
+}
+
+async function preloadFrameTextures(S) {
+  const paths = _pathsFromSnapshot(S);
+  // Nur laden, wenn sich die Menge geändert hat
+  const cur = new Set(paths);
+  if (paths.length && _setEquals(cur, _lastPreloaded) === false) {
+    await Promise.all(paths.map(p => loadTexture(p)));
+    _lastPreloaded = cur;
   }
 }
 
-function sweepAllTokenFrames(S) {
-  for (const t of canvas.tokens.placeables) updateFrame(t, S);
+function _setEquals(a, b) {
+  if (!(b instanceof Set) || a.size !== b.size) return false;
+  for (const v of a) if (!b.has(v)) return false;
+  return true;
 }
 
-function requestReload() {
+function sweepAllTokenFrames(S) {
+  // Rendering erst nach Preload, non-blocking
+  requestAnimationFrame(() => {
+    for (const t of canvas.tokens.placeables) updateFrame(t, S);
+  });
+}
+
+async function requestReload() {
   ui.notifications?.info("Greybearded Tokens: Bitte Oberfläche neu laden (F5), um Änderungen zu übernehmen.");
   const S = buildSnapshot();
-  preloadFrameTextures(S);
+  await preloadFrameTextures(S);
   sweepAllTokenFrames(S);
 }
 
 export function registerSettings() {
-  // ── Rahmen ─────────────────────────────────────────────────────────────────
+  // ── Frames ─────────────────────────────────────────────────────────────────
   game.settings.register(MOD_ID, "frames", {
     name: "Grouped Frames",
     scope: "world",
     config: false,
     type: Object,
-    default: {
-      frame1: DEFAULT_FRAME1,
-      frame2: DEFAULT_FRAME2,
-      mask:   DEFAULT_MASK
-    }
+    default: { frame1: DEFAULT_FRAME1, frame2: DEFAULT_FRAME2, mask: DEFAULT_MASK }
   });
 
   game.settings.registerMenu(MOD_ID, "framesMenu", {
@@ -58,7 +74,7 @@ export function registerSettings() {
     type: Object,
     default: DEFAULT_NAMEPLATES
   });
-  
+
   game.settings.registerMenu(MOD_ID, "nameplateMenu", {
     name: "Nameplate",
     label: "Configure Nameplate",
@@ -75,7 +91,7 @@ export function registerSettings() {
     type: Object,
     default: DEFAULT_COLORS
   });
-  
+
   game.settings.registerMenu(MOD_ID, "colorsMenu", {
     name: "Colors",
     label: "Disposition Colors",
@@ -83,7 +99,12 @@ export function registerSettings() {
     type: ColorsForm,
     restricted: true
   });
-  
+
+  // Initiales Preload nach Canvas-Start
+  Hooks.once("canvasReady", async () => {
+    const S = buildSnapshot();
+    await preloadFrameTextures(S);
+  });
+
   console.log("✅⭕ Greybearded Token Frames: Settings registered.");
 }
-
