@@ -54,9 +54,10 @@ export class FramesForm extends FormApplication {
   activateListeners(htmlJQ) {
     super.activateListeners(htmlJQ);
     const root = htmlJQ[0] ?? htmlJQ;
-
+  
     bindHexPairs(root, ["frame1-defaultColor", "frame2-defaultColor"]);
-
+  
+    // FilePicker
     root.querySelectorAll('[data-action="fp"]').forEach(btn => {
       btn.addEventListener("click", async (ev) => {
         ev.preventDefault();
@@ -65,10 +66,23 @@ export class FramesForm extends FormApplication {
         const fp = new FilePicker({
           type: "image",
           current: input?.value || "",
-          callback: (path) => { if (input) input.value = path; }
+          callback: (path) => {
+            if (input) input.value = path;
+            const box = root.querySelector(`[data-preview-for="${targetName}"] img`);
+            if (box) box.src = path;
+          }
         });
         fp.render(true);
       });
+    });
+  
+    // Textfeld → Preview
+    ["frame1-path","frame2-path","mask-path"].forEach(name => {
+      const inp = root.querySelector(`input[name="${name}"]`);
+      const img = root.querySelector(`[data-preview-for="${name}"] img`);
+      if (!inp || !img) return;
+      inp.addEventListener("input", () => { img.src = inp.value || ""; });
+      inp.addEventListener("change", () => { img.src = inp.value || ""; });
     });
   }
 
