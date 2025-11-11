@@ -1,6 +1,6 @@
 // modules/greybearded-tokens/scripts/settings/colors-form.js
 import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
-import { buildSnapshot } from "../settings-snapshot.js";
+import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
 
 const DISPOSITION = ["hostile", "neutral", "friendly", "secret", "character"];
