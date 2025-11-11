@@ -60,6 +60,6 @@ export const DEFAULT_FRAME2 = {
 };
 
 export const DEFAULT_MASK = {
-  enabled: false,
+  enabled: true,
   path: "modules/greybearded-tokens/assets/mask-round.png"
 };
