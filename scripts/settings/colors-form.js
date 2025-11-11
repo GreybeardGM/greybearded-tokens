@@ -3,7 +3,7 @@ import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
 import { buildSnapshot } from "../settings-snapshot.js";
 import { updateFrame } from "../apply-frame.js";
 
-const ROLES = ["hostile", "neutral", "friendly", "secret", "character"];
+const DISPOSITION = ["hostile", "neutral", "friendly", "secret", "character"];
 const HEX   = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
 
 export class ColorsForm extends FormApplication {
@@ -19,18 +19,18 @@ export class ColorsForm extends FormApplication {
 
   async getData() {
     const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
-    const rows = ROLES.map(r => ({
-      role: r,
-      value: (typeof cur?.[r] === "string" && HEX.test(cur[r])) ? cur[r] : (DEFAULT_COLORS[r] ?? "#000000")
+    const rows = DISPOSITION.map(d => ({
+      disposition: d,
+      value: (typeof cur?.[d] === "string" && HEX.test(cur[d])) ? cur[d] : (DEFAULT_COLORS[d] ?? "#000000")
     }));
     return { rows };
   }
 
   activateListeners(html) {
     super.activateListeners(html);
-    for (const r of ROLES) {
-      const txt = html.find(`input[name="${r}-text"]`)[0];
-      const clr = html.find(`input[name="${r}-color"]`)[0];
+    for (const d of DISPOSITION) {
+      const txt = html.find(`input[name="${d}-text"]`)[0];
+      const clr = html.find(`input[name="${d}-color"]`)[0];
       if (!txt || !clr) continue;
       txt.addEventListener("input", () => { if (HEX.test(txt.value)) clr.value = txt.value; });
       clr.addEventListener("input", () => { if (HEX.test(clr.value)) txt.value = clr.value; });
@@ -42,10 +42,10 @@ export class ColorsForm extends FormApplication {
     // FormApplication liefert flache Map → wir lesen direkt aus dem DOM, um Text+Picker zu mergen
     const el = this.element[0];
     const next = {};
-    for (const r of ROLES) {
-      const t = el.querySelector(`input[name="${r}-text"]`)?.value?.trim();
-      const c = el.querySelector(`input[name="${r}-color"]`)?.value?.trim();
-      next[r] = HEX.test(t) ? t : (HEX.test(c) ? c : (DEFAULT_COLORS[r] ?? "#000000"));
+    for (const d of DISPOSITION) {
+      const t = el.querySelector(`input[name="${d}-text"]`)?.value?.trim();
+      const c = el.querySelector(`input[name="${d}-color"]`)?.value?.trim();
+      next[d] = HEX.test(t) ? t : (HEX.test(c) ? c : (DEFAULT_COLORS[d] ?? "#000000"));
     }
 
     await game.settings.set(MOD_ID, "colors", next);
