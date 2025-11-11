@@ -137,17 +137,11 @@ function updateNameplate(token, S, tx, ty) {
     fontPx = Math.max(8, Math.round(basePx * sizeFactor * textureScale));
   }
 
-  /*
-  if (!gb.npPrev.anchored && label.anchor?.set) {
-    label.anchor.set(0.5, 0);
-    gb.npPrev.anchored = true;
-  }
-  */
-
   label.style.fontSize = fontPx;
   label.style.fontFamily = NP.fontFamily;
-  label.style.fill = getTintColor(token, S, NP);
-
+  const tint = getTintColor(token, S, NP);
+  if (tint != null) label.style.fill = tint;
+   
   const padding = Math.max(2, Math.round(fontPx * 0.10));
   label.y = (token.h * (1 + ty) / 2) + padding;
 
