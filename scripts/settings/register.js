@@ -4,6 +4,7 @@ import { updateFrame } from "../apply-frame.js";
 import { buildSnapshot } from "./snapshot.js";
 import { ColorsForm } from "./colors-form.js";
 import { NameplateForm } from "./nameplate-form.js";
+import { FramesForm } from "./settings/frames-form.js";
 
 async function preloadFrameTextures(S) {
   const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
@@ -39,6 +40,14 @@ export function registerSettings() {
       frame2: DEFAULT_FRAME2,
       mask:   DEFAULT_MASK
     }
+  });
+
+  game.settings.registerMenu(MOD_ID, "framesMenu", {
+    name: "Frames & Mask",
+    label: "Configure Frames",
+    icon: "fas fa-images",
+    type: FramesForm,
+    restricted: true
   });
 
   // ── Nameplates ──────────────────────────────────────────────────────────────
