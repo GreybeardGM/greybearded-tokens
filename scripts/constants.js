@@ -29,3 +29,13 @@ export const DEFAULT_COLORS = {
   "secret":    "#6B5E7A",
   "character": "#888888"
 };
+
+export const DEFAULT_NAMEPLATES = {
+  enabled: false,
+  baseFontSize: 22,
+  fontFamily: "Signika",
+  usePlayerColor: false,
+  defaultColor: "#ffffff",
+  tintMode: "Unicolor",
+  scaleWithToken: true
+};
