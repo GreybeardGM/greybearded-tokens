@@ -1,5 +1,5 @@
 // settings-snapshot.js
-import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
+import { MOD_ID, DEFAULT_COLORS, DEFAULT_NAMEPLATES } from "../constants.js";
 
 let _S = null;
 
@@ -39,16 +39,15 @@ function _readAll() {
     },
 
     // ── Nameplates ───────────────────────────────────────────────────────────
-    nameplate: {
-      enabled:        bool(get("nameplateEnabled")),
-      baseFontSize:   num(get("nameplateBaseFontSize"), 22),
-      fontFamily:     str(get("nameplateFontFamily"), "Signika"),
-      usePlayerColor: bool(get("nameplateUsePlayerColor")),
-      defaultColor:   str(get("nameplateDefaultColor"), "#888888" ),
-      tintMode:       str(get("nameplateTintMode"), "Unicolor"),
-      scaleWithToken: bool(get("nameplateScaleWithToken"))
-    },
-
+    nameplate: (() => {
+      try {
+        const v = game.settings.get(MOD_ID, "nameplate");
+        return (v && typeof v === "object") ? v : DEFAULT_NAMEPLATES;
+      } catch { 
+        return DEFAULT_NAMEPLATES;
+      }
+    })(),
+    
     // ── Colors (gruppiert) ──────────────────────────────────────────────────
     colors: (() => {
       try {
