@@ -1,6 +1,6 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
-import { getGbFrameSettings } from "./settings-snapshot.js";
+import { getGbFrameSettings } from "./settings/snapshot.js";
 
 /* =========================
    Konsolidierter Namespace (mit Upgrade/Hydration)
