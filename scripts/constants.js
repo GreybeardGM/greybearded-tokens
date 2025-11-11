@@ -1,3 +1,5 @@
+// modules/greybearded-tokens/scripts/constants.js
+
 export const MOD_ID = "greybearded-tokens";
 
 // Tint Choices
@@ -38,4 +40,26 @@ export const DEFAULT_NAMEPLATES = {
   defaultColor: "#ffffff",
   tintMode: "NoTint",
   scaleWithToken: true
+};
+
+export const DEFAULT_FRAME1 = {
+  path: "modules/greybearded-tokens/assets/frame-default.png",
+  scale: 1,
+  tintMode: "Disposition",
+  usePlayerColor: false,
+  defaultColor: "#888888"
+};
+
+export const DEFAULT_FRAME2 = {
+  enabled: false,
+  path: "modules/greybearded-tokens/assets/frame-secondary.png",
+  scale: 1,
+  tintMode: "Unicolor",
+  usePlayerColor: true,
+  defaultColor: "#888888"
+};
+
+export const DEFAULT_MASK = {
+  enabled: false,
+  path: "modules/greybearded-tokens/assets/mask-round.png"
 };
