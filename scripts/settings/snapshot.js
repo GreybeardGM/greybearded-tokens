@@ -1,5 +1,5 @@
-// settings-snapshot.js
-import { MOD_ID, DEFAULT_COLORS, DEFAULT_NAMEPLATES } from "../constants.js";
+// settings/snapshot.js
+import { MOD_ID, DEFAULT_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "../constants.js";
 
 let _S = null;
 
@@ -10,32 +10,34 @@ function str(v, fb = "")  { return (typeof v === "string" && v.length) ? v : fb;
 function _readAll() {
   const get = (k) => game.settings.get(MOD_ID, k);
 
+  // Neues gruppiertes Frames-Setting
+  const FR = (() => {
+    try {
+      const v = get("frames");
+      return (v && typeof v === "object") ? v : null;
+    } catch { return null; }
+  })();
+  
   const snap = {
-    // ── Frame 1 ──────────────────────────────────────────────────────────────
+    // ── Frames ──────────────────────────────────────────────────────────────
     frame1: {
-      path:           str(get("path1"), "modules/greybearded-tokens/assets/frame-default.png"),
-      scale:          num(get("scale1"), 1),
-      tintMode:       str(get("tintMode1"), "Disposition"),
-      usePlayerColor: bool(get("usePlayerColor1")),
-      // Neuer, dedizierter Default; fällt auf Legacy-Global zurück
-      defaultColor:   str(get("frame1DefaultColor"), "#888888" )
+      path:           str(FR?.frame1?.path,           DEFAULT_FRAME1.path),
+      scale:          num(FR?.frame1?.scale,          DEFAULT_FRAME1.scale),
+      tintMode:       str(FR?.frame1?.tintMode,       DEFAULT_FRAME1.tintMode),
+      usePlayerColor: bool(FR?.frame1?.usePlayerColor),
+      defaultColor:   str(FR?.frame1?.defaultColor,   DEFAULT_FRAME1.defaultColor)
     },
-
-    // ── Frame 2 ──────────────────────────────────────────────────────────────
     frame2: {
-      enabled:        bool(get("secondEnabled")),
-      path:           str(get("path2"), "modules/greybearded-tokens/assets/frame-secondary.png"),
-      scale:          num(get("scale2"), 1),
-      tintMode:       str(get("tintMode2"), "Unicolor"),
-      usePlayerColor: bool(get("usePlayerColor2")),
-      // Neuer, dedizierter Default; fällt auf Legacy-Global zurück
-      defaultColor:   str(get("frame2DefaultColor"), "#888888" )
+      enabled:        bool(FR?.frame2?.enabled),
+      path:           str(FR?.frame2?.path,           DEFAULT_FRAME2.path),
+      scale:          num(FR?.frame2?.scale,          DEFAULT_FRAME2.scale),
+      tintMode:       str(FR?.frame2?.tintMode,       DEFAULT_FRAME2.tintMode),
+      usePlayerColor: bool(FR?.frame2?.usePlayerColor),
+      defaultColor:   str(FR?.frame2?.defaultColor,   DEFAULT_FRAME2.defaultColor)
     },
-
-    // ── Mask ─────────────────────────────────────────────────────────────────
     mask: {
-      enabled:  bool(get("maskEnabled")),
-      path:     str(get("pathMask"), "modules/greybearded-tokens/assets/mask-round.png")
+      enabled:        bool(FR?.mask?.enabled),
+      path:           str(FR?.mask?.path,             DEFAULT_MASK.path)
     },
 
     // ── Nameplates ───────────────────────────────────────────────────────────
