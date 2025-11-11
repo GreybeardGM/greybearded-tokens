@@ -1,6 +1,6 @@
 // modules/greybearded-tokens/scripts/settings/snapshot.js
 import { MOD_ID, DEFAULT_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "../constants.js";
-import { num, bool, str, readObjectSetting } from "../utils/helpers.js";
+import { num, bool, str, readObjectSetting } from "./helpers.js";
 
 let _S = null;
 
