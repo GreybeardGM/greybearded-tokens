@@ -36,6 +36,6 @@ export const DEFAULT_NAMEPLATES = {
   fontFamily: "Signika",
   usePlayerColor: false,
   defaultColor: "#ffffff",
-  tintMode: "Unicolor",
+  tintMode: "NoTint",
   scaleWithToken: true
 };
