@@ -1,8 +1,8 @@
 // settings.js
-import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_COLORS } from "./constants.js";
-import { buildSnapshot } from "./settings-snapshot.js";
-import { updateFrame } from "./apply-frame.js";
-import { ColorsForm } from "./settings/colors-form.js";
+import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_COLORS } from "../constants.js";
+import { buildSnapshot } from "./snapshot.js";
+import { updateFrame } from "../apply-frame.js";
+import { ColorsForm } from "./colors-form.js";
 
 async function preloadFrameTextures(S) {
   const paths = [S.path1, S.secondEnabled ? S.path2 : null].filter(Boolean);
