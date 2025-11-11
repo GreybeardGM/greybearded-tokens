@@ -58,6 +58,8 @@ export class NameplateForm extends FormApplication {
     await game.settings.set(MOD_ID, "nameplate", next);
 
     const S = buildSnapshot();
-    for (const t of canvas.tokens.placeables) updateFrame(t, S);
+    if (canvas?.tokens?.placeables?.length) {
+      for (const t of canvas.tokens.placeables) updateFrame(t, S);
+    }
   }
 }
