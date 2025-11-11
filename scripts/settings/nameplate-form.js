@@ -1,6 +1,6 @@
-// modules/greybearded-tokens/settings/nameplate-form.js
+// modules/greybearded-tokens/scripts/settings/nameplate-form.js
 import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_NAMEPLATES } from "../constants.js";
-import { buildSnapshot } from "../settings-snapshot.js";
+import { buildSnapshot } from "../settings/snapshot.js";
 import { updateFrame } from "../apply-frame.js";
 
 const HEX = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -17,19 +17,19 @@ export class NameplateForm extends FormApplication {
   }
 
   async getData() {
-    const cur = (game.settings.get(MOD_ID, "nameplate") ?? {});
+    const cur = game.settings.get(MOD_ID, "nameplate") ?? {};
+    // Nullish statt ||, damit false/0 nicht überschrieben werden
+    const enabled        = (cur.enabled ?? DEFAULT_NAMEPLATES.enabled);
+    const baseFontSize   = Number.isFinite(Number(cur.baseFontSize)) ? Number(cur.baseFontSize) : DEFAULT_NAMEPLATES.baseFontSize;
+    const fontFamily     = (typeof cur.fontFamily === "string" && cur.fontFamily in FONT_CHOICES) ? cur.fontFamily : DEFAULT_NAMEPLATES.fontFamily;
+    const usePlayerColor = (cur.usePlayerColor ?? DEFAULT_NAMEPLATES.usePlayerColor);
+    const defaultColor   = (typeof cur.defaultColor === "string" && HEX.test(cur.defaultColor)) ? cur.defaultColor : DEFAULT_NAMEPLATES.defaultColor;
+    const tintMode       = (typeof cur.tintMode === "string" && cur.tintMode in TINT_CHOICES) ? cur.tintMode : DEFAULT_NAMEPLATES.tintMode;
+    const scaleWithToken = (cur.scaleWithToken ?? DEFAULT_NAMEPLATES.scaleWithToken);
+
     return {
-      enabled:        cur.enabled || DEFAULT_NAMEPLATES.enabled,
-      baseFontSize:   Number.isFinite(Number(formData.baseFontSize)) ? Number(formData.baseFontSize) : DEFAULT_NAMEPLATES.baseFontSize,
-      fontFamily:     String(formData.fontFamily || DEFAULT_NAMEPLATES.fontFamily),
-      usePlayerColor: cur.usePlayerColor || DEFAULT_NAMEPLATES.usePlayerColor,
-      defaultColor:   HEX.test(formData["defaultColor-text"]) ? formData["defaultColor-text"]
-                     : HEX.test(formData["defaultColor-color"]) ? formData["defaultColor-color"]
-                     : DEFAULT_NAMEPLATES.defaultColor,
-      tintMode:       String(formData.tintMode || DEFAULT_NAMEPLATES.tintMode),
-      scaleWithToken: cur.scaleWithToken || DEFAULT_NAMEPLATES.scaleWithToken,
-      TINT_CHOICES,
-      FONT_CHOICES
+      enabled, baseFontSize, fontFamily, usePlayerColor, defaultColor, tintMode, scaleWithToken,
+      TINT_CHOICES, FONT_CHOICES
     };
   }
 
@@ -44,16 +44,28 @@ export class NameplateForm extends FormApplication {
   }
 
   async _updateObject(_event, formData) {
-    // formData: flache Map → gezielt lesen
+    // flache Map → Werte ziehen, Choices validieren, Defaults aus DEFAULT_NAMEPLATES
+    let baseFontSize = Number(formData.baseFontSize);
+    baseFontSize = Number.isFinite(baseFontSize) ? baseFontSize : DEFAULT_NAMEPLATES.baseFontSize;
+
+    let fontFamily = String(formData.fontFamily || DEFAULT_NAMEPLATES.fontFamily);
+    if (!(fontFamily in FONT_CHOICES)) fontFamily = DEFAULT_NAMEPLATES.fontFamily;
+
+    let tintMode = String(formData.tintMode || DEFAULT_NAMEPLATES.tintMode);
+    if (!(tintMode in TINT_CHOICES)) tintMode = DEFAULT_NAMEPLATES.tintMode;
+
+    const defaultColor =
+      HEX.test(formData["defaultColor-text"])  ? formData["defaultColor-text"]  :
+      HEX.test(formData["defaultColor-color"]) ? formData["defaultColor-color"] :
+      DEFAULT_NAMEPLATES.defaultColor;
+
     const next = {
       enabled:        !!formData.enabled,
-      baseFontSize:   Number.isFinite(Number(formData.baseFontSize)) ? Number(formData.baseFontSize) : 22,
-      fontFamily:     String(formData.fontFamily || "Signika"),
+      baseFontSize,
+      fontFamily,
       usePlayerColor: !!formData.usePlayerColor,
-      defaultColor:   HEX.test(formData["defaultColor-text"]) ? formData["defaultColor-text"]
-                     : HEX.test(formData["defaultColor-color"]) ? formData["defaultColor-color"]
-                     : "#ffffff",
-      tintMode:       String(formData.tintMode || "Unicolor"),
+      defaultColor,
+      tintMode,
       scaleWithToken: !!formData.scaleWithToken
     };
 
