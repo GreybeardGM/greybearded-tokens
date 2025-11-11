@@ -5,7 +5,19 @@ import { updateFrame } from "../apply-frame.js";
 import { isHex, num, bool, oneOf, bindHexSync } from "./helpers.js";
 
 export class NameplateForm extends FormApplication {
-  static get defaultOptions() { /* unverändert */ }
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "gb-nameplate-form",
+      title: "Greybearded Tokens — Nameplate",
+      template: "modules/greybearded-tokens/templates/nameplate-form.hbs",
+      classes: ["gb-nameplate-form"],
+      width: 520,
+      height: "auto",
+      resizable: true,
+      submitOnChange: false,
+      closeOnSubmit: true
+    });
+  }
 
   async getData() {
     const cur = game.settings.get(MOD_ID, "nameplate") ?? {};
@@ -31,13 +43,13 @@ export class NameplateForm extends FormApplication {
   }
 
   async _updateObject(_event, formData) {
-    let baseFontSize = num(formData.baseFontSize, DEFAULT_NAMEPLATES.baseFontSize);
-    let fontFamily   = oneOf(String(formData.fontFamily || ""), FONT_CHOICES, DEFAULT_NAMEPLATES.fontFamily);
-    let tintMode     = oneOf(String(formData.tintMode || ""), TINT_CHOICES, DEFAULT_NAMEPLATES.tintMode);
+    const baseFontSize = num(formData.baseFontSize, DEFAULT_NAMEPLATES.baseFontSize);
+    const fontFamily   = oneOf(String(formData.fontFamily || ""), FONT_CHOICES, DEFAULT_NAMEPLATES.fontFamily);
+    const tintMode     = oneOf(String(formData.tintMode || ""), TINT_CHOICES, DEFAULT_NAMEPLATES.tintMode);
     const defaultColor = isHex(formData["defaultColor-text"])
       ? formData["defaultColor-text"]
       : (isHex(formData["defaultColor-color"]) ? formData["defaultColor-color"] : DEFAULT_NAMEPLATES.defaultColor);
-    
+
     const next = {
       enabled:        bool(formData.enabled,        DEFAULT_NAMEPLATES.enabled),
       baseFontSize,
