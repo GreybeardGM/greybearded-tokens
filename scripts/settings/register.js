@@ -1,4 +1,4 @@
-// settings.js
+// settings/register.js
 import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_COLORS } from "../constants.js";
 import { updateFrame } from "../apply-frame.js";
 import { buildSnapshot } from "./snapshot.js";
@@ -253,7 +253,7 @@ export function registerSettings() {
     name: "Colors",
     label: "Configure Colors",
     icon: "fas fa-palette",
-    type: ColorsForm,   // Klasse kommt später
+    type: ColorsForm,
     restricted: true
   });
   
