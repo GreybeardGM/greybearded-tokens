@@ -6,6 +6,7 @@
     .fg { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0; }
     .fg label { flex: 0 0 44%; }
     .fg input[type="text"], .fg input[type="number"], .fg select { flex: 1 1 auto; }
+    .fg.is-dummy input[disabled] { opacity: 0.85; pointer-events: none; }
     .input-pair { display:flex; gap:8px; align-items:center; }
     .input-pair input[type="color"] { padding:0; }
 
@@ -25,9 +26,14 @@
         <img src="{{f1.path}}" alt="Frame 1 Preview">
       </div>
 
-      <!-- Spacer für Zeilenangleichung (entspricht 'Enabled' von Frame 2) -->
-      <div class="fg" aria-hidden="true">
-        <label>&nbsp;</label><span></span>
+      <!-- Dummy Enabled (nur Platzhalter, wird NICHT gespeichert) -->
+      <div class="fg is-dummy" aria-hidden="true">
+        <label>Enabled</label>
+        <input type="checkbox"
+               checked
+               disabled
+               data-dummy="frame1-enabled"
+               title="Frame 1 is always active."/>
       </div>
 
       <div class="fg">
