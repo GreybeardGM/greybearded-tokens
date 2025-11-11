@@ -1,5 +1,5 @@
 // hooks.js
-import { getGbFrameSettings, buildSnapshot } from "./settings-snapshot.js";
+import { getGbFrameSettings, buildSnapshot } from "./settings/snapshot.js";
 import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
 import { updateFrame } from "./apply-frame.js";
 
