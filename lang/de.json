@@ -1,4 +1,16 @@
 {
+  "GBT.Colors.Name": "Tokenrahmen-Farben",
+  "GBT.Colors.Hint": "Lege die Standardfarben für jede Token-Disposition fest.",
+  "GBT.Colors.Hostile": "Feindlich",
+  "GBT.Colors.Neutral": "Neutral",
+  "GBT.Colors.Friendly": "Verbündet",
+  "GBT.Colors.Secret": "Verborgen",
+  "GBT.Colors.Character": "Spielercharakter",
+  "GBT.Colors.ColorHex": "Farbwert (Hex)",
+  "GBT.Colors.ColorPicker": "Farbauswahl",
+  "GBT.Colors.ButtonCancel": "Abbrechen",
+  "GBT.Colors.ButtonSave": "Speichern",
+  "GBT.Colors.InvalidHex": "Bitte gib einen gültigen Hexadezimalwert ein (z. B. #RRGGBB)."
   "GBT.Sync.Name": "Porträt → Prototyp-Token Sync",
   "GBT.Sync.Hint": "Lege fest, wie das Actor-Porträt mit dem Prototyp-Token-Bild synchronisiert wird, wenn sich das Porträt ändert.",
   "GBT.Sync.ChoiceAlways": "Immer synchronisieren",
