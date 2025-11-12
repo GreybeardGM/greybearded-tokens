@@ -15,6 +15,8 @@
   "GBT.Tint.Advanced": "Advanced",
   "GBT.Tint.Custom": "Custom",
 
+  "GBT.Frames.Name": "Frame Settings",
+  "GBT.Frames.Label": "Configure Frames",
   "GBT.Frames.Frame1": "Frame 1",
   "GBT.Frames.Frame2": "Frame 2",
   "GBT.Frames.Mask": "Mask",
@@ -32,10 +34,13 @@
   "GBT.Disposition.Secret": "Secret",
   "GBT.Disposition.Character": "Player Character",
 
+  "GBT.Colors.Name": "Disposition Colors",
+  "GBT.Colors.Label": "Configure Colors",
   "GBT.Colors.Disposition": "Disposition",
-  "GBT.Colors.Name": "Token Frame Colors",
   "GBT.Colors.Hint": "Define default tint colors for each token disposition.",
 
+  "GBT.Nameplate.Name": "Nameplate Settings",
+  "GBT.Nameplate.Label": "Configure Nameplates",
   "GBT.Nameplate.BaseFontSize": "Base Font Size (px)",
   "GBT.Nameplate.FontFamily": "Font Family",
   "GBT.Nameplate.ScaleWithToken": "Scale With Token",
