@@ -1,4 +1,12 @@
 {
+  "GBT.Nameplate.Enabled": "Enabled",
+  "GBT.Nameplate.BaseFontSize": "Base Font Size (px)",
+  "GBT.Nameplate.FontFamily": "Font Family",
+  "GBT.Nameplate.UsePlayerColor": "Use Player Color",
+  "GBT.Nameplate.DefaultColor": "Default Color",
+  "GBT.Nameplate.TintMode": "Tint Mode",
+  "GBT.Nameplate.ScaleWithToken": "Scale With Token",
+  "GBT.Nameplate.ButtonSave": "Save"
   "GBT.Colors.Name": "Token Frame Colors",
   "GBT.Colors.Hint": "Define default tint colors for each token disposition.",
   "GBT.Colors.Disposition": "Disposition"
