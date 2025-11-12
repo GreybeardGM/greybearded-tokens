@@ -66,24 +66,24 @@ export function registerSettings() {
 
   // Sichtbare Menüs
   game.settings.registerMenu(MOD_ID, "framesMenu", {
-    name: "GBT.Menu.Frames.Name",     // Frame Setting
-    label: "GBT.Menu.Frames.Label",   // Configure Frames
+    name: "GBT.Frames.Name",     // Frame Setting
+    label: "GBT.Frames.Label",   // Configure Frames
     icon: "fas fa-images",
     type: FramesForm,
     restricted: true
   });
 
   game.settings.registerMenu(MOD_ID, "nameplateMenu", {
-    name: "GBT.Menu.Nameplate.Name",   // Nameplate Settings
-    label: "GBT.Menu.Nameplate.Label", // Configure Nameplate
+    name: "GBT.Nameplate.Name",   // Nameplate Settings
+    label: "GBT.Nameplate.Label", // Configure Nameplate
     icon: "fas fa-font",
     type: NameplateForm,
     restricted: true
   });
 
   game.settings.registerMenu(MOD_ID, "colorsMenu", {
-    name: "GBT.Menu.Colors.Name",     // Disposition Colors
-    label: "GBT.Menu.Colors.Label",   // Configure Colors
+    name: "GBT.Colors.Name",     // Disposition Colors
+    label: "GBT.Colors.Label",   // Configure Colors
     icon: "fas fa-palette",
     type: ColorsForm,
     restricted: true
