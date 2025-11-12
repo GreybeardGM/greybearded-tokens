@@ -1,6 +1,6 @@
 <form class="gb-nameplate">
   <div class="form-group">
-    <label>{{localize "GBT.Nameplate.Enabled"}}</label>
+    <label>{{localize "GBT.Common.Enabled"}}</label>
     <input type="checkbox" name="enabled" {{#if enabled}}checked{{/if}} />
   </div>
 
@@ -35,7 +35,7 @@
     <label>{{localize "GBT.Nameplate.TintMode"}}</label>
     <select name="tintMode">
       {{#each TINT_CHOICES}}
-        <option value="{{@key}}" {{#if (eq ../tintMode @key)}}selected{{/if}}>{{this}}</option>
+        <option value="{{@key}}" {{#if (eq ../tintMode @key)}}selected{{/if}}>{{localize this}}</option>
       {{/each}}
     </select>
   </div>
@@ -46,6 +46,6 @@
   </div>
 
   <footer class="sheet-footer flexrow" style="margin-top:8px; gap:8px; justify-content:flex-end;">
-    <button type="submit" class="dialog-button">{{localize "GBT.Nameplate.ButtonSave"}}</button>
+    <button type="submit" class="dialog-button">{{localize "GBT.Common.Save"}}</button>
   </footer>
 </form>
