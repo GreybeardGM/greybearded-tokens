@@ -21,11 +21,11 @@
   "GBT.Frames.Frame1Preview": "Frame 1 Preview",
   "GBT.Frames.Frame2Preview": "Frame 2 Preview",
   "GBT.Frames.MaskPreview": "Mask Preview",
-  "GBT.Frames.Frame1AlwaysOnTitle": "Frame 1 is always active."
+  "GBT.Frames.Frame1AlwaysOnTitle": "Frame 1 is always active.",
   "GBT.Frames.Path": "Path",
   "GBT.Frames.Scale": "Scale",
   "GBT.Frames.Browse": "Browse…",
-  
+
   "GBT.Disposition.Hostile": "Hostile",
   "GBT.Disposition.Neutral": "Neutral",
   "GBT.Disposition.Friendly": "Friendly",
