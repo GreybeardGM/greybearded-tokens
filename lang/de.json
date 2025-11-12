@@ -1,35 +1,43 @@
 {
-  "GBT.Nameplate.Enabled": "Aktiviert",
+  "GBT.Common.Enabled": "Aktiviert",
+  "GBT.Common.Save": "Speichern",
+  "GBT.Common.Cancel": "Abbrechen",
+  "GBT.Common.Disposition": "Disposition",
+  "GBT.Common.ColorHex": "Farbwert (Hex)",
+  "GBT.Common.ColorPicker": "Farbauswahl",
+  "GBT.Common.InvalidHex": "Bitte gib einen gültigen Hexwert ein (z. B. #RRGGBB).",
+
+  "GBT.Disposition.Hostile": "Feindlich",
+  "GBT.Disposition.Neutral": "Neutral",
+  "GBT.Disposition.Friendly": "Verbündet",
+  "GBT.Disposition.Secret": "Verborgen",
+  "GBT.Disposition.Character": "Spielercharakter",
+
+  "GBT.Tint.None": "Keine Tönung",
+  "GBT.Tint.Disposition": "Disposition",
+  "GBT.Tint.Unicolor": "Einfarbig",
+  "GBT.Tint.Advanced": "Erweitert",
+  "GBT.Tint.Custom": "Benutzerdefiniert",
+
+  "GBT.Colors.Name": "Tokenrahmen-Farben",
+  "GBT.Colors.Hint": "Lege die Standardtönungen für jede Token-Disposition fest.",
+
   "GBT.Nameplate.BaseFontSize": "Grundschriftgröße (px)",
   "GBT.Nameplate.FontFamily": "Schriftfamilie",
   "GBT.Nameplate.UsePlayerColor": "Spielerfarbe verwenden",
   "GBT.Nameplate.DefaultColor": "Standardfarbe",
   "GBT.Nameplate.TintMode": "Farbmodus",
   "GBT.Nameplate.ScaleWithToken": "Mit Token skalieren",
-  "GBT.Nameplate.ButtonSave": "Speichern"
-  "GBT.Colors.Name": "Tokenrahmen-Farben",
-  "GBT.Colors.Hint": "Lege die Standardfarben für jede Token-Disposition fest.",
-  "GBT.Colors.Disposition": "Disposition"
-  "GBT.Colors.Hostile": "Feindlich",
-  "GBT.Colors.Neutral": "Neutral",
-  "GBT.Colors.Friendly": "Verbündet",
-  "GBT.Colors.Secret": "Verborgen",
-  "GBT.Colors.Character": "Spielercharakter",
-  "GBT.Colors.ColorHex": "Farbwert (Hex)",
-  "GBT.Colors.ColorPicker": "Farbauswahl",
-  "GBT.Colors.ButtonCancel": "Abbrechen",
-  "GBT.Colors.ButtonSave": "Speichern",
-  "GBT.Colors.InvalidHex": "Bitte gib einen gültigen Hexadezimalwert ein (z. B. #RRGGBB)."
-  "GBT.Sync.Name": "Porträt → Prototyp-Token Sync",
-  "GBT.Sync.Hint": "Lege fest, wie das Actor-Porträt mit dem Prototyp-Token-Bild synchronisiert wird, wenn sich das Porträt ändert.",
+
+  "GBT.Sync.Name": "Portrait → Prototyp-Token-Sync",
+  "GBT.Sync.Hint": "Lege fest, wie das Portrait mit dem Prototyp-Token-Bild synchronisiert wird, wenn sich das Portrait ändert.",
   "GBT.Sync.ChoiceAlways": "Immer synchronisieren",
   "GBT.Sync.ChoiceDialog": "Nachfragen (Dialog)",
   "GBT.Sync.ChoiceNothing": "Nichts tun",
   "GBT.Sync.DialogTitle": "Prototyp-Token-Bild synchronisieren?",
-  "GBT.Sync.DialogText": "Das Porträt des Actors hat sich geändert. Soll das Prototyp-Token-Bild angepasst werden?",
-  "GBT.Sync.ActorPortrait": "Actor-Porträt",
+  "GBT.Sync.DialogText": "Das Portrait wurde geändert. Soll das Prototyp-Token-Bild angepasst werden?",
+  "GBT.Sync.ActorPortrait": "Charakterportrait",
   "GBT.Sync.ProtoToken": "Prototyp-Token",
   "GBT.Sync.ButtonSync": "Synchronisieren",
-  "GBT.Sync.ButtonCancel": "Abbrechen",
   "GBT.Sync.DoneInfo": "Prototyp-Token-Bild für {name} synchronisiert."
 }
