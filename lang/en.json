@@ -1,25 +1,34 @@
 {
-  "GBT.Nameplate.Enabled": "Enabled",
+  "GBT.Common.Enabled": "Enabled",
+  "GBT.Common.Save": "Save",
+  "GBT.Common.Cancel": "Cancel",
+  "GBT.Common.Disposition": "Disposition",
+  "GBT.Common.ColorHex": "Color Hex",
+  "GBT.Common.ColorPicker": "Color Picker",
+  "GBT.Common.InvalidHex": "Please enter a valid hexadecimal color (e.g. #RRGGBB).",
+
+  "GBT.Disposition.Hostile": "Hostile",
+  "GBT.Disposition.Neutral": "Neutral",
+  "GBT.Disposition.Friendly": "Friendly",
+  "GBT.Disposition.Secret": "Secret",
+  "GBT.Disposition.Character": "Player Character",
+
+  "GBT.Tint.None": "No Tint",
+  "GBT.Tint.Disposition": "Disposition",
+  "GBT.Tint.Unicolor": "Unicolor",
+  "GBT.Tint.Advanced": "Advanced",
+  "GBT.Tint.Custom": "Custom",
+
+  "GBT.Colors.Name": "Token Frame Colors",
+  "GBT.Colors.Hint": "Define default tint colors for each token disposition.",
+
   "GBT.Nameplate.BaseFontSize": "Base Font Size (px)",
   "GBT.Nameplate.FontFamily": "Font Family",
   "GBT.Nameplate.UsePlayerColor": "Use Player Color",
   "GBT.Nameplate.DefaultColor": "Default Color",
   "GBT.Nameplate.TintMode": "Tint Mode",
   "GBT.Nameplate.ScaleWithToken": "Scale With Token",
-  "GBT.Nameplate.ButtonSave": "Save"
-  "GBT.Colors.Name": "Token Frame Colors",
-  "GBT.Colors.Hint": "Define default tint colors for each token disposition.",
-  "GBT.Colors.Disposition": "Disposition"
-  "GBT.Colors.Hostile": "Hostile",
-  "GBT.Colors.Neutral": "Neutral",
-  "GBT.Colors.Friendly": "Friendly",
-  "GBT.Colors.Secret": "Secret",
-  "GBT.Colors.Character": "Player Character",
-  "GBT.Colors.ColorHex": "Color Hex",
-  "GBT.Colors.ColorPicker": "Picker",
-  "GBT.Colors.ButtonCancel": "Cancel",
-  "GBT.Colors.ButtonSave": "Save",
-  "GBT.Colors.InvalidHex": "Please enter a valid hexadecimal color (e.g. #RRGGBB)."
+
   "GBT.Sync.Name": "Portrait → Prototype Token Sync",
   "GBT.Sync.Hint": "Choose how to handle syncing the actor portrait to the prototype token image when the portrait changes.",
   "GBT.Sync.ChoiceAlways": "Always synchronize",
@@ -30,6 +39,5 @@
   "GBT.Sync.ActorPortrait": "Actor Portrait",
   "GBT.Sync.ProtoToken": "Prototype Token",
   "GBT.Sync.ButtonSync": "Synchronize",
-  "GBT.Sync.ButtonCancel": "Cancel",
   "GBT.Sync.DoneInfo": "Prototype Token image synchronized for {name}."
 }
