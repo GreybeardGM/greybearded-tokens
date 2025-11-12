@@ -1,4 +1,7 @@
 <form class="gb-nameplate">
+  <style>
+    .gb-nameplate label { flex:3; }
+  </style>
   <div class="form-group">
     <label>{{localize "GBT.Common.Enabled"}}</label>
     <input type="checkbox" name="enabled" {{#if enabled}}checked{{/if}} />
