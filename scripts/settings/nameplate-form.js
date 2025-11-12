@@ -11,7 +11,7 @@ export class NameplateForm extends FormApplication {
       title: "GBT.Nameplate.Name",
       template: "modules/greybearded-tokens/templates/nameplate-form.hbs",
       classes: ["gb-nameplate-form"],
-      width: 300,
+      width: 330,
       height: "auto",
       resizable: true,
       submitOnChange: false,
