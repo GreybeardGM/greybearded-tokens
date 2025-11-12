@@ -40,6 +40,7 @@ export function getTintColor(token, S, part) {
 
   switch (tintMode) {
     case "NoTint":
+    default:
       return null;
 
     case "Unicolor":
@@ -49,7 +50,6 @@ export function getTintColor(token, S, part) {
       // Platzhalter für künftige Regeln (Bedingungen/Flags/Status)
       return defaultColor;
 
-    case "custom":
     case "Custom": {
       const raw = token?.document?.getFlag?.("greybearded-tokens", "customTint");
       const hex = normalizeToHex(raw);
@@ -61,8 +61,7 @@ export function getTintColor(token, S, part) {
       return isPC ? (S.colors?.character ?? defaultColor) : defaultColor;
     }
 
-    case "Disposition":
-    default: {
+    case "Disposition": {
       const disp = token?.document?.disposition;
       const isPC = token?.actor?.type === "character" && token?.actor?.hasPlayerOwner;
       if (isPC) return S.colors?.character ?? defaultColor;
