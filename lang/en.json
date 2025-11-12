@@ -2,16 +2,12 @@
   "GBT.Common.Enabled": "Enabled",
   "GBT.Common.Save": "Save",
   "GBT.Common.Cancel": "Cancel",
-  "GBT.Common.Disposition": "Disposition",
+  "GBT.Common.TintMode": "Tint Mode",
+  "GBT.Common.UsePlayerColor": "Use Player Color",
   "GBT.Common.ColorHex": "Color Hex",
   "GBT.Common.ColorPicker": "Color Picker",
   "GBT.Common.InvalidHex": "Please enter a valid hexadecimal color (e.g. #RRGGBB).",
-
-  "GBT.Disposition.Hostile": "Hostile",
-  "GBT.Disposition.Neutral": "Neutral",
-  "GBT.Disposition.Friendly": "Friendly",
-  "GBT.Disposition.Secret": "Secret",
-  "GBT.Disposition.Character": "Player Character",
+  "GBT.Common.DefaultColor": "Default Color",
 
   "GBT.Tint.None": "No Tint",
   "GBT.Tint.Disposition": "Disposition",
@@ -19,14 +15,29 @@
   "GBT.Tint.Advanced": "Advanced",
   "GBT.Tint.Custom": "Custom",
 
+  "GBT.Frames.Frame1": "Frame 1",
+  "GBT.Frames.Frame2": "Frame 2",
+  "GBT.Frames.Mask": "Mask",
+  "GBT.Frames.Frame1Preview": "Frame 1 Preview",
+  "GBT.Frames.Frame2Preview": "Frame 2 Preview",
+  "GBT.Frames.MaskPreview": "Mask Preview",
+  "GBT.Frames.Frame1AlwaysOnTitle": "Frame 1 is always active."
+  "GBT.Frames.Path": "Path",
+  "GBT.Frames.Scale": "Scale",
+  "GBT.Frames.Browse": "Browse…",
+  
+  "GBT.Disposition.Hostile": "Hostile",
+  "GBT.Disposition.Neutral": "Neutral",
+  "GBT.Disposition.Friendly": "Friendly",
+  "GBT.Disposition.Secret": "Secret",
+  "GBT.Disposition.Character": "Player Character",
+
+  "GBT.Colors.Disposition": "Disposition",
   "GBT.Colors.Name": "Token Frame Colors",
   "GBT.Colors.Hint": "Define default tint colors for each token disposition.",
 
   "GBT.Nameplate.BaseFontSize": "Base Font Size (px)",
   "GBT.Nameplate.FontFamily": "Font Family",
-  "GBT.Nameplate.UsePlayerColor": "Use Player Color",
-  "GBT.Nameplate.DefaultColor": "Default Color",
-  "GBT.Nameplate.TintMode": "Tint Mode",
   "GBT.Nameplate.ScaleWithToken": "Scale With Token",
 
   "GBT.Sync.Name": "Portrait → Prototype Token Sync",
