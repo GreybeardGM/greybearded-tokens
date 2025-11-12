@@ -2,9 +2,9 @@
   <table style="width:100%; border-collapse:collapse;">
     <thead>
       <tr>
-        <th style="text-align:left; padding:4px 6px;">{{localize "GBT.Colors.Disposition"}}</th>
-        <th style="text-align:left; padding:4px 6px;">{{localize "GBT.Colors.ColorHex"}}</th>
-        <th style="text-align:left; padding:4px 6px;">{{localize "GBT.Colors.ColorPicker"}}</th>
+        <th>{{localize "GBT.Common.Disposition"}}</th>
+        <th>{{localize "GBT.Common.ColorHex"}}</th>
+        <th>{{localize "GBT.Common.ColorPicker"}}</th>
       </tr>
     </thead>
     <tbody>
@@ -12,7 +12,7 @@
       <tr>
         <td style="padding:4px 6px; width:30%;">
           <label for="{{disposition}}-text">
-            {{#if label}}{{label}}{{else}}{{disposition}}{{/if}}
+            {{localize (concat "GBT.Disposition." (capitalize disposition))}}
           </label>
         </td>
         <td style="padding:4px 6px; width:45%;">
@@ -27,7 +27,11 @@
   </table>
 
   <div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;">
-    <button type="button" class="dialog-button" data-action="cancel">{{localize "GBT.Colors.ButtonCancel"}}</button>
-    <button type="submit" class="dialog-button">{{localize "GBT.Colors.ButtonSave"}}</button>
+    <button type="button" class="dialog-button" data-action="cancel">
+      {{localize "GBT.Common.Cancel"}}
+    </button>
+    <button type="submit" class="dialog-button">
+      {{localize "GBT.Common.Save"}}
+    </button>
   </div>
 </form>
