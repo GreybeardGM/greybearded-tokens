@@ -9,7 +9,6 @@ import { FramesForm } from "./frames-form.js";
 /* ---------- Preload-Cache ---------- */
 let _lastPreloaded = new Set();
 
-/* Pfade aus dem Snapshot ziehen */
 function _pathsFromSnapshot(S) {
   const out = [];
   if (S?.frame1?.path) out.push(S.frame1.path);
@@ -21,7 +20,7 @@ function _pathsFromSnapshot(S) {
 async function preloadFrameTextures(S) {
   const paths = _pathsFromSnapshot(S);
   const cur = new Set(paths);
-  if (paths.length && (_setEquals(cur, _lastPreloaded) === false)) {
+  if (paths.length && !_setEquals(cur, _lastPreloaded)) {
     await Promise.all(paths.map((p) => loadTexture(p)));
     _lastPreloaded = cur;
   }
@@ -40,7 +39,7 @@ function sweepAllTokenFrames(S) {
 }
 
 export function registerSettings() {
-  // ── Frames ──────────────────────────────────────────────────
+  // Wertecontainer (nicht sichtbar)
   game.settings.register(MOD_ID, "frames", {
     name: "Frames",
     scope: "world",
@@ -49,15 +48,6 @@ export function registerSettings() {
     default: { frame1: DEFAULT_FRAME1, frame2: DEFAULT_FRAME2, mask: DEFAULT_MASK }
   });
 
-  game.settings.registerMenu(MOD_ID, "framesMenu", {
-    name: "GBT.Settings.Frames.MenuName",
-    label: "GBT.Settings.Frames.MenuLabel",
-    icon: "fas fa-images",
-    type: FramesForm,
-    restricted: true
-  });
-
-  // ── Nameplate ───────────────────────────────────────────────
   game.settings.register(MOD_ID, "nameplate", {
     name: "Nameplate",
     scope: "world",
@@ -66,15 +56,6 @@ export function registerSettings() {
     default: DEFAULT_NAMEPLATES
   });
 
-  game.settings.registerMenu(MOD_ID, "nameplateMenu", {
-    name: "GBT.Settings.Nameplate.MenuName",
-    label: "GBT.Settings.Nameplate.MenuLabel",
-    icon: "fas fa-font",
-    type: NameplateForm,
-    restricted: true
-  });
-
-  // ── Colors ──────────────────────────────────────────────────
   game.settings.register(MOD_ID, "colors", {
     name: "Colors",
     scope: "world",
@@ -83,15 +64,31 @@ export function registerSettings() {
     default: DEFAULT_COLORS
   });
 
+  // Sichtbare Menüs
+  game.settings.registerMenu(MOD_ID, "framesMenu", {
+    name: "GBT.Menu.Frames.Name",     // Frame Setting
+    label: "GBT.Menu.Frames.Label",   // Configure Frames
+    icon: "fas fa-images",
+    type: FramesForm,
+    restricted: true
+  });
+
+  game.settings.registerMenu(MOD_ID, "nameplateMenu", {
+    name: "GBT.Menu.Nameplate.Name",   // Nameplate Settings
+    label: "GBT.Menu.Nameplate.Label", // Configure Nameplate
+    icon: "fas fa-font",
+    type: NameplateForm,
+    restricted: true
+  });
+
   game.settings.registerMenu(MOD_ID, "colorsMenu", {
-    name: "GBT.Settings.Colors.MenuName",
-    label: "GBT.Settings.Colors.MenuLabel",
+    name: "GBT.Menu.Colors.Name",     // Disposition Colors
+    label: "GBT.Menu.Colors.Label",   // Configure Colors
     icon: "fas fa-palette",
     type: ColorsForm,
     restricted: true
   });
 
-  // Preload nach Canvas-Start
   Hooks.once("canvasReady", async () => {
     const S = buildSnapshot();
     await preloadFrameTextures(S);
