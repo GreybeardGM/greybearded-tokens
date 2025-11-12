@@ -8,7 +8,7 @@ export class NameplateForm extends FormApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "gb-nameplate-form",
-      title: "Greybearded Tokens — Nameplate",
+      title: "GBT.Nameplate.Name",
       template: "modules/greybearded-tokens/templates/nameplate-form.hbs",
       classes: ["gb-nameplate-form"],
       width: 300,
