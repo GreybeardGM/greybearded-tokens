@@ -14,7 +14,7 @@ export class FramesForm extends FormApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "gb-frames-form",
-      title: "Greybearded Tokens — Frames & Mask",
+      title: "GBT.Frames.Label",
       template: "modules/greybearded-tokens/templates/frames-form.hbs",
       classes: ["gb-frames-form"],
       width: 820
