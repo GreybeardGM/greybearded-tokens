@@ -1,5 +1,5 @@
 // settings/register.js
-import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "../constants.js";
+import { MOD_ID, DEFAULT_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "../constants.js";
 import { updateFrame } from "../apply-frame.js";
 import { buildSnapshot } from "./snapshot.js";
 import { ColorsForm } from "./colors-form.js";
@@ -15,15 +15,14 @@ function _pathsFromSnapshot(S) {
   if (S?.frame1?.path) out.push(S.frame1.path);
   if (S?.frame2?.enabled && S?.frame2?.path) out.push(S.frame2.path);
   if (S?.mask?.enabled && S?.mask?.path) out.push(S.mask.path);
-  return [...new Set(out)]; // dedup
+  return [...new Set(out)];
 }
 
 async function preloadFrameTextures(S) {
   const paths = _pathsFromSnapshot(S);
-  // Nur laden, wenn sich die Menge geändert hat
   const cur = new Set(paths);
-  if (paths.length && _setEquals(cur, _lastPreloaded) === false) {
-    await Promise.all(paths.map(p => loadTexture(p)));
+  if (paths.length && (_setEquals(cur, _lastPreloaded) === false)) {
+    await Promise.all(paths.map((p) => loadTexture(p)));
     _lastPreloaded = cur;
   }
 }
@@ -35,23 +34,15 @@ function _setEquals(a, b) {
 }
 
 function sweepAllTokenFrames(S) {
-  // Rendering erst nach Preload, non-blocking
   requestAnimationFrame(() => {
     for (const t of canvas.tokens.placeables) updateFrame(t, S);
   });
 }
 
-async function requestReload() {
-  ui.notifications?.info("Greybearded Tokens: Bitte Oberfläche neu laden (F5), um Änderungen zu übernehmen.");
-  const S = buildSnapshot();
-  await preloadFrameTextures(S);
-  sweepAllTokenFrames(S);
-}
-
 export function registerSettings() {
-  // ── Frames ─────────────────────────────────────────────────────────────────
+  // ── Frames ──────────────────────────────────────────────────
   game.settings.register(MOD_ID, "frames", {
-    name: "Grouped Frames",
+    name: "Frames",
     scope: "world",
     config: false,
     type: Object,
@@ -59,16 +50,16 @@ export function registerSettings() {
   });
 
   game.settings.registerMenu(MOD_ID, "framesMenu", {
-    name: "Frames & Mask",
-    label: "Configure Frames",
+    name: "GBT.Settings.Frames.MenuName",
+    label: "GBT.Settings.Frames.MenuLabel",
     icon: "fas fa-images",
     type: FramesForm,
     restricted: true
   });
 
-  // ── Nameplates ──────────────────────────────────────────────────────────────
+  // ── Nameplate ───────────────────────────────────────────────
   game.settings.register(MOD_ID, "nameplate", {
-    name: "Nameplate Settings",
+    name: "Nameplate",
     scope: "world",
     config: false,
     type: Object,
@@ -76,16 +67,16 @@ export function registerSettings() {
   });
 
   game.settings.registerMenu(MOD_ID, "nameplateMenu", {
-    name: "Nameplate",
-    label: "Configure Nameplate",
+    name: "GBT.Settings.Nameplate.MenuName",
+    label: "GBT.Settings.Nameplate.MenuLabel",
     icon: "fas fa-font",
     type: NameplateForm,
     restricted: true
   });
 
-  // ── Disposition-Farben ──────────────────────────────────────────────────────
+  // ── Colors ──────────────────────────────────────────────────
   game.settings.register(MOD_ID, "colors", {
-    name: "Grouped Colors",
+    name: "Colors",
     scope: "world",
     config: false,
     type: Object,
@@ -93,17 +84,18 @@ export function registerSettings() {
   });
 
   game.settings.registerMenu(MOD_ID, "colorsMenu", {
-    name: "Colors",
-    label: "Disposition Colors",
+    name: "GBT.Settings.Colors.MenuName",
+    label: "GBT.Settings.Colors.MenuLabel",
     icon: "fas fa-palette",
     type: ColorsForm,
     restricted: true
   });
 
-  // Initiales Preload nach Canvas-Start
+  // Preload nach Canvas-Start
   Hooks.once("canvasReady", async () => {
     const S = buildSnapshot();
     await preloadFrameTextures(S);
+    sweepAllTokenFrames(S);
   });
 
   console.log("✅⭕ Greybearded Token Frames: Settings registered.");
