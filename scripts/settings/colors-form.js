@@ -13,7 +13,7 @@ export class ColorsForm extends FormApplication {
       title: "GBT.Colors.Name",
       template: "modules/greybearded-tokens/templates/colors-form.hbs",
       classes: ["gb-colors-form"],
-      width: 300,
+      width: 330,
       height: "auto",
       resizable: true,
       submitOnChange: false,
