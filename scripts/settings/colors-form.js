@@ -10,7 +10,7 @@ export class ColorsForm extends FormApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "gb-colors-form",
-      title: "Greybearded Tokens — Colors",
+      title: "GBT.Colors.Label",
       template: "modules/greybearded-tokens/templates/colors-form.hbs",
       classes: ["gb-colors-form"],
       width: 300,
