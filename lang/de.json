@@ -1,4 +1,12 @@
 {
+  "GBT.Nameplate.Enabled": "Aktiviert",
+  "GBT.Nameplate.BaseFontSize": "Grundschriftgröße (px)",
+  "GBT.Nameplate.FontFamily": "Schriftfamilie",
+  "GBT.Nameplate.UsePlayerColor": "Spielerfarbe verwenden",
+  "GBT.Nameplate.DefaultColor": "Standardfarbe",
+  "GBT.Nameplate.TintMode": "Farbmodus",
+  "GBT.Nameplate.ScaleWithToken": "Mit Token skalieren",
+  "GBT.Nameplate.ButtonSave": "Speichern"
   "GBT.Colors.Name": "Tokenrahmen-Farben",
   "GBT.Colors.Hint": "Lege die Standardfarben für jede Token-Disposition fest.",
   "GBT.Colors.Disposition": "Disposition"
