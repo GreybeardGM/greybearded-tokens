@@ -4,11 +4,11 @@ export const MOD_ID = "greybearded-tokens";
 
 // Tint Choices
 export const TINT_CHOICES = {
-  none: "GBT.Tint.None",
-  disposition: "GBT.Tint.Disposition",
-  unicolor: "GBT.Tint.Unicolor",
-  advanced: "GBT.Tint.Advanced",
-  custom: "GBT.Tint.Custom"
+  NoTint:      "GBT.Tint.None",
+  Disposition: "GBT.Tint.Disposition",
+  Unicolor:    "GBT.Tint.Unicolor",
+  Advanced:    "GBT.Tint.Advanced",
+  Custom:      "GBT.Tint.Custom"
 };
 
 // Font Choices
