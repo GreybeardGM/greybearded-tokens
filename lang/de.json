@@ -1,6 +1,7 @@
 {
   "GBT.Colors.Name": "Tokenrahmen-Farben",
   "GBT.Colors.Hint": "Lege die Standardfarben für jede Token-Disposition fest.",
+  "GBT.Colors.Disposition": "Disposition"
   "GBT.Colors.Hostile": "Feindlich",
   "GBT.Colors.Neutral": "Neutral",
   "GBT.Colors.Friendly": "Verbündet",
