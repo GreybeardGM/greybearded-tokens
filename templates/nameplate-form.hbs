@@ -1,16 +1,16 @@
 <form class="gb-nameplate">
   <div class="form-group">
-    <label>Enabled</label>
+    <label>{{localize "GBT.Nameplate.Enabled"}}</label>
     <input type="checkbox" name="enabled" {{#if enabled}}checked{{/if}} />
   </div>
 
   <div class="form-group">
-    <label>Base Font Size (px)</label>
+    <label>{{localize "GBT.Nameplate.BaseFontSize"}}</label>
     <input type="number" name="baseFontSize" min="6" max="96" step="1" value="{{baseFontSize}}" />
   </div>
 
   <div class="form-group">
-    <label>Font Family</label>
+    <label>{{localize "GBT.Nameplate.FontFamily"}}</label>
     <select name="fontFamily">
       {{#each FONT_CHOICES}}
         <option value="{{@key}}" {{#if (eq ../fontFamily @key)}}selected{{/if}}>{{this}}</option>
@@ -19,12 +19,12 @@
   </div>
 
   <div class="form-group">
-    <label>Use Player Color</label>
+    <label>{{localize "GBT.Nameplate.UsePlayerColor"}}</label>
     <input type="checkbox" name="usePlayerColor" {{#if usePlayerColor}}checked{{/if}} />
   </div>
 
   <div class="form-group">
-    <label>Default Color</label>
+    <label>{{localize "GBT.Nameplate.DefaultColor"}}</label>
     <div style="display:flex; gap:8px; align-items:center;">
       <input type="text"  name="defaultColor-text"  value="{{defaultColor}}" placeholder="#RRGGBB" />
       <input type="color" name="defaultColor-color" value="{{defaultColor}}" />
@@ -32,7 +32,7 @@
   </div>
 
   <div class="form-group">
-    <label>Tint Mode</label>
+    <label>{{localize "GBT.Nameplate.TintMode"}}</label>
     <select name="tintMode">
       {{#each TINT_CHOICES}}
         <option value="{{@key}}" {{#if (eq ../tintMode @key)}}selected{{/if}}>{{this}}</option>
@@ -41,11 +41,11 @@
   </div>
 
   <div class="form-group">
-    <label>Scale With Token</label>
+    <label>{{localize "GBT.Nameplate.ScaleWithToken"}}</label>
     <input type="checkbox" name="scaleWithToken" {{#if scaleWithToken}}checked{{/if}} />
   </div>
 
   <footer class="sheet-footer flexrow" style="margin-top:8px; gap:8px; justify-content:flex-end;">
-    <button type="submit" class="dialog-button">Save</button>
+    <button type="submit" class="dialog-button">{{localize "GBT.Nameplate.ButtonSave"}}</button>
   </footer>
 </form>
