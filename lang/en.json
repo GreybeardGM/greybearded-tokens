@@ -1,6 +1,7 @@
 {
   "GBT.Colors.Name": "Token Frame Colors",
   "GBT.Colors.Hint": "Define default tint colors for each token disposition.",
+  "GBT.Colors.Disposition": "Disposition"
   "GBT.Colors.Hostile": "Hostile",
   "GBT.Colors.Neutral": "Neutral",
   "GBT.Colors.Friendly": "Friendly",
