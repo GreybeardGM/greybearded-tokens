@@ -1,6 +1,6 @@
 // get-tint-color.js
 import { getPlayerColor } from "./get-player-color.js";
-import { DEFAULT_COLORS } from "./constants.js";
+import { DEFAULT_DISPOSITION_COLORS } from "./settings/constants.js";
 
 /**
  * Liefert die Tint-Farbe für ein Token anhand eines spezifischen Settings-Objekts.
@@ -67,10 +67,10 @@ export function getTintColor(token, S, part) {
       if (isPC) return S.colors?.character ?? defaultColor;
 
       switch (disp) {
-        case -2: return S.colors?.secret   ?? DEFAULT_COLORS.secret;
-        case -1: return S.colors?.hostile  ?? DEFAULT_COLORS.hostile;
-        case  0: return S.colors?.neutral  ?? DEFAULT_COLORS.neutral;
-        case  1: return S.colors?.friendly ?? DEFAULT_COLORS.friendly;
+        case -2: return S.colors?.secret   ?? DEFAULT_DISPOSITION_COLORS.secret;
+        case -1: return S.colors?.hostile  ?? DEFAULT_DISPOSITION_COLORS.hostile;
+        case  0: return S.colors?.neutral  ?? DEFAULT_DISPOSITION_COLORS.neutral;
+        case  1: return S.colors?.friendly ?? DEFAULT_DISPOSITION_COLORS.friendly;
         default: return defaultColor;
       }
     }
