@@ -3,19 +3,36 @@ import { getGbFrameSettings, buildSnapshot } from "./settings/snapshot.js";
 import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
 import { updateFrame } from "./apply-frame.js";
 
-async function preloadFrameTextures() {
-  const S = getGbFrameSettings();
-  const paths = [
-    S?.frame1?.path,
-    (S?.frame2?.enabled ? S?.frame2?.path : null)
-  ].filter(Boolean);
+/* ---------- Preload-Cache ---------- */
+let _lastPreloaded = new Set();
 
-  if (!paths.length) return;
-  await Promise.all(paths.map((p) => PIXI.Assets.load(p)));
+function _pathsFromSnapshot(S) {
+  const out = [];
+  if (S?.frame1?.path) out.push(S.frame1.path);
+  if (S?.frame2?.enabled && S?.frame2?.path) out.push(S.frame2.path);
+  if (S?.mask?.enabled && S?.mask?.path) out.push(S.mask.path);
+  return [...new Set(out)];
 }
 
-function sweepAllTokenFrames() {
-  for (const t of canvas.tokens.placeables) updateFrame(t);
+async function preloadFrameTextures(S) {
+  const paths = _pathsFromSnapshot(S);
+  const cur = new Set(paths);
+  if (paths.length && !_setEquals(cur, _lastPreloaded)) {
+    await Promise.all(paths.map((p) => loadTexture(p)));
+    _lastPreloaded = cur;
+  }
+}
+
+function _setEquals(a, b) {
+  if (!(b instanceof Set) || a.size !== b.size) return false;
+  for (const v of a) if (!b.has(v)) return false;
+  return true;
+}
+
+function sweepAllTokenFrames(S) {
+  requestAnimationFrame(() => {
+    for (const t of canvas.tokens.placeables) updateFrame(t, S);
+  });
 }
 
 export function registerRenderingHooks() {
@@ -37,10 +54,9 @@ export function registerRenderingHooks() {
   // späte Lebenszyklen
   Hooks.on("canvasReady", async () => {
     rebuildPlayerColorSnapshot();
-    buildSnapshot();                // gültige Settings sicherstellen
-    await preloadFrameTextures();   // erst nach Snapshot
-    //sweepAllTokenFrames();
+    const S = buildSnapshot();
+    await preloadFrameTextures(S);
+    sweepAllTokenFrames(S);
   });
   
-  console.log("✅⭕ Greybearded Token Frames: Hooks registered.");
 }
