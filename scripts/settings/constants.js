@@ -1,8 +1,7 @@
-// modules/greybearded-tokens/scripts/constants.js
+// modules/greybearded-tokens/scripts/settings/constants.js
 
 export const MOD_ID = "greybearded-tokens";
 
-// Tint Choices
 export const TINT_CHOICES = {
   NoTint:      "GBT.Tint.None",
   Disposition: "GBT.Tint.Disposition",
@@ -11,7 +10,6 @@ export const TINT_CHOICES = {
   Custom:      "GBT.Tint.Custom"
 };
 
-// Font Choices
 export const FONT_CHOICES = {
   "Arial": "Arial",
   "Amiri": "Amiri",
@@ -24,7 +22,7 @@ export const FONT_CHOICES = {
   "Times New Roman": "Times New Roman"
 };
 
-export const DEFAULT_COLORS = {
+export const DEFAULT_DISPOSITION_COLORS = {
   "hostile":   "#993333",
   "neutral":   "#B7A789",
   "friendly":  "#5F7A8A",
@@ -41,6 +39,7 @@ export const DEFAULT_NAMEPLATES = {
   tintMode: "NoTint",
   scaleWithToken: true
 };
+
 
 export const DEFAULT_FRAME1 = {
   path: "modules/greybearded-tokens/assets/frame-default.png",
