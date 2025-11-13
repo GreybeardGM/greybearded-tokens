@@ -2,7 +2,7 @@
 // Minimal-invasives Sidecar-Skript für Actor→Prototype-Token Bild-Sync.
 // Core v12+, keine Abhängigkeiten vom Rest deines Moduls.
 
-import { MOD_ID } from "./constants.js";
+import { MOD_ID } from "./settings/constants.js";
 const SETTING_KEY = "portraitSyncMode";
 const SYNC_MODES = { ALWAYS: "always", DIALOG: "dialog", NOTHING: "nothing" };
 
