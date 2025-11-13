@@ -1,5 +1,5 @@
 // settings/register.js
-import { MOD_ID, DEFAULT_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "../constants.js";
+import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "./constants.js";
 import { updateFrame } from "../apply-frame.js";
 import { buildSnapshot } from "./snapshot.js";
 import { ColorsForm } from "./colors-form.js";
@@ -61,7 +61,7 @@ export function registerSettings() {
     scope: "world",
     config: false,
     type: Object,
-    default: DEFAULT_COLORS
+    default: DEFAULT_DISPOSITION_COLORS
   });
 
   // Sichtbare Menüs
