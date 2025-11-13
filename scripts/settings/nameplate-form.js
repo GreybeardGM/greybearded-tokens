@@ -1,5 +1,5 @@
 // modules/greybearded-tokens/scripts/settings/nameplate-form.js
-import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_NAMEPLATES } from "../constants.js";
+import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_NAMEPLATES } from "./constants.js";
 import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
 import { isHex, num, bool, oneOf, bindHexSync } from "./helpers.js";
