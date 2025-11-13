@@ -55,7 +55,7 @@ export const DEFAULT_FRAME2 = {
   scale: 1,
   tintMode: "Unicolor",
   usePlayerColor: true,
-  defaultColor: "#888888"
+  defaultColor: "#000000"
 };
 
 export const DEFAULT_MASK = {
