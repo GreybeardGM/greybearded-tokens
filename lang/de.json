@@ -28,11 +28,11 @@
   "GBT.Frames.Scale": "Skalierung",
   "GBT.Frames.Browse": "Durchsuchen…",
 
-  "GBT.Disposition.Hostile": "Feindlich",
-  "GBT.Disposition.Neutral": "Neutral",
-  "GBT.Disposition.Friendly": "Verbündet",
-  "GBT.Disposition.Secret": "Geheimnisvoll",
-  "GBT.Disposition.Character": "Spielercharakter",
+  "GBT.Disposition.hostile": "Feindlich",
+  "GBT.Disposition.neutral": "Neutral",
+  "GBT.Disposition.friendly": "Verbündet",
+  "GBT.Disposition.secret": "Geheimnisvoll",
+  "GBT.Disposition.character": "Spielercharakter",
 
   "GBT.Colors.Name": "Disposition-Farben",
   "GBT.Colors.Label": "Farben konfigurieren",
