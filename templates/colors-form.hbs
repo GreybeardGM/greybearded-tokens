@@ -2,7 +2,7 @@
   <table style="width:100%; border-collapse:collapse;">
     <thead>
       <tr>
-        <th>{{localize "GBT.Colors.Disposition"}}</th>
+        <th>{{tableName}}</th>
         <th>{{localize "GBT.Common.ColorHex"}}</th>
         <th>{{localize "GBT.Common.ColorPicker"}}</th>
       </tr>
@@ -11,15 +11,15 @@
       {{#each rows}}
       <tr>
         <td style="padding:4px 6px; width:30%;">
-          <label for="{{disposition}}-text">
-            {{localize (concat "GBT.Disposition." (capitalize disposition))}}
+          <label for="{{role}}-text">
+            {{localize (concat "GBT.Disposition." (capitalize role))}}
           </label>
         </td>
         <td style="padding:4px 6px; width:45%;">
-          <input id="{{disposition}}-text" type="text" name="{{disposition}}-text" value="{{value}}" placeholder="#RRGGBB" />
+          <input id="{{role}}-text" type="text" name="{{role}}-text" value="{{value}}" placeholder="#RRGGBB" />
         </td>
         <td style="padding:4px 6px; width:25%;">
-          <input id="{{disposition}}-color" type="color" name="{{disposition}}-color" value="{{value}}" />
+          <input id="{{role}}-color" type="color" name="{{role}}-color" value="{{value}}" />
         </td>
       </tr>
       {{/each}}
