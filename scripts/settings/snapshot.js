@@ -1,5 +1,5 @@
 // modules/greybearded-tokens/scripts/settings/snapshot.js
-import { MOD_ID, DEFAULT_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "../constants.js";
+import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "./constants.js";
 import { num, bool, str, readObjectSetting } from "./helpers.js";
 
 let _S = null;
@@ -9,7 +9,7 @@ function _readAll() {
     frame1: DEFAULT_FRAME1, frame2: DEFAULT_FRAME2, mask: DEFAULT_MASK
   });
   const NP = readObjectSetting(MOD_ID, "nameplate", DEFAULT_NAMEPLATES);
-  const CL = readObjectSetting(MOD_ID, "colors", DEFAULT_COLORS);
+  const CL = readObjectSetting(MOD_ID, "colors", DEFAULT_DISPOSITION_COLORS);
 
   const snap = {
     frame1: {
