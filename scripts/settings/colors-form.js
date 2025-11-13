@@ -1,5 +1,5 @@
 // modules/greybearded-tokens/scripts/settings/colors-form.js
-import { MOD_ID, DEFAULT_COLORS } from "../constants.js";
+import { MOD_ID, DEFAULT_DISPOSITION_COLORS } from "./constants.js";
 import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
 import { isHex, bindHexPairs } from "./helpers.js";
@@ -22,10 +22,10 @@ export class ColorsForm extends FormApplication {
   }
 
   async getData() {
-    const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_COLORS) || DEFAULT_COLORS;
+    const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_DISPOSITION_COLORS) || DEFAULT_DISPOSITION_COLORS;
     const rows = DISPOSITION.map(d => ({
       disposition: d,
-      value: (typeof cur?.[d] === "string" && isHex(cur[d])) ? cur[d] : (DEFAULT_COLORS[d] ?? "#000000")
+      value: (typeof cur?.[d] === "string" && isHex(cur[d])) ? cur[d] : (DEFAULT_DISPOSITION_COLORS[d] ?? "#000000")
     }));
     return { rows };
   }
@@ -43,7 +43,7 @@ export class ColorsForm extends FormApplication {
     for (const d of DISPOSITION) {
       const t = el.querySelector(`input[name="${d}-text"]`)?.value?.trim();
       const c = el.querySelector(`input[name="${d}-color"]`)?.value?.trim();
-      next[d] = isHex(t) ? t : (isHex(c) ? c : (DEFAULT_COLORS[d] ?? "#000000"));
+      next[d] = isHex(t) ? t : (isHex(c) ? c : (DEFAULT_DISPOSITION_COLORS[d] ?? "#000000"));
     }
     await game.settings.set(MOD_ID, "colors", next);
     const S = buildSnapshot();
