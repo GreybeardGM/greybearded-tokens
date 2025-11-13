@@ -1,42 +1,8 @@
 // settings/register.js
 import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "./constants.js";
-import { updateFrame } from "../apply-frame.js";
-import { buildSnapshot } from "./snapshot.js";
 import { ColorsForm } from "./colors-form.js";
 import { NameplateForm } from "./nameplate-form.js";
 import { FramesForm } from "./frames-form.js";
-
-/* ---------- Preload-Cache ---------- */
-let _lastPreloaded = new Set();
-
-function _pathsFromSnapshot(S) {
-  const out = [];
-  if (S?.frame1?.path) out.push(S.frame1.path);
-  if (S?.frame2?.enabled && S?.frame2?.path) out.push(S.frame2.path);
-  if (S?.mask?.enabled && S?.mask?.path) out.push(S.mask.path);
-  return [...new Set(out)];
-}
-
-async function preloadFrameTextures(S) {
-  const paths = _pathsFromSnapshot(S);
-  const cur = new Set(paths);
-  if (paths.length && !_setEquals(cur, _lastPreloaded)) {
-    await Promise.all(paths.map((p) => loadTexture(p)));
-    _lastPreloaded = cur;
-  }
-}
-
-function _setEquals(a, b) {
-  if (!(b instanceof Set) || a.size !== b.size) return false;
-  for (const v of a) if (!b.has(v)) return false;
-  return true;
-}
-
-function sweepAllTokenFrames(S) {
-  requestAnimationFrame(() => {
-    for (const t of canvas.tokens.placeables) updateFrame(t, S);
-  });
-}
 
 export function registerSettings() {
   // Wertecontainer (nicht sichtbar)
@@ -87,12 +53,6 @@ export function registerSettings() {
     icon: "fas fa-palette",
     type: ColorsForm,
     restricted: true
-  });
-
-  Hooks.once("canvasReady", async () => {
-    const S = buildSnapshot();
-    await preloadFrameTextures(S);
-    sweepAllTokenFrames(S);
   });
 
 }
