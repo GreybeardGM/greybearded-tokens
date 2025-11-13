@@ -95,5 +95,4 @@ export function registerSettings() {
     sweepAllTokenFrames(S);
   });
 
-  console.log("✅⭕ Greybearded Token Frames: Settings registered.");
 }
