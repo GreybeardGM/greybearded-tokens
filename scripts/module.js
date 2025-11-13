@@ -17,8 +17,3 @@ Hooks.on("canvasReady", () => {
   // Szene-/Weltwechsel: Snapshot auffrischen
   buildSnapshot();
 });
-
-// Optional: bei Settings-Änderung Snapshot erneuern
-Hooks.on("updateSetting", (setting) => {
-  if (setting?.key?.startsWith("greybearded-tokens.")) buildSnapshot();
-});
