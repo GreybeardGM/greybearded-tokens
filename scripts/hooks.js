@@ -54,7 +54,7 @@ export function registerRenderingHooks() {
       }
     }
 
-    // Frames aktualisieren, wenn andere Szene
+    /*// Frames aktualisieren, wenn andere Szene
     if (viewChange && user.isSelf) {
       if (!canvas?.ready) return;
       // Sicherheitscheck: nur wenn das Canvas tatsächlich diese Szene zeigt
@@ -64,6 +64,7 @@ export function registerRenderingHooks() {
       preloadFrameTextures(S);   // kein await nötig
       sweepAllTokenFrames(S);
     }
+    */
   });
 
   Hooks.on("createUser", () => {
