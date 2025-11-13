@@ -3,7 +3,7 @@ import {
   MOD_ID,
   TINT_CHOICES,
   DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK
-} from "../constants.js";
+} from "./constants.js";
 import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
 import {
