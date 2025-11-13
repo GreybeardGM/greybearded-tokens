@@ -153,7 +153,7 @@ function updateNameplate(token, S, tx, ty) {
    ========================= */
 async function applyFrameToToken(token) {
   if (!token || token.destroyed) return;
-  if (!token.scene?.active) return;
+  // if (!token.scene?.active) return; // Deaktivierung für Inaktive Szenen
 
   // Settings laden
   const S = getGbFrameSettings();
