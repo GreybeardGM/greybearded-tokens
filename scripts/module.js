@@ -10,7 +10,6 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   buildSnapshot(); // Settings jetzt sicher
-  console.log("GBT ready");
 });
 
 Hooks.on("canvasReady", () => {
