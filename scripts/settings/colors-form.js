@@ -23,9 +23,10 @@ export class ColorsForm extends FormApplication {
 
   async getData() {
     const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_DISPOSITION_COLORS) || DEFAULT_DISPOSITION_COLORS;
-    const rows = DISPOSITION.map(d => ({
-      disposition: d,
-      value: (typeof cur?.[d] === "string" && isHex(cur[d])) ? cur[d] : (DEFAULT_DISPOSITION_COLORS[d] ?? "#000000")
+    const rows = DISPOSITION.map(r => ({
+      tableName: "GBT.Colors.Disposition",
+      role: r,
+      value: (typeof cur?.[r] === "string" && isHex(cur[r])) ? cur[r] : (DEFAULT_DISPOSITION_COLORS[r] ?? "#000000")
     }));
     return { rows };
   }
@@ -40,10 +41,10 @@ export class ColorsForm extends FormApplication {
   async _updateObject(_event, _formData) {
     const el = this.element[0];
     const next = {};
-    for (const d of DISPOSITION) {
-      const t = el.querySelector(`input[name="${d}-text"]`)?.value?.trim();
-      const c = el.querySelector(`input[name="${d}-color"]`)?.value?.trim();
-      next[d] = isHex(t) ? t : (isHex(c) ? c : (DEFAULT_DISPOSITION_COLORS[d] ?? "#000000"));
+    for (const r of DISPOSITION) {
+      const t = el.querySelector(`input[name="${r}-text"]`)?.value?.trim();
+      const c = el.querySelector(`input[name="${r}-color"]`)?.value?.trim();
+      next[r] = isHex(t) ? t : (isHex(c) ? c : (DEFAULT_DISPOSITION_COLORS[r] ?? "#000000"));
     }
     await game.settings.set(MOD_ID, "colors", next);
     const S = buildSnapshot();
