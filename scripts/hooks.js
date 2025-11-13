@@ -36,27 +36,52 @@ function sweepAllTokenFrames(S) {
 }
 
 export function registerRenderingHooks() {
-  
+
   Hooks.on("refreshToken", (t) => {
     updateFrame(t);
   });
 
   Hooks.on("updateUser", (user, change) => {
     if (!change) return;
-    if ("color" in change || "character" in change) {
+
+    const colorOrCharChange = ("color" in change) || ("character" in change);
+    const viewChange        = ("viewedScene" in change);
+
+    if (colorOrCharChange) {
       rebuildPlayerColorSnapshot();
-      if (canvas?.ready) sweepAllTokenFrames();
+      if (canvas?.ready) {
+        sweepAllTokenFrames();
+      }
+    }
+
+    // Frames aktualisieren, wenn andere Szene
+    if (viewChange && user.isSelf) {
+      if (!canvas?.ready) return;
+      // Sicherheitscheck: nur wenn das Canvas tatsächlich diese Szene zeigt
+      if (canvas.scene?.id !== user.viewedScene) return;
+
+      const S = buildSnapshot();
+      preloadFrameTextures(S);   // kein await nötig
+      sweepAllTokenFrames(S);
     }
   });
-  Hooks.on("createUser", () => { rebuildPlayerColorSnapshot(); if (canvas?.ready) sweepAllTokenFrames(); });
-  Hooks.on("deleteUser", () => { rebuildPlayerColorSnapshot(); if (canvas?.ready) sweepAllTokenFrames(); });
 
-  // späte Lebenszyklen
+  Hooks.on("createUser", () => {
+    rebuildPlayerColorSnapshot();
+    if (canvas?.ready) sweepAllTokenFrames();
+  });
+
+  Hooks.on("deleteUser", () => {
+    rebuildPlayerColorSnapshot();
+    if (canvas?.ready) sweepAllTokenFrames();
+  });
+
+  // Updaten für alle Tokes, wenn Canvas geladen
   Hooks.on("canvasReady", async () => {
     rebuildPlayerColorSnapshot();
     const S = buildSnapshot();
     await preloadFrameTextures(S);
     sweepAllTokenFrames(S);
   });
-  
+
 }
