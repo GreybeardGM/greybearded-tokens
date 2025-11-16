@@ -5,6 +5,8 @@ import { updateFrame } from "./apply-frame.js";
 
 /* ---------- Preload-Cache ---------- */
 let _lastPreloaded = new Set();
+let _pendingSweepHandle = null;
+let _pendingSweepSnapshot = null;
 
 function _pathsFromSnapshot(S) {
   const out = [];
@@ -29,9 +31,17 @@ function _setEquals(a, b) {
   return true;
 }
 
-function sweepAllTokenFrames(S) {
-  requestAnimationFrame(() => {
-    for (const t of canvas.tokens.placeables) updateFrame(t, S);
+function sweepAllTokenFrames(snapshot) {
+  if (!canvas?.ready) return;
+
+  _pendingSweepSnapshot = snapshot ?? _pendingSweepSnapshot ?? getGbFrameSettings();
+  if (_pendingSweepHandle) return;
+
+  _pendingSweepHandle = requestAnimationFrame(() => {
+    _pendingSweepHandle = null;
+    const snap = _pendingSweepSnapshot ?? getGbFrameSettings();
+    _pendingSweepSnapshot = null;
+    for (const t of canvas.tokens.placeables) updateFrame(t, snap);
   });
 }
 
