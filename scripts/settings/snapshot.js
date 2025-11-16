@@ -4,6 +4,22 @@ import { num, bool, str, readObjectSetting } from "./helpers.js";
 
 let _S = null;
 
+function deriveRuntimeFlags(snapshot) {
+  const hasFrame1 = !!snapshot?.frame1?.path;
+  const hasFrame2 = !!(snapshot?.frame2?.enabled && snapshot?.frame2?.path);
+  const hasMask   = !!(snapshot?.mask?.enabled && snapshot?.mask?.path);
+  const hasName   = !!snapshot?.nameplate?.enabled;
+
+  return {
+    hasFrame1,
+    hasFrame2,
+    hasMask,
+    hasNameplate: hasName,
+    hasAnyOverlay: hasFrame1 || hasFrame2,
+    hasAnyVisuals: hasFrame1 || hasFrame2 || hasMask || hasName
+  };
+}
+
 function _readAll() {
   const FR = readObjectSetting(MOD_ID, "frames", {
     frame1: DEFAULT_FRAME1, frame2: DEFAULT_FRAME2, mask: DEFAULT_MASK
@@ -34,6 +50,8 @@ function _readAll() {
     nameplate: NP,
     colors:    CL
   };
+
+  snap.runtime = deriveRuntimeFlags(snap);
 
   return snap;
 }
