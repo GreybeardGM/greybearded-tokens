@@ -20,7 +20,8 @@ async function preloadFrameTextures(S) {
   const paths = _pathsFromSnapshot(S);
   const cur = new Set(paths);
   if (paths.length && !_setEquals(cur, _lastPreloaded)) {
-    await Promise.all(paths.map((p) => loadTexture(p)));
+    const load = foundry?.canvas?.loadTexture ?? loadTexture;
+    await Promise.all(paths.map((p) => load(p)));
     _lastPreloaded = cur;
   }
 }
