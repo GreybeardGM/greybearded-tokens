@@ -55,5 +55,6 @@
   "GBT.Sync.ActorPortrait": "Actor Portrait",
   "GBT.Sync.ProtoToken": "Prototype Token",
   "GBT.Sync.ButtonSync": "Synchronize",
+  "GBT.Sync.ButtonCancel": "Cancel",
   "GBT.Sync.DoneInfo": "Prototype Token image synchronized for {name}."
 }

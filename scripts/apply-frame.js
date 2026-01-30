@@ -286,8 +286,26 @@ async function applyFrameToToken(token, snapshot) {
 /* =========================
    Frame Update Reservieren
    ========================= */
+const frameQueue = [];
+let frameQueueScheduled = false;
+
 function nextTick(fn){
-  requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(fn,0)));
+  frameQueue.push(fn);
+  if (typeof queueMicrotask === "function") {
+    queueMicrotask(scheduleFrameQueue);
+    return;
+  }
+  scheduleFrameQueue();
+}
+
+function scheduleFrameQueue() {
+  if (frameQueueScheduled) return;
+  frameQueueScheduled = true;
+  requestAnimationFrame(() => {
+    frameQueueScheduled = false;
+    const callbacks = frameQueue.splice(0, frameQueue.length);
+    for (const callback of callbacks) callback();
+  });
 }
 
 export async function updateFrame(token, snapshot) {

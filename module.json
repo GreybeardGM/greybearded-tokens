@@ -2,8 +2,8 @@
   "id": "greybearded-tokens",
   "title": "Greybearded Token Frames",
   "type": "module",
-  "version": "0.1.0",
-  "description": "Adds scalable, tintable token overlays",
+  "version": "0.1.1",
+  "description": "Adds scalable, tintable token overlays and masks.",
   "author": "GreybeardGM",
   "languages": [
     { "lang": "en", "name": "English", "path": "lang/en.json" },
