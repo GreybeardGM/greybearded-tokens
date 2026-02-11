@@ -118,9 +118,11 @@ async function promptSyncDialog(actor, oldSrc, newImg) {
   });
 
   const result = await DialogV2.wait({
-    window: { title: game.i18n.localize("GBT.Sync.DialogTitle") },
     content,
-    contentClasses: ["gbt-frames"],
+    window: {
+      title: game.i18n.localize("GBT.Sync.DialogTitle"),
+      contentClasses: ["gbt-frames"]
+    },
     buttons: [
       {
         action: "sync",
