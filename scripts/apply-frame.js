@@ -288,6 +288,7 @@ async function applyFrameToToken(token, snapshot) {
    ========================= */
 const frameQueue = [];
 let frameQueueScheduled = false;
+const MAX_FRAME_RETRIES = 12;
 
 function nextTick(fn){
   frameQueue.push(fn);
@@ -308,13 +309,56 @@ function scheduleFrameQueue() {
   });
 }
 
-export async function updateFrame(token, snapshot) {
+function isTokenVisualReady(token) {
+  if (!token || token.destroyed) return false;
+  if (!token.mesh || !token.mesh.visible) return false;
+  if (!isFinite(token.w) || !isFinite(token.h) || token.w <= 0 || token.h <= 0) return false;
+  const tex = token.mesh.texture;
+  return !!(tex?.valid || tex?.baseTexture?.valid);
+}
+
+function reserveFrameUpdate(token) {
   if (!token?._gb) token._gb = {};
-  if (token._gb.frameScheduled) return;
+  const gb = token._gb;
+  if (gb.frameScheduled) return false;
+  gb.frameScheduled = true;
+  gb.frameRetryCount = gb.frameRetryCount ?? 0;
+  return true;
+}
+
+function releaseFrameUpdate(token) {
+  if (!token?._gb) return;
+  token._gb.frameScheduled = false;
+}
+
+function scheduleRetry(token, snapshot) {
+  const gb = token?._gb;
+  if (!gb) return;
+  const retries = (gb.frameRetryCount ?? 0) + 1;
+  gb.frameRetryCount = retries;
+  if (retries > MAX_FRAME_RETRIES) {
+    gb.frameRetryCount = 0;
+    releaseFrameUpdate(token);
+    return;
+  }
+  releaseFrameUpdate(token);
+  requestAnimationFrame(() => updateFrame(token, snapshot));
+}
+
+export async function updateFrame(token, snapshot) {
+  if (!reserveFrameUpdate(token)) return;
   const S = snapshot ?? getGbFrameSettings();
-  token._gb.frameScheduled = true;   // ✅ Reservation
   nextTick(async () => {
-    try { await applyFrameToToken(token, S); }
-    finally { token._gb.frameScheduled = false; } // ✅ Flag NUR hier zurücksetzen
+    try {
+      if (!isTokenVisualReady(token)) {
+        scheduleRetry(token, S);
+        return;
+      }
+
+      token._gb.frameRetryCount = 0;
+      await applyFrameToToken(token, S);
+    } finally {
+      if (token?._gb?.frameScheduled) releaseFrameUpdate(token);
+    }
   });
 }
