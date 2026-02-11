@@ -4,7 +4,12 @@
 
 import { MOD_ID } from "./settings/constants.js";
 const SETTING_KEY = "portraitSyncMode";
+const SYNC_DIALOG_TEMPLATE = `modules/${MOD_ID}/templates/portrait-sync-dialog.hbs`;
 const SYNC_MODES = { ALWAYS: "always", DIALOG: "dialog", NOTHING: "nothing" };
+const SYNC_SOURCE_FLAG = `${MOD_ID}.portraitSyncSource`;
+const SYNC_SOURCES = {
+  TOKEN_TO_EMBEDDED_ACTOR: "token-to-embedded-actor"
+};
 
 Hooks.once("init", () => {
   game.settings.register(MOD_ID, SETTING_KEY, {
@@ -29,10 +34,13 @@ Hooks.once("init", () => {
 Hooks.on("updateActor", async (actor, changed, options, userId) => {
   try {
     if (!("img" in changed)) return;                 // nichts zu tun, wenn Portrait unverändert
+    if (options?.[SYNC_SOURCE_FLAG] === SYNC_SOURCES.TOKEN_TO_EMBEDDED_ACTOR) return;
+    if (isEmbeddedActor(actor)) return;
+
     const mode = game.settings.get(MOD_ID, SETTING_KEY);
     if (mode === SYNC_MODES.NOTHING) return;
     if (userId !== game.user.id) return;            // Nur für auslösenden Nutzer anzeigen
-    
+
     const newImg = actor.img;                        // bereits persistierter Wert
     if (!newImg) return;
 
@@ -50,10 +58,37 @@ Hooks.on("updateActor", async (actor, changed, options, userId) => {
 
     if (mode === SYNC_MODES.DIALOG) {
       await promptSyncDialog(actor, currentProtoSrc, newImg);
-      return;
     }
   } catch (err) {
     console.error(`${MOD_ID} | Portrait sync failed:`, err);
+  }
+});
+
+/**
+ * Unverlinkte Token mit eingebettetem Actor: Wird das Token-Bild geändert,
+ * synchronisieren wir das Portrait des eingebetteten Actors.
+ */
+Hooks.on("updateToken", async (tokenDoc, changed, options, userId) => {
+  try {
+    const newTokenImg = changed?.texture?.src;
+    if (!newTokenImg) return;
+    if (userId !== game.user.id) return;
+
+    const mode = game.settings.get(MOD_ID, SETTING_KEY);
+    if (mode === SYNC_MODES.NOTHING) return;
+
+    if (tokenDoc.actorLink) return;
+
+    const embeddedActor = tokenDoc.actor;
+    if (!embeddedActor || !isEmbeddedActor(embeddedActor)) return;
+    if (embeddedActor.img === newTokenImg) return;
+
+    await embeddedActor.update(
+      { img: newTokenImg },
+      { [SYNC_SOURCE_FLAG]: SYNC_SOURCES.TOKEN_TO_EMBEDDED_ACTOR }
+    );
+  } catch (err) {
+    console.error(`${MOD_ID} | Token → embedded actor portrait sync failed:`, err);
   }
 });
 
@@ -66,55 +101,52 @@ async function syncPrototypeTokenImage(actor, img) {
 
 /** Einfache Bestätigungsabfrage mit zwei Buttons: Synchronize / Cancel. */
 async function promptSyncDialog(actor, oldSrc, newImg) {
-  return new Promise((resolve) => {
-    const title = game.i18n.localize("GBT.Sync.DialogTitle");
-    const content = `
-      <div style="max-width:100%; overflow:hidden;">
-        <p>${game.i18n.localize("GBT.Sync.DialogText")}</p>
-        <div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px;">
-          <div>
-            <label><strong>${game.i18n.localize("GBT.Sync.ActorPortrait")}</strong></label>
-            <div style="border:1px solid #888; border-radius:4px; padding:4px;">
-              <img src="${newImg}" style="max-width:100%; height:auto; display:block; object-fit:contain;">
-            </div>
-            <code style="display:block; font-size:0.8em; overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(newImg)}</code>
-          </div>
-          <div>
-            <label><strong>${game.i18n.localize("GBT.Sync.ProtoToken")}</strong></label>
-            <div style="border:1px solid #888; border-radius:4px; padding:4px;">
-              <img src="${oldSrc ?? ""}" style="max-width:100%; height:auto; display:block; object-fit:contain;">
-            </div>
-            <code style="display:block; font-size:0.8em; overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(oldSrc ?? "")}</code>
-          </div>
-        </div>
-      </div>
-    `;
+  const DialogV2 = foundry?.applications?.api?.DialogV2;
+  if (!DialogV2) {
+    console.error(`${MOD_ID} | DialogV2 is not available.`);
+    return false;
+  }
 
-    new Dialog({
-      title,
-      content,
-      buttons: {
-        sync: {
-          icon: '<i class="fa-solid fa-link"></i>',
-          label: game.i18n.localize("GBT.Sync.ButtonSync"),
-          callback: async () => {
-            await syncPrototypeTokenImage(actor, newImg);
-            resolve(true);
-          }
-        },
-        cancel: {
-          icon: '<i class="fa-regular fa-circle-xmark"></i>',
-          label: game.i18n.localize("GBT.Sync.ButtonCancel"),
-          callback: () => resolve(false)
-        }
-      },
-      default: "sync"
-    }, { jQuery: false }).render(true);
+  const content = await renderTemplate(SYNC_DIALOG_TEMPLATE, {
+    text: game.i18n.localize("GBT.Sync.DialogText"),
+    actorPortraitLabel: game.i18n.localize("GBT.Sync.ActorPortrait"),
+    actorPortraitSrc: newImg,
+    actorPortraitPath: newImg,
+    protoTokenLabel: game.i18n.localize("GBT.Sync.ProtoToken"),
+    protoTokenSrc: oldSrc ?? "",
+    protoTokenPath: oldSrc ?? ""
   });
+
+  const result = await DialogV2.wait({
+    content,
+    window: {
+      title: game.i18n.localize("GBT.Sync.DialogTitle"),
+      contentClasses: ["gbt-frames"]
+    },
+    buttons: [
+      {
+        action: "sync",
+        icon: "fa-solid fa-link",
+        label: game.i18n.localize("GBT.Sync.ButtonSync"),
+        callback: () => "sync"
+      },
+      {
+        action: "cancel",
+        icon: "fa-regular fa-circle-xmark",
+        label: game.i18n.localize("GBT.Sync.ButtonCancel"),
+        callback: () => "cancel",
+        default: true
+      }
+    ],
+    rejectClose: false
+  });
+
+  if (result !== "sync") return false;
+
+  await syncPrototypeTokenImage(actor, newImg);
+  return true;
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"'`=\/]/g, c =>
-    ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;","/":"&#x2F;","`":"&#x60;","=":"&#x3D;" }[c])
-  );
+function isEmbeddedActor(actor) {
+  return actor?.parent?.documentName === "Token";
 }
