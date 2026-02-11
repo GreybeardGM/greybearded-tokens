@@ -1,60 +1,70 @@
 {
-  "GBT.Common.Enabled": "Aktiviert",
-  "GBT.Common.Save": "Speichern",
-  "GBT.Common.Cancel": "Abbrechen",
-  "GBT.Common.TintMode": "Farbmodus",
-  "GBT.Common.UsePlayerColor": "Spielerfarbe verwenden",
-  "GBT.Common.ColorHex": "Farbwert (Hex)",
-  "GBT.Common.ColorPicker": "Farbauswahl",
-  "GBT.Common.InvalidHex": "Bitte gib einen gültigen Hexadezimalwert ein (z. B. #RRGGBB).",
-  "GBT.Common.DefaultColor": "Standardfarbe",
-
-  "GBT.Tint.None": "Keine Färbung",
-  "GBT.Tint.Disposition": "Disposition",
-  "GBT.Tint.Unicolor": "Einfarbig",
-  "GBT.Tint.Advanced": "Erweitert",
-  "GBT.Tint.Custom": "Benutzerdefiniert",
-
-  "GBT.Frames.Name": "Rahmen-Einstellungen",
-  "GBT.Frames.Label": "Rahmen konfigurieren",
-  "GBT.Frames.Frame1": "Rahmen 1",
-  "GBT.Frames.Frame2": "Rahmen 2",
-  "GBT.Frames.Mask": "Maske",
-  "GBT.Frames.Frame1Preview": "Vorschau Rahmen 1",
-  "GBT.Frames.Frame2Preview": "Vorschau Rahmen 2",
-  "GBT.Frames.MaskPreview": "Vorschau Maske",
-  "GBT.Frames.Frame1AlwaysOnTitle": "Rahmen 1 ist immer aktiv.",
-  "GBT.Frames.Path": "Pfad",
-  "GBT.Frames.Scale": "Skalierung",
-  "GBT.Frames.Browse": "Durchsuchen…",
-
-  "GBT.Disposition.hostile": "Feindlich",
-  "GBT.Disposition.neutral": "Neutral",
-  "GBT.Disposition.friendly": "Verbündet",
-  "GBT.Disposition.secret": "Geheimnisvoll",
-  "GBT.Disposition.character": "Spielercharakter",
-
-  "GBT.Colors.Name": "Disposition-Farben",
-  "GBT.Colors.Label": "Farben konfigurieren",
-  "GBT.Colors.Disposition": "Disposition",
-  "GBT.Colors.Hint": "Lege die Standardfärbungen für jede Token-Disposition fest.",
-
-  "GBT.Nameplate.Name": "Namensschild-Einstellungen",
-  "GBT.Nameplate.Label": "Namensschilder konfigurieren",
-  "GBT.Nameplate.BaseFontSize": "Grundschriftgröße (px)",
-  "GBT.Nameplate.FontFamily": "Schriftfamilie",
-  "GBT.Nameplate.ScaleWithToken": "Mit Token skalieren",
-
-  "GBT.Sync.Name": "Portrait → Prototyp-Token-Synchronisation",
-  "GBT.Sync.Hint": "Lege fest, wie das Portrait mit dem Prototyp-Token-Bild synchronisiert wird, wenn sich das Portrait ändert.",
-  "GBT.Sync.ChoiceAlways": "Immer synchronisieren",
-  "GBT.Sync.ChoiceDialog": "Nachfragen (Dialog)",
-  "GBT.Sync.ChoiceNothing": "Nichts tun",
-  "GBT.Sync.DialogTitle": "Prototyp-Token-Bild synchronisieren?",
-  "GBT.Sync.DialogText": "Das Portrait wurde geändert. Soll das Prototyp-Token-Bild angepasst werden?",
-  "GBT.Sync.ActorPortrait": "Charakter-Portrait",
-  "GBT.Sync.ProtoToken": "Prototyp-Token",
-  "GBT.Sync.ButtonSync": "Synchronisieren",
-  "GBT.Sync.ButtonCancel": "Abbrechen",
-  "GBT.Sync.DoneInfo": "Prototyp-Token-Bild für {name} synchronisiert."
+  "GBT": {
+    "Common": {
+      "Enabled": "Aktiviert",
+      "Save": "Speichern",
+      "Cancel": "Abbrechen",
+      "TintMode": "Farbmodus",
+      "UsePlayerColor": "Spielerfarbe verwenden",
+      "ColorHex": "Farbwert (Hex)",
+      "ColorPicker": "Farbauswahl",
+      "InvalidHex": "Bitte gib einen gültigen Hexadezimalwert ein (z. B. #RRGGBB).",
+      "DefaultColor": "Standardfarbe"
+    },
+    "Tint": {
+      "None": "Keine Färbung",
+      "Disposition": "Disposition",
+      "Unicolor": "Einfarbig",
+      "Advanced": "Erweitert",
+      "Custom": "Benutzerdefiniert"
+    },
+    "Frames": {
+      "Name": "Rahmen-Einstellungen",
+      "Label": "Rahmen konfigurieren",
+      "Frame1": "Rahmen 1",
+      "Frame2": "Rahmen 2",
+      "Mask": "Maske",
+      "Frame1Preview": "Vorschau Rahmen 1",
+      "Frame2Preview": "Vorschau Rahmen 2",
+      "MaskPreview": "Vorschau Maske",
+      "Frame1AlwaysOnTitle": "Rahmen 1 ist immer aktiv.",
+      "Path": "Pfad",
+      "Scale": "Skalierung",
+      "Browse": "Durchsuchen…"
+    },
+    "Disposition": {
+      "hostile": "Feindlich",
+      "neutral": "Neutral",
+      "friendly": "Verbündet",
+      "secret": "Geheimnisvoll",
+      "character": "Spielercharakter"
+    },
+    "Colors": {
+      "Name": "Disposition-Farben",
+      "Label": "Farben konfigurieren",
+      "Disposition": "Disposition",
+      "Hint": "Lege die Standardfärbungen für jede Token-Disposition fest."
+    },
+    "Nameplate": {
+      "Name": "Namensschild-Einstellungen",
+      "Label": "Namensschilder konfigurieren",
+      "BaseFontSize": "Grundschriftgröße (px)",
+      "FontFamily": "Schriftfamilie",
+      "ScaleWithToken": "Mit Token skalieren"
+    },
+    "Sync": {
+      "Name": "Porträt → Prototyp-Token-Synchronisation",
+      "Hint": "Lege fest, wie das Porträt mit dem Prototyp-Token-Bild synchronisiert wird, wenn sich das Porträt ändert.",
+      "ChoiceAlways": "Immer synchronisieren",
+      "ChoiceDialog": "Nachfragen (Dialog)",
+      "ChoiceNothing": "Nichts tun",
+      "DialogTitle": "Prototyp-Token-Bild synchronisieren?",
+      "DialogText": "Das Porträt wurde geändert. Soll das Prototyp-Token-Bild angepasst werden?",
+      "ActorPortrait": "Charakterporträt",
+      "ProtoToken": "Prototyp-Token",
+      "ButtonSync": "Synchronisieren",
+      "ButtonCancel": "Abbrechen",
+      "DoneInfo": "Prototyp-Token-Bild für {name} synchronisiert."
+    }
+  }
 }

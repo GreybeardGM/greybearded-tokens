@@ -1,60 +1,70 @@
 {
-  "GBT.Common.Enabled": "Enabled",
-  "GBT.Common.Save": "Save",
-  "GBT.Common.Cancel": "Cancel",
-  "GBT.Common.TintMode": "Tint Mode",
-  "GBT.Common.UsePlayerColor": "Use Player Color",
-  "GBT.Common.ColorHex": "Color Hex",
-  "GBT.Common.ColorPicker": "Color Picker",
-  "GBT.Common.InvalidHex": "Please enter a valid hexadecimal color (e.g. #RRGGBB).",
-  "GBT.Common.DefaultColor": "Default Color",
-
-  "GBT.Tint.None": "No Tint",
-  "GBT.Tint.Disposition": "Disposition",
-  "GBT.Tint.Unicolor": "Unicolor",
-  "GBT.Tint.Advanced": "Advanced",
-  "GBT.Tint.Custom": "Custom",
-
-  "GBT.Frames.Name": "Frame Settings",
-  "GBT.Frames.Label": "Configure Frames",
-  "GBT.Frames.Frame1": "Frame 1",
-  "GBT.Frames.Frame2": "Frame 2",
-  "GBT.Frames.Mask": "Mask",
-  "GBT.Frames.Frame1Preview": "Frame 1 Preview",
-  "GBT.Frames.Frame2Preview": "Frame 2 Preview",
-  "GBT.Frames.MaskPreview": "Mask Preview",
-  "GBT.Frames.Frame1AlwaysOnTitle": "Frame 1 is always active.",
-  "GBT.Frames.Path": "Path",
-  "GBT.Frames.Scale": "Scale",
-  "GBT.Frames.Browse": "Browse…",
-
-  "GBT.Disposition.hostile": "Hostile",
-  "GBT.Disposition.neutral": "Neutral",
-  "GBT.Disposition.friendly": "Friendly",
-  "GBT.Disposition.secret": "Secret",
-  "GBT.Disposition.character": "Player Character",
-
-  "GBT.Colors.Name": "Disposition Colors",
-  "GBT.Colors.Label": "Configure Colors",
-  "GBT.Colors.Disposition": "Disposition",
-  "GBT.Colors.Hint": "Define default tint colors for each token disposition.",
-
-  "GBT.Nameplate.Name": "Nameplate Settings",
-  "GBT.Nameplate.Label": "Configure Nameplates",
-  "GBT.Nameplate.BaseFontSize": "Base Font Size (px)",
-  "GBT.Nameplate.FontFamily": "Font Family",
-  "GBT.Nameplate.ScaleWithToken": "Scale With Token",
-
-  "GBT.Sync.Name": "Portrait → Prototype Token Sync",
-  "GBT.Sync.Hint": "Choose how to handle syncing the actor portrait to the prototype token image when the portrait changes.",
-  "GBT.Sync.ChoiceAlways": "Always synchronize",
-  "GBT.Sync.ChoiceDialog": "Ask (dialog)",
-  "GBT.Sync.ChoiceNothing": "Do nothing",
-  "GBT.Sync.DialogTitle": "Sync Prototype Token Image?",
-  "GBT.Sync.DialogText": "The actor portrait has changed. Do you want to update the prototype token image to match?",
-  "GBT.Sync.ActorPortrait": "Actor Portrait",
-  "GBT.Sync.ProtoToken": "Prototype Token",
-  "GBT.Sync.ButtonSync": "Synchronize",
-  "GBT.Sync.ButtonCancel": "Cancel",
-  "GBT.Sync.DoneInfo": "Prototype Token image synchronized for {name}."
+  "GBT": {
+    "Common": {
+      "Enabled": "Enabled",
+      "Save": "Save",
+      "Cancel": "Cancel",
+      "TintMode": "Tint Mode",
+      "UsePlayerColor": "Use Player Color",
+      "ColorHex": "Color Hex",
+      "ColorPicker": "Color Picker",
+      "InvalidHex": "Please enter a valid hexadecimal color (e.g. #RRGGBB).",
+      "DefaultColor": "Default Color"
+    },
+    "Tint": {
+      "None": "No Tint",
+      "Disposition": "Disposition",
+      "Unicolor": "Unicolor",
+      "Advanced": "Advanced",
+      "Custom": "Custom"
+    },
+    "Frames": {
+      "Name": "Frame Settings",
+      "Label": "Configure Frames",
+      "Frame1": "Frame 1",
+      "Frame2": "Frame 2",
+      "Mask": "Mask",
+      "Frame1Preview": "Frame 1 Preview",
+      "Frame2Preview": "Frame 2 Preview",
+      "MaskPreview": "Mask Preview",
+      "Frame1AlwaysOnTitle": "Frame 1 is always active.",
+      "Path": "Path",
+      "Scale": "Scale",
+      "Browse": "Browse…"
+    },
+    "Disposition": {
+      "hostile": "Hostile",
+      "neutral": "Neutral",
+      "friendly": "Friendly",
+      "secret": "Secret",
+      "character": "Player Character"
+    },
+    "Colors": {
+      "Name": "Disposition Colors",
+      "Label": "Configure Colors",
+      "Disposition": "Disposition",
+      "Hint": "Define default tint colors for each token disposition."
+    },
+    "Nameplate": {
+      "Name": "Nameplate Settings",
+      "Label": "Configure Nameplates",
+      "BaseFontSize": "Base Font Size (px)",
+      "FontFamily": "Font Family",
+      "ScaleWithToken": "Scale With Token"
+    },
+    "Sync": {
+      "Name": "Portrait → Prototype Token Sync",
+      "Hint": "Choose how to handle syncing the actor portrait to the prototype token image when the portrait changes.",
+      "ChoiceAlways": "Always synchronize",
+      "ChoiceDialog": "Ask (Dialog)",
+      "ChoiceNothing": "Do nothing",
+      "DialogTitle": "Sync Prototype Token Image?",
+      "DialogText": "The actor portrait has changed. Do you want to update the prototype token image to match?",
+      "ActorPortrait": "Actor Portrait",
+      "ProtoToken": "Prototype Token",
+      "ButtonSync": "Synchronize",
+      "ButtonCancel": "Cancel",
+      "DoneInfo": "Prototype Token image synchronized for {name}."
+    }
+  }
 }
