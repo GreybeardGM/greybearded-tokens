@@ -1,5 +1,4 @@
 .gbt-frames .gbt-frames__sync-dialog {
-  max-width: 100%;
   overflow: hidden;
 }
 
@@ -23,16 +22,14 @@
 }
 
 .gbt-frames .gbt-frames__sync-image-wrap {
-  border: 1px solid var(--color-border-light-2, #888);
-  border-radius: 4px;
-  padding: 4px;
+  padding: 0.25rem;
   background: color-mix(in srgb, var(--color-bg, #000) 15%, transparent);
 }
 
 .gbt-frames .gbt-frames__sync-image {
   display: block;
   width: 100%;
-  max-height: 180px;
+  max-height: 16.5rem;
   object-fit: contain;
 }
 
@@ -42,6 +39,7 @@
   font-size: 0.8em;
   overflow-wrap: anywhere;
   word-break: break-word;
+  max-width: 17rem;
 }
 
 @media (max-width: 720px) {
