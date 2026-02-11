@@ -73,6 +73,10 @@ Hooks.on("updateToken", async (tokenDoc, changed, options, userId) => {
     const newTokenImg = changed?.texture?.src;
     if (!newTokenImg) return;
     if (userId !== game.user.id) return;
+
+    const mode = game.settings.get(MOD_ID, SETTING_KEY);
+    if (mode === SYNC_MODES.NOTHING) return;
+
     if (tokenDoc.actorLink) return;
 
     const embeddedActor = tokenDoc.actor;
@@ -122,23 +126,23 @@ async function promptSyncDialog(actor, oldSrc, newImg) {
         action: "sync",
         icon: "fa-solid fa-link",
         label: game.i18n.localize("GBT.Sync.ButtonSync"),
-        default: true
+        callback: () => "sync"
       },
       {
         action: "cancel",
         icon: "fa-regular fa-circle-xmark",
-        label: game.i18n.localize("GBT.Sync.ButtonCancel")
+        label: game.i18n.localize("GBT.Sync.ButtonCancel"),
+        callback: () => "cancel",
+        default: true
       }
     ],
     rejectClose: false
   });
 
-  if (result === "sync") {
-    await syncPrototypeTokenImage(actor, newImg);
-    return true;
-  }
+  if (result !== "sync") return false;
 
-  return false;
+  await syncPrototypeTokenImage(actor, newImg);
+  return true;
 }
 
 function isEmbeddedActor(actor) {
