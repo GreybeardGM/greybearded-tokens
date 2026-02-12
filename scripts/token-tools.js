@@ -45,10 +45,10 @@ Hooks.on('getSceneControlButtons', (controls) => {
     }
 
     const dispositionEntries = [
-      { key: 'HOSTILE', label: 'GBT.Disposition.hostile' },
-      { key: 'NEUTRAL', label: 'GBT.Disposition.neutral' },
-      { key: 'FRIENDLY', label: 'GBT.Disposition.friendly' },
-      { key: 'SECRET', label: 'GBT.Disposition.secret' }
+      { key: 'HOSTILE', label: 'GBT.Disposition.hostile', cssClass: 'btn-hostile' },
+      { key: 'NEUTRAL', label: 'GBT.Disposition.neutral', cssClass: 'btn-neutral' },
+      { key: 'FRIENDLY', label: 'GBT.Disposition.friendly', cssClass: 'btn-friendly' },
+      { key: 'SECRET', label: 'GBT.Disposition.secret', cssClass: 'btn-secret' }
     ].filter(({ key }) => Number.isInteger(CONST.TOKEN_DISPOSITIONS?.[key]));
 
     if (!dispositionEntries.length) return;
@@ -66,10 +66,11 @@ Hooks.on('getSceneControlButtons', (controls) => {
         contentClasses: ['gbt-frames']
       },
       content: `<p>${game.i18n.localize('GBT.Tools.Disposition.Content')}</p>`,
-      buttons: dispositionEntries.map(({ key, label }) => ({
+      buttons: dispositionEntries.map(({ key, label, cssClass }) => ({
         action: key.toLowerCase(),
         label: game.i18n.localize(label),
         icon: `<i class="${dispositionMeta[key] ?? 'fa-solid fa-circle'}"></i>`,
+        class: cssClass,
         default: key === dispositionEntries[0].key,
         callback: () => CONST.TOKEN_DISPOSITIONS[key]
       }))
