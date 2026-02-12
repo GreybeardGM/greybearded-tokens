@@ -124,8 +124,6 @@ function updateNameplate(token, S, tx, ty) {
   const label = token?.nameplate;
   if (!label || !label.style) return;
 
-  const gb = ensureGbNS(token);
-
   const basePx = Number(NP.baseFontSize ?? 22) || 22;
   let fontPx = basePx;
 

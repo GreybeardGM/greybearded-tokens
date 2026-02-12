@@ -56,7 +56,6 @@ export function registerRenderingHooks() {
     if (!change) return;
 
     const colorOrCharChange = ("color" in change) || ("character" in change);
-    const viewChange        = ("viewedScene" in change);
 
     if (colorOrCharChange) {
       rebuildPlayerColorSnapshot();
