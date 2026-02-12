@@ -1,5 +1,6 @@
 // modules/greybearded-tokens/scripts/token-tools.js
 import { updateFrame } from "./apply-frame.js";
+import { MOD_ID, DEFAULT_DISPOSITION_COLORS } from "./settings/constants.js";
 
 Hooks.on('getSceneControlButtons', (controls) => {
   const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
@@ -45,10 +46,10 @@ Hooks.on('getSceneControlButtons', (controls) => {
     }
 
     const dispositionEntries = [
-      { key: 'HOSTILE', label: 'GBT.Disposition.hostile', cssClass: 'btn-hostile' },
-      { key: 'NEUTRAL', label: 'GBT.Disposition.neutral', cssClass: 'btn-neutral' },
-      { key: 'FRIENDLY', label: 'GBT.Disposition.friendly', cssClass: 'btn-friendly' },
-      { key: 'SECRET', label: 'GBT.Disposition.secret', cssClass: 'btn-secret' }
+      { key: 'HOSTILE', label: 'GBT.Disposition.hostile', colorKey: 'hostile' },
+      { key: 'NEUTRAL', label: 'GBT.Disposition.neutral', colorKey: 'neutral' },
+      { key: 'FRIENDLY', label: 'GBT.Disposition.friendly', colorKey: 'friendly' },
+      { key: 'SECRET', label: 'GBT.Disposition.secret', colorKey: 'secret' }
     ].filter(({ key }) => Number.isInteger(CONST.TOKEN_DISPOSITIONS?.[key]));
 
     if (!dispositionEntries.length) return;
@@ -60,20 +61,27 @@ Hooks.on('getSceneControlButtons', (controls) => {
       SECRET: 'fa-solid fa-user-secret'
     };
 
+    const dispositionColors = game.settings.get(MOD_ID, 'colors') ?? DEFAULT_DISPOSITION_COLORS;
+
     const disposition = await foundry.applications.api.DialogV2.wait({
       window: {
         title: game.i18n.localize('GBT.Tools.Disposition.Title'),
         contentClasses: ['gbt-frames']
       },
       content: `<p>${game.i18n.localize('GBT.Tools.Disposition.Content')}</p>`,
-      buttons: dispositionEntries.map(({ key, label, cssClass }) => ({
-        action: key.toLowerCase(),
-        label: game.i18n.localize(label),
-        icon: `<i class="${dispositionMeta[key] ?? 'fa-solid fa-circle'}"></i>`,
-        class: cssClass,
-        default: key === dispositionEntries[0].key,
-        callback: () => CONST.TOKEN_DISPOSITIONS[key]
-      }))
+      buttons: dispositionEntries.map(({ key, label, colorKey }) => {
+        const dispositionColor = dispositionColors[colorKey] ?? DEFAULT_DISPOSITION_COLORS[colorKey];
+
+        return {
+          action: key.toLowerCase(),
+          label: game.i18n.localize(label),
+          icon: dispositionMeta[key] ?? 'fa-solid fa-circle',
+          class: 'colored-icon',
+          style: { '--gbt-disposition-color': dispositionColor },
+          default: key === dispositionEntries[0].key,
+          callback: () => CONST.TOKEN_DISPOSITIONS[key]
+        };
+      })
     });
 
     if (!Number.isInteger(disposition)) return;
@@ -95,7 +103,6 @@ Hooks.on('getSceneControlButtons', (controls) => {
     icon: 'fa-solid fa-down-left-and-up-right-to-center',
     button: true,
     visible: game.user.isGM,
-    onClick: () => runOnSelectionSize(-1),
     onChange: () => runOnSelectionSize(-1)
   };
 
@@ -105,7 +112,6 @@ Hooks.on('getSceneControlButtons', (controls) => {
     icon: 'fa-solid fa-up-right-and-down-left-from-center',
     button: true,
     visible: game.user.isGM,
-    onClick: () => runOnSelectionSize(1),
     onChange: () => runOnSelectionSize(1)
   };
 
@@ -115,7 +121,6 @@ Hooks.on('getSceneControlButtons', (controls) => {
     icon: 'fa-solid fa-vector-square',
     button: true,
     visible: game.user.isGM,
-    onClick: () => runToggleDisableFrame(),
     onChange: () => runToggleDisableFrame()
   };
 
@@ -125,7 +130,6 @@ Hooks.on('getSceneControlButtons', (controls) => {
     icon: 'fa-solid fa-people-arrows-left-right',
     button: true,
     visible: game.user.isGM,
-    onClick: () => runSetDisposition(),
     onChange: () => runSetDisposition()
   };
 
