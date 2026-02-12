@@ -188,6 +188,24 @@ function _resolveOutlineFactory() {
     };
   }
 
+  const overlayOutline = globalThis.OutlineOverlayFilter;
+  if (overlayOutline?.create) {
+    return {
+      id: "OutlineOverlayFilter.create",
+      isMatch: (filter) => filter instanceof overlayOutline,
+      create: ({ thickness, color }) => {
+        const f = overlayOutline.create({
+          outlineColor: color,
+          outlineThickness: thickness,
+          knockout: true,
+          wave: false
+        });
+        f.padding = Math.ceil(thickness + 1);
+        return f;
+      }
+    };
+  }
+
   return {
     id: "PIXI.Filter.alpha-outline",
     isMatch: (filter) => !!filter?._gbAlphaOutline,
@@ -252,9 +270,11 @@ function setFrameOutline(token, enabled, options = {}) {
     outlineSprite = new PIXI.Sprite(sprite.texture);
     outlineSprite.name = "gb-frame-outline";
     outlineSprite.renderable = true;
+    outlineSprite.alpha = 1;
+    outlineSprite.visible = true;
     const parent = sprite.parent;
     const idx = Math.max(0, parent.getChildIndex(sprite));
-    parent.addChildAt(outlineSprite, idx);
+    parent.addChildAt(outlineSprite, Math.min(parent.children.length, idx + 1));
     gb.outlineSprite = outlineSprite;
     gb.outlineState = null;
   }
