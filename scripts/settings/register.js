@@ -1,5 +1,5 @@
 // settings/register.js
-import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "./constants.js";
+import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK, DEFAULT_BORDER } from "./constants.js";
 import { ColorsForm } from "./colors-form.js";
 import { NameplateForm } from "./nameplate-form.js";
 import { FramesForm } from "./frames-form.js";
@@ -28,6 +28,14 @@ export function registerSettings() {
     config: false,
     type: Object,
     default: DEFAULT_DISPOSITION_COLORS
+  });
+
+  game.settings.register(MOD_ID, "border", {
+    name: "Border",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: DEFAULT_BORDER
   });
 
   // Sichtbare Menüs
