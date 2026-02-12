@@ -188,23 +188,6 @@ function _resolveOutlineFactory() {
     };
   }
 
-  const overlayOutline = globalThis.OutlineOverlayFilter;
-  if (overlayOutline?.create) {
-    return {
-      id: "OutlineOverlayFilter.create",
-      isMatch: (filter) => filter instanceof overlayOutline,
-      create: ({ thickness, color }) => {
-        const f = overlayOutline.create({
-          outlineColor: color,
-          outlineThickness: thickness,
-          knockout: true,
-          wave: false
-        });
-        f.padding = Math.ceil(thickness + 1);
-        return f;
-      }
-    };
-  }
 
   return {
     id: "PIXI.Filter.alpha-outline",
