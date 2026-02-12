@@ -51,3 +51,7 @@
 .gbt-frames button.colored-icon i {
   color: var(--gbt-disposition-color);
 }
+
+.gbt-frames button {
+  min-width: 6.5rem;
+}
