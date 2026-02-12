@@ -15,6 +15,8 @@ function ensureGbNS(token) {
   if (!("maskSprite" in gb)) gb.maskSprite = null;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
+  if (!("outlineState" in gb)) gb.outlineState = null;
+  if (!("outlineSprite" in gb)) gb.outlineSprite = null;
   //if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
 
   return gb;
@@ -98,6 +100,10 @@ function removeGbFramesIfAny(token) {
   gb.overlay = null;
   gb.f1 = null;
   gb.f2 = null;
+  if (gb.outlineSprite?.parent) gb.outlineSprite.parent.removeChild(gb.outlineSprite);
+  gb.outlineSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
+  gb.outlineSprite = null;
+  gb.outlineState = null;
 }
 
 function upsertOverlayOnToken(token) {
@@ -112,6 +118,159 @@ function upsertOverlayOnToken(token) {
 
   gb.overlay = overlay;
   return overlay;
+}
+
+function getOutlineTargetSprite(token) {
+  const gb = ensureGbNS(token);
+  return gb.f1 ?? gb.f2 ?? null;
+}
+
+const ALPHA_OUTLINE_FRAG = `
+precision mediump float;
+
+varying vec2 vTextureCoord;
+uniform sampler2D uSampler;
+uniform vec4 inputSize;
+uniform float outlineThickness;
+uniform vec3 outlineColor;
+uniform float sampleCount;
+
+const float PI = 3.141592653589793;
+const int MAX_SAMPLES = 32;
+
+void main(void) {
+  vec4 src = texture2D(uSampler, vTextureCoord);
+  if (src.a > 0.0) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+
+  vec2 pixelStep = vec2(inputSize.z, inputSize.w) * outlineThickness;
+  float edgeAlpha = 0.0;
+
+  for (int i = 0; i < MAX_SAMPLES; i++) {
+    if (float(i) >= sampleCount) break;
+    float t = float(i) / sampleCount;
+    float angle = t * (2.0 * PI);
+    vec2 offset = vec2(cos(angle), sin(angle)) * pixelStep;
+    edgeAlpha = max(edgeAlpha, texture2D(uSampler, vTextureCoord + offset).a);
+  }
+
+  if (edgeAlpha <= 0.0) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+
+  gl_FragColor = vec4(outlineColor, edgeAlpha);
+}
+`;
+
+function _hexToRgbArray(color) {
+  const hex = Number(color) >>> 0;
+  return [
+    ((hex >> 16) & 0xFF) / 255,
+    ((hex >> 8) & 0xFF) / 255,
+    (hex & 0xFF) / 255
+  ];
+}
+
+function _resolveOutlineFactory() {
+  const pixiOutline = PIXI?.filters?.OutlineFilter;
+  if (pixiOutline) {
+    return {
+      id: "PIXI.filters.OutlineFilter",
+      isMatch: (filter) => filter instanceof pixiOutline,
+      create: ({ thickness, color, quality }) => {
+        const f = new pixiOutline(thickness, color, quality);
+        f.padding = Math.ceil(thickness + 1);
+        return f;
+      }
+    };
+  }
+
+
+  return {
+    id: "PIXI.Filter.alpha-outline",
+    isMatch: (filter) => !!filter?._gbAlphaOutline,
+    create: ({ thickness, color, quality }) => {
+      const sampleCount = Math.max(8, Math.min(Math.round((quality || 0.2) * 64), 24));
+      const filter = new PIXI.Filter(undefined, ALPHA_OUTLINE_FRAG, {
+        outlineThickness: thickness,
+        outlineColor: _hexToRgbArray(color),
+        sampleCount
+      });
+      filter._gbAlphaOutline = true;
+      filter.padding = Math.ceil(thickness + 1);
+      filter.autoFit = true;
+      return filter;
+    }
+  };
+}
+
+
+function _syncOutlineSprite(target, outlineSprite) {
+  outlineSprite.texture = target.texture;
+  outlineSprite.anchor.copyFrom(target.anchor);
+  outlineSprite.position.copyFrom(target.position);
+  outlineSprite.scale.copyFrom(target.scale);
+  outlineSprite.rotation = target.rotation;
+  outlineSprite.width = target.width;
+  outlineSprite.height = target.height;
+}
+
+function _clearOutlineArtifacts(token) {
+  const gb = ensureGbNS(token);
+  if (gb.f1?.filters?.length) gb.f1.filters = null;
+  if (gb.f2?.filters?.length) gb.f2.filters = null;
+  if (gb.outlineSprite?.parent) gb.outlineSprite.parent.removeChild(gb.outlineSprite);
+  gb.outlineSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
+  gb.outlineSprite = null;
+  gb.outlineState = null;
+}
+
+function setFrameOutline(token, enabled, options = {}) {
+  const gb = ensureGbNS(token);
+  const sprite = getOutlineTargetSprite(token);
+
+  if (!enabled || !sprite) {
+    _clearOutlineArtifacts(token);
+    return;
+  }
+
+  const outlineFactory = _resolveOutlineFactory();
+  if (!outlineFactory) return;
+
+  const colorInput = options.color ?? "#f7e7a3";
+  const color = (typeof colorInput === "number") ? colorInput : PIXI.utils.string2hex(colorInput);
+  const thickness = Math.max(0.5, Math.min(Number(options.thickness ?? 1) || 1, 3));
+  const quality = Math.max(0.1, Math.min(Number(options.quality ?? 0.2) || 0.2, 0.5));
+  const stateKey = `${sprite.name}|${outlineFactory.id}|${color}|${thickness}|${quality}`;
+
+  let outlineSprite = gb.outlineSprite;
+  if (!outlineSprite || outlineSprite.destroyed || outlineSprite.parent !== sprite.parent) {
+    if (outlineSprite?.parent) outlineSprite.parent.removeChild(outlineSprite);
+    outlineSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
+    outlineSprite = new PIXI.Sprite(sprite.texture);
+    outlineSprite.name = "gb-frame-outline";
+    outlineSprite.renderable = true;
+    outlineSprite.alpha = 1;
+    outlineSprite.visible = true;
+    const parent = sprite.parent;
+    const idx = Math.max(0, parent.getChildIndex(sprite));
+    parent.addChildAt(outlineSprite, Math.min(parent.children.length, idx + 1));
+    gb.outlineSprite = outlineSprite;
+    gb.outlineState = null;
+  }
+
+  _syncOutlineSprite(sprite, outlineSprite);
+
+  if (gb.outlineState !== stateKey || !outlineFactory.isMatch(outlineSprite.filters?.[0])) {
+    outlineSprite.filters = [outlineFactory.create({ thickness, color, quality })];
+    gb.outlineState = stateKey;
+  }
+
+  if (gb.f1?.filters?.length) gb.f1.filters = null;
+  if (gb.f2?.filters?.length) gb.f2.filters = null;
 }
 
 /* =========================
@@ -169,6 +328,7 @@ async function applyFrameToToken(token, snapshot) {
   // 2) Disable-Flag: Frames & Maske aufräumen
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) {
     removeGbFramesIfAny(token);
+    setFrameOutline(token, false);
     const gb = ensureGbNS(token);
     if (gb.maskSprite) clearMaskInline(token);
     return;
@@ -177,6 +337,7 @@ async function applyFrameToToken(token, snapshot) {
   // Wenn global keinerlei Visuals aktiv sind, sofort aufräumen
   if (!runtime.hasAnyVisuals) {
     removeGbFramesIfAny(token);
+    setFrameOutline(token, false);
     const gb = ensureGbNS(token);
     if (gb.maskSprite) clearMaskInline(token);
     return;
@@ -270,8 +431,13 @@ async function applyFrameToToken(token, snapshot) {
       gb.f2.height = (kH * ty * (F2.scale || 1)) / sy;
       gb.f2.position.set(0, 0);
     }
+
+    const outlineOptions = S?.border ?? {};
+    const outlineEnabled = !!(outlineOptions.enabled && token.controlled);
+    setFrameOutline(token, outlineEnabled, outlineOptions);
   } else {
     removeGbFramesIfAny(token);
+    setFrameOutline(token, false);
   }
 
   // 4) Maske einmalig am Mesh (blockierend beibehalten)
