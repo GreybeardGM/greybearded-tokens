@@ -65,6 +65,14 @@
       "ButtonSync": "Synchronisieren",
       "ButtonCancel": "Abbrechen",
       "DoneInfo": "Prototyp-Token-Bild für {name} synchronisiert."
+    },
+    "Tools": {
+      "Disposition": {
+        "ToolTitle": "Disposition für ausgewählte Token setzen",
+        "Title": "Disposition ändern",
+        "Content": "Welche Disposition soll auf alle ausgewählten Token angewendet werden?",
+        "NoneSelected": "Bitte wähle mindestens einen Token aus."
+      }
     }
   }
 }
