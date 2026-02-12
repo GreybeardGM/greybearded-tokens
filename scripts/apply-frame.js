@@ -16,6 +16,7 @@ function ensureGbNS(token) {
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
   if (!("outlineState" in gb)) gb.outlineState = null;
+  if (!("outlineSprite" in gb)) gb.outlineSprite = null;
   //if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
 
   return gb;
@@ -99,6 +100,9 @@ function removeGbFramesIfAny(token) {
   gb.overlay = null;
   gb.f1 = null;
   gb.f2 = null;
+  if (gb.outlineSprite?.parent) gb.outlineSprite.parent.removeChild(gb.outlineSprite);
+  gb.outlineSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
+  gb.outlineSprite = null;
   gb.outlineState = null;
 }
 
@@ -121,6 +125,55 @@ function getOutlineTargetSprite(token) {
   return gb.f1 ?? gb.f2 ?? null;
 }
 
+const ALPHA_OUTLINE_FRAG = `
+precision mediump float;
+
+varying vec2 vTextureCoord;
+uniform sampler2D uSampler;
+uniform vec4 inputSize;
+uniform float outlineThickness;
+uniform vec3 outlineColor;
+uniform float sampleCount;
+
+const float PI = 3.141592653589793;
+const int MAX_SAMPLES = 32;
+
+void main(void) {
+  vec4 src = texture2D(uSampler, vTextureCoord);
+  if (src.a > 0.0) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+
+  vec2 pixelStep = vec2(inputSize.z, inputSize.w) * outlineThickness;
+  float edgeAlpha = 0.0;
+
+  for (int i = 0; i < MAX_SAMPLES; i++) {
+    if (float(i) >= sampleCount) break;
+    float t = float(i) / sampleCount;
+    float angle = t * (2.0 * PI);
+    vec2 offset = vec2(cos(angle), sin(angle)) * pixelStep;
+    edgeAlpha = max(edgeAlpha, texture2D(uSampler, vTextureCoord + offset).a);
+  }
+
+  if (edgeAlpha <= 0.0) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+
+  gl_FragColor = vec4(outlineColor, edgeAlpha);
+}
+`;
+
+function _hexToRgbArray(color) {
+  const hex = Number(color) >>> 0;
+  return [
+    ((hex >> 16) & 0xFF) / 255,
+    ((hex >> 8) & 0xFF) / 255,
+    (hex & 0xFF) / 255
+  ];
+}
+
 function _resolveOutlineFactory() {
   const pixiOutline = PIXI?.filters?.OutlineFilter;
   if (pixiOutline) {
@@ -135,25 +188,43 @@ function _resolveOutlineFactory() {
     };
   }
 
-  const overlayOutline = globalThis.OutlineOverlayFilter;
-  if (overlayOutline?.create) {
-    return {
-      id: "OutlineOverlayFilter.create",
-      isMatch: (filter) => filter instanceof overlayOutline,
-      create: ({ thickness, color }) => {
-        const f = overlayOutline.create({
-          outlineColor: color,
-          outlineThickness: thickness,
-          knockout: false,
-          wave: false
-        });
-        f.padding = Math.ceil(thickness + 1);
-        return f;
-      }
-    };
-  }
+  return {
+    id: "PIXI.Filter.alpha-outline",
+    isMatch: (filter) => !!filter?._gbAlphaOutline,
+    create: ({ thickness, color, quality }) => {
+      const sampleCount = Math.max(8, Math.min(Math.round((quality || 0.2) * 64), 24));
+      const filter = new PIXI.Filter(undefined, ALPHA_OUTLINE_FRAG, {
+        outlineThickness: thickness,
+        outlineColor: _hexToRgbArray(color),
+        sampleCount
+      });
+      filter._gbAlphaOutline = true;
+      filter.padding = Math.ceil(thickness + 1);
+      filter.autoFit = true;
+      return filter;
+    }
+  };
+}
 
-  return null;
+
+function _syncOutlineSprite(target, outlineSprite) {
+  outlineSprite.texture = target.texture;
+  outlineSprite.anchor.copyFrom(target.anchor);
+  outlineSprite.position.copyFrom(target.position);
+  outlineSprite.scale.copyFrom(target.scale);
+  outlineSprite.rotation = target.rotation;
+  outlineSprite.width = target.width;
+  outlineSprite.height = target.height;
+}
+
+function _clearOutlineArtifacts(token) {
+  const gb = ensureGbNS(token);
+  if (gb.f1?.filters?.length) gb.f1.filters = null;
+  if (gb.f2?.filters?.length) gb.f2.filters = null;
+  if (gb.outlineSprite?.parent) gb.outlineSprite.parent.removeChild(gb.outlineSprite);
+  gb.outlineSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
+  gb.outlineSprite = null;
+  gb.outlineState = null;
 }
 
 function setFrameOutline(token, enabled, options = {}) {
@@ -161,9 +232,7 @@ function setFrameOutline(token, enabled, options = {}) {
   const sprite = getOutlineTargetSprite(token);
 
   if (!enabled || !sprite) {
-    if (gb.f1?.filters?.length) gb.f1.filters = null;
-    if (gb.f2?.filters?.length) gb.f2.filters = null;
-    gb.outlineState = null;
+    _clearOutlineArtifacts(token);
     return;
   }
 
@@ -176,15 +245,29 @@ function setFrameOutline(token, enabled, options = {}) {
   const quality = Math.max(0.1, Math.min(Number(options.quality ?? 0.2) || 0.2, 0.5));
   const stateKey = `${sprite.name}|${outlineFactory.id}|${color}|${thickness}|${quality}`;
 
-  if (gb.outlineState === stateKey && outlineFactory.isMatch(sprite.filters?.[0])) return;
+  let outlineSprite = gb.outlineSprite;
+  if (!outlineSprite || outlineSprite.destroyed || outlineSprite.parent !== sprite.parent) {
+    if (outlineSprite?.parent) outlineSprite.parent.removeChild(outlineSprite);
+    outlineSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
+    outlineSprite = new PIXI.Sprite(sprite.texture);
+    outlineSprite.name = "gb-frame-outline";
+    outlineSprite.renderable = true;
+    const parent = sprite.parent;
+    const idx = Math.max(0, parent.getChildIndex(sprite));
+    parent.addChildAt(outlineSprite, idx);
+    gb.outlineSprite = outlineSprite;
+    gb.outlineState = null;
+  }
 
-  const filter = outlineFactory.create({ thickness, color, quality });
+  _syncOutlineSprite(sprite, outlineSprite);
 
-  if (sprite === gb.f1 && gb.f2?.filters?.length) gb.f2.filters = null;
-  if (sprite === gb.f2 && gb.f1?.filters?.length) gb.f1.filters = null;
+  if (gb.outlineState !== stateKey || !outlineFactory.isMatch(outlineSprite.filters?.[0])) {
+    outlineSprite.filters = [outlineFactory.create({ thickness, color, quality })];
+    gb.outlineState = stateKey;
+  }
 
-  sprite.filters = [filter];
-  gb.outlineState = stateKey;
+  if (gb.f1?.filters?.length) gb.f1.filters = null;
+  if (gb.f2?.filters?.length) gb.f2.filters = null;
 }
 
 /* =========================
