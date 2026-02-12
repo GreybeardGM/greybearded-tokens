@@ -52,6 +52,7 @@ export function registerRenderingHooks() {
     updateFrame(t);
   });
 
+
   Hooks.on("updateUser", (user, change) => {
     if (!change) return;
 

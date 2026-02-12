@@ -270,6 +270,7 @@ async function applyFrameToToken(token, snapshot) {
       gb.f2.height = (kH * ty * (F2.scale || 1)) / sy;
       gb.f2.position.set(0, 0);
     }
+
   } else {
     removeGbFramesIfAny(token);
   }
