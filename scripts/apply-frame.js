@@ -15,6 +15,7 @@ function ensureGbNS(token) {
   if (!("maskSprite" in gb)) gb.maskSprite = null;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
+  if (!("outlineState" in gb)) gb.outlineState = null;
   //if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
 
   return gb;
@@ -98,6 +99,7 @@ function removeGbFramesIfAny(token) {
   gb.overlay = null;
   gb.f1 = null;
   gb.f2 = null;
+  gb.outlineState = null;
 }
 
 function upsertOverlayOnToken(token) {
@@ -112,6 +114,43 @@ function upsertOverlayOnToken(token) {
 
   gb.overlay = overlay;
   return overlay;
+}
+
+function getOutlineTargetSprite(token) {
+  const gb = ensureGbNS(token);
+  return gb.f1 ?? gb.f2 ?? null;
+}
+
+function setFrameOutline(token, enabled, options = {}) {
+  const gb = ensureGbNS(token);
+  const sprite = getOutlineTargetSprite(token);
+
+  if (!enabled || !sprite) {
+    if (gb.f1?.filters?.length) gb.f1.filters = null;
+    if (gb.f2?.filters?.length) gb.f2.filters = null;
+    gb.outlineState = null;
+    return;
+  }
+
+  const OutlineFilter = PIXI?.filters?.OutlineFilter;
+  if (!OutlineFilter) return;
+
+  const colorInput = options.color ?? "#f7e7a3";
+  const color = (typeof colorInput === "number") ? colorInput : PIXI.utils.string2hex(colorInput);
+  const thickness = Math.max(0.5, Math.min(Number(options.thickness ?? 1) || 1, 3));
+  const quality = Math.max(0.1, Math.min(Number(options.quality ?? 0.2) || 0.2, 0.5));
+  const stateKey = `${sprite.name}|${color}|${thickness}|${quality}`;
+
+  if (gb.outlineState === stateKey && sprite.filters?.[0] instanceof OutlineFilter) return;
+
+  const filter = new OutlineFilter(thickness, color, quality);
+  filter.padding = Math.ceil(thickness + 1);
+
+  if (sprite === gb.f1 && gb.f2?.filters?.length) gb.f2.filters = null;
+  if (sprite === gb.f2 && gb.f1?.filters?.length) gb.f1.filters = null;
+
+  sprite.filters = [filter];
+  gb.outlineState = stateKey;
 }
 
 /* =========================
@@ -169,6 +208,7 @@ async function applyFrameToToken(token, snapshot) {
   // 2) Disable-Flag: Frames & Maske aufräumen
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) {
     removeGbFramesIfAny(token);
+    setFrameOutline(token, false);
     const gb = ensureGbNS(token);
     if (gb.maskSprite) clearMaskInline(token);
     return;
@@ -177,6 +217,7 @@ async function applyFrameToToken(token, snapshot) {
   // Wenn global keinerlei Visuals aktiv sind, sofort aufräumen
   if (!runtime.hasAnyVisuals) {
     removeGbFramesIfAny(token);
+    setFrameOutline(token, false);
     const gb = ensureGbNS(token);
     if (gb.maskSprite) clearMaskInline(token);
     return;
@@ -270,8 +311,13 @@ async function applyFrameToToken(token, snapshot) {
       gb.f2.height = (kH * ty * (F2.scale || 1)) / sy;
       gb.f2.position.set(0, 0);
     }
+
+    const outlineOptions = S?.border ?? {};
+    const outlineEnabled = !!(outlineOptions.enabled && token.controlled);
+    setFrameOutline(token, outlineEnabled, outlineOptions);
   } else {
     removeGbFramesIfAny(token);
+    setFrameOutline(token, false);
   }
 
   // 4) Maske einmalig am Mesh (blockierend beibehalten)
