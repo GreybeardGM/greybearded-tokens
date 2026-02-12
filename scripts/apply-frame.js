@@ -125,55 +125,6 @@ function getOutlineTargetSprite(token) {
   return gb.f1 ?? gb.f2 ?? null;
 }
 
-const ALPHA_OUTLINE_FRAG = `
-precision mediump float;
-
-varying vec2 vTextureCoord;
-uniform sampler2D uSampler;
-uniform vec4 inputSize;
-uniform float outlineThickness;
-uniform vec3 outlineColor;
-uniform float sampleCount;
-
-const float PI = 3.141592653589793;
-const int MAX_SAMPLES = 32;
-
-void main(void) {
-  vec4 src = texture2D(uSampler, vTextureCoord);
-  if (src.a > 0.0) {
-    gl_FragColor = vec4(0.0);
-    return;
-  }
-
-  vec2 pixelStep = vec2(inputSize.z, inputSize.w) * outlineThickness;
-  float edgeAlpha = 0.0;
-
-  for (int i = 0; i < MAX_SAMPLES; i++) {
-    if (float(i) >= sampleCount) break;
-    float t = float(i) / sampleCount;
-    float angle = t * (2.0 * PI);
-    vec2 offset = vec2(cos(angle), sin(angle)) * pixelStep;
-    edgeAlpha = max(edgeAlpha, texture2D(uSampler, vTextureCoord + offset).a);
-  }
-
-  if (edgeAlpha <= 0.0) {
-    gl_FragColor = vec4(0.0);
-    return;
-  }
-
-  gl_FragColor = vec4(outlineColor, edgeAlpha);
-}
-`;
-
-function _hexToRgbArray(color) {
-  const hex = Number(color) >>> 0;
-  return [
-    ((hex >> 16) & 0xFF) / 255,
-    ((hex >> 8) & 0xFF) / 255,
-    (hex & 0xFF) / 255
-  ];
-}
-
 function _resolveOutlineFactory() {
   const pixiOutline = PIXI?.filters?.OutlineFilter;
   if (pixiOutline) {
@@ -188,25 +139,26 @@ function _resolveOutlineFactory() {
     };
   }
 
+  const overlayOutline = globalThis.OutlineOverlayFilter;
+  if (overlayOutline?.create) {
+    return {
+      id: "OutlineOverlayFilter.create",
+      isMatch: (filter) => filter instanceof overlayOutline,
+      create: ({ thickness, color }) => {
+        const f = overlayOutline.create({
+          outlineColor: color,
+          outlineThickness: thickness,
+          knockout: true,
+          wave: false
+        });
+        f.padding = Math.ceil(thickness + 1);
+        return f;
+      }
+    };
+  }
 
-  return {
-    id: "PIXI.Filter.alpha-outline",
-    isMatch: (filter) => !!filter?._gbAlphaOutline,
-    create: ({ thickness, color, quality }) => {
-      const sampleCount = Math.max(8, Math.min(Math.round((quality || 0.2) * 64), 24));
-      const filter = new PIXI.Filter(undefined, ALPHA_OUTLINE_FRAG, {
-        outlineThickness: thickness,
-        outlineColor: _hexToRgbArray(color),
-        sampleCount
-      });
-      filter._gbAlphaOutline = true;
-      filter.padding = Math.ceil(thickness + 1);
-      filter.autoFit = true;
-      return filter;
-    }
-  };
+  return null;
 }
-
 
 function _syncOutlineSprite(target, outlineSprite) {
   outlineSprite.texture = target.texture;
@@ -238,7 +190,10 @@ function setFrameOutline(token, enabled, options = {}) {
   }
 
   const outlineFactory = _resolveOutlineFactory();
-  if (!outlineFactory) return;
+  if (!outlineFactory) {
+    _clearOutlineArtifacts(token);
+    return;
+  }
 
   const colorInput = options.color ?? "#f7e7a3";
   const color = (typeof colorInput === "number") ? colorInput : PIXI.utils.string2hex(colorInput);
