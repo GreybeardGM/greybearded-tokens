@@ -361,9 +361,6 @@ async function applyFrameToToken(token, snapshot) {
       gb.f2.position.set(0, 0);
     }
 
-    const outlineOptions = S?.border ?? {};
-    const outlineEnabled = !!(outlineOptions.enabled && token.controlled);
-    setFrameOutline(token, outlineEnabled, outlineOptions);
   } else {
     removeGbFramesIfAny(token);
     setFrameOutline(token, false);

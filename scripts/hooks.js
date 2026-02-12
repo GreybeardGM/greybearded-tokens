@@ -52,9 +52,6 @@ export function registerRenderingHooks() {
     updateFrame(t);
   });
 
-  Hooks.on("controlToken", (token) => {
-    updateFrame(token);
-  });
 
   Hooks.on("updateUser", (user, change) => {
     if (!change) return;
