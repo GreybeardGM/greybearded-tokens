@@ -161,16 +161,6 @@ function _resolveOutlineFactory() {
   return null;
 }
 
-function _syncOutlineSprite(target, outlineSprite) {
-  outlineSprite.texture = target.texture;
-  outlineSprite.anchor.copyFrom(target.anchor);
-  outlineSprite.position.copyFrom(target.position);
-  outlineSprite.scale.copyFrom(target.scale);
-  outlineSprite.rotation = target.rotation;
-  outlineSprite.width = target.width;
-  outlineSprite.height = target.height;
-}
-
 function _clearOutlineArtifacts(token) {
   const gb = ensureGbNS(token);
   if (gb.f1?.filters?.length) gb.f1.filters = null;
@@ -201,31 +191,15 @@ function setFrameOutline(token, enabled, options = {}) {
   const quality = Math.max(0.1, Math.min(Number(options.quality ?? 0.2) || 0.2, 0.5));
   const stateKey = `${sprite.name}|${outlineFactory.id}|${color}|${thickness}|${quality}`;
 
-  let outlineSprite = gb.outlineSprite;
-  if (!outlineSprite || outlineSprite.destroyed || outlineSprite.parent !== sprite.parent) {
-    if (outlineSprite?.parent) outlineSprite.parent.removeChild(outlineSprite);
-    outlineSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
-    outlineSprite = new PIXI.Sprite(sprite.texture);
-    outlineSprite.name = "gb-frame-outline";
-    outlineSprite.renderable = true;
-    outlineSprite.alpha = 1;
-    outlineSprite.visible = true;
-    const parent = sprite.parent;
-    const idx = Math.max(0, parent.getChildIndex(sprite));
-    parent.addChildAt(outlineSprite, Math.min(parent.children.length, idx + 1));
-    gb.outlineSprite = outlineSprite;
-    gb.outlineState = null;
-  }
+  if (gb.outlineState === stateKey && outlineFactory.isMatch(sprite.filters?.[0])) return;
 
-  _syncOutlineSprite(sprite, outlineSprite);
+  const filter = outlineFactory.create({ thickness, color, quality });
 
-  if (gb.outlineState !== stateKey || !outlineFactory.isMatch(outlineSprite.filters?.[0])) {
-    outlineSprite.filters = [outlineFactory.create({ thickness, color, quality })];
-    gb.outlineState = stateKey;
-  }
+  if (sprite === gb.f1 && gb.f2?.filters?.length) gb.f2.filters = null;
+  if (sprite === gb.f2 && gb.f1?.filters?.length) gb.f1.filters = null;
 
-  if (gb.f1?.filters?.length) gb.f1.filters = null;
-  if (gb.f2?.filters?.length) gb.f2.filters = null;
+  sprite.filters = [filter];
+  gb.outlineState = stateKey;
 }
 
 /* =========================
