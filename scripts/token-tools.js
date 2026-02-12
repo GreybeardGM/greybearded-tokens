@@ -69,15 +69,19 @@ Hooks.on('getSceneControlButtons', (controls) => {
         contentClasses: ['gbt-frames']
       },
       content: `<p>${game.i18n.localize('GBT.Tools.Disposition.Content')}</p>`,
-      buttons: dispositionEntries.map(({ key, label, colorKey }) => ({
-        action: key.toLowerCase(),
-        label: game.i18n.localize(label),
-        icon: dispositionMeta[key] ?? 'fa-solid fa-circle',
-        class: 'colored-icon',
-        style: `--gbt-disposition-color: ${dispositionColors[colorKey] ?? DEFAULT_DISPOSITION_COLORS[colorKey]};`,
-        default: key === dispositionEntries[0].key,
-        callback: () => CONST.TOKEN_DISPOSITIONS[key]
-      }))
+      buttons: dispositionEntries.map(({ key, label, colorKey }) => {
+        const dispositionColor = dispositionColors[colorKey] ?? DEFAULT_DISPOSITION_COLORS[colorKey];
+
+        return {
+          action: key.toLowerCase(),
+          label: game.i18n.localize(label),
+          icon: dispositionMeta[key] ?? 'fa-solid fa-circle',
+          class: 'colored-icon',
+          style: { '--gbt-disposition-color': dispositionColor },
+          default: key === dispositionEntries[0].key,
+          callback: () => CONST.TOKEN_DISPOSITIONS[key]
+        };
+      })
     });
 
     if (!Number.isInteger(disposition)) return;
