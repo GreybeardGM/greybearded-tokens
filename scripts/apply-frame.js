@@ -149,7 +149,7 @@ function _resolveOutlineFactory() {
         const f = overlayOutline.create({
           outlineColor: color,
           outlineThickness: thickness,
-          knockout: true,
+          knockout: false,
           wave: false
         });
         f.padding = Math.ceil(thickness + 1);
@@ -196,8 +196,7 @@ function setFrameOutline(token, enabled, options = {}) {
     return;
   }
 
-  const colorInput = options.color ?? "#f7e7a3";
-  const color = (typeof colorInput === "number") ? colorInput : PIXI.utils.string2hex(colorInput);
+  const color = 0xFFFFFF;
   const thickness = Math.max(0.5, Math.min(Number(options.thickness ?? 1) || 1, 3));
   const quality = Math.max(0.1, Math.min(Number(options.quality ?? 0.2) || 0.2, 0.5));
   const stateKey = `${sprite.name}|${outlineFactory.id}|${color}|${thickness}|${quality}`;
