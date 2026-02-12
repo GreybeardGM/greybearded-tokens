@@ -139,11 +139,12 @@ function _resolveOutlineFactory() {
     };
   }
 
-  const overlayOutline = globalThis.OutlineOverlayFilter;
+  const overlayOutline = foundry?.canvas?.rendering?.filters?.OutlineOverlayFilter
+    ?? globalThis.OutlineOverlayFilter;
   if (overlayOutline?.create) {
     return {
       id: "OutlineOverlayFilter.create",
-      isMatch: (filter) => filter instanceof overlayOutline,
+      isMatch: (filter) => !!filter && filter.constructor === overlayOutline,
       create: ({ thickness, color }) => {
         const f = overlayOutline.create({
           outlineColor: color,
