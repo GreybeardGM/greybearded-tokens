@@ -6,12 +6,7 @@ import { isHex, bindHexPairs } from "./helpers.js";
 
 const DISPOSITION = ["hostile", "neutral", "friendly", "secret", "character"];
 
-const BaseFormApplication = globalThis.FormApplication
-  ?? foundry?.applications?.api?.FormApplication
-  ?? foundry?.applications?.api?.ApplicationV2
-  ?? globalThis.Application;
-
-export class ColorsForm extends BaseFormApplication {
+export class ColorsForm extends FormApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "gb-colors-form",
@@ -56,4 +51,3 @@ export class ColorsForm extends BaseFormApplication {
     if (canvas?.tokens?.placeables?.length) for (const t of canvas.tokens.placeables) updateFrame(t, S);
   }
 }
-
