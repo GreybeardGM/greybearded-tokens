@@ -15,8 +15,6 @@ function ensureGbNS(token) {
   if (!("maskSprite" in gb)) gb.maskSprite = null;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
-  if (!("outlineState" in gb)) gb.outlineState = null;
-  if (!("outlineSprite" in gb)) gb.outlineSprite = null;
   //if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
 
   return gb;
@@ -100,10 +98,6 @@ function removeGbFramesIfAny(token) {
   gb.overlay = null;
   gb.f1 = null;
   gb.f2 = null;
-  if (gb.outlineSprite?.parent) gb.outlineSprite.parent.removeChild(gb.outlineSprite);
-  gb.outlineSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
-  gb.outlineSprite = null;
-  gb.outlineState = null;
 }
 
 function upsertOverlayOnToken(token) {
@@ -118,88 +112,6 @@ function upsertOverlayOnToken(token) {
 
   gb.overlay = overlay;
   return overlay;
-}
-
-function getOutlineTargetSprite(token) {
-  const gb = ensureGbNS(token);
-  return gb.f1 ?? gb.f2 ?? null;
-}
-
-function _resolveOutlineFactory() {
-  const pixiOutline = PIXI?.filters?.OutlineFilter;
-  if (pixiOutline) {
-    return {
-      id: "PIXI.filters.OutlineFilter",
-      isMatch: (filter) => filter instanceof pixiOutline,
-      create: ({ thickness, color, quality }) => {
-        const f = new pixiOutline(thickness, color, quality);
-        f.padding = Math.ceil(thickness + 1);
-        return f;
-      }
-    };
-  }
-
-  const overlayOutline = foundry?.canvas?.rendering?.filters?.OutlineOverlayFilter
-    ?? globalThis.OutlineOverlayFilter;
-  if (overlayOutline?.create) {
-    return {
-      id: "OutlineOverlayFilter.create",
-      isMatch: (filter) => !!filter && filter.constructor === overlayOutline,
-      create: ({ thickness, color }) => {
-        const f = overlayOutline.create({
-          outlineColor: color,
-          outlineThickness: thickness,
-          knockout: false,
-          wave: false
-        });
-        f.padding = Math.ceil(thickness + 1);
-        return f;
-      }
-    };
-  }
-
-  return null;
-}
-
-function _clearOutlineArtifacts(token) {
-  const gb = ensureGbNS(token);
-  if (gb.f1?.filters?.length) gb.f1.filters = null;
-  if (gb.f2?.filters?.length) gb.f2.filters = null;
-  if (gb.outlineSprite?.parent) gb.outlineSprite.parent.removeChild(gb.outlineSprite);
-  gb.outlineSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
-  gb.outlineSprite = null;
-  gb.outlineState = null;
-}
-
-function setFrameOutline(token, enabled, options = {}) {
-  const gb = ensureGbNS(token);
-  const sprite = getOutlineTargetSprite(token);
-
-  if (!enabled || !sprite) {
-    _clearOutlineArtifacts(token);
-    return;
-  }
-
-  const outlineFactory = _resolveOutlineFactory();
-  if (!outlineFactory) {
-    _clearOutlineArtifacts(token);
-    return;
-  }
-
-  const color = 0xFFFFFF;
-  const thickness = Math.max(0.5, Math.min(Number(options.thickness ?? 1) || 1, 3));
-  const quality = Math.max(0.1, Math.min(Number(options.quality ?? 0.2) || 0.2, 0.5));
-  const stateKey = `${sprite.name}|${outlineFactory.id}|${color}|${thickness}|${quality}`;
-
-  if (gb.outlineState === stateKey && outlineFactory.isMatch(sprite.filters?.[0])) return;
-
-  const filter = outlineFactory.create({ thickness, color, quality });
-
-  if (sprite === gb.f1 && gb.f2?.filters?.length) gb.f2.filters = null;
-  if (sprite === gb.f2 && gb.f1?.filters?.length) gb.f1.filters = null;
-
-  sprite.filters = [filter];
-  gb.outlineState = stateKey;
 }
 
 /* =========================
@@ -257,7 +169,6 @@ async function applyFrameToToken(token, snapshot) {
   // 2) Disable-Flag: Frames & Maske aufräumen
   if (token.document.getFlag("greybearded-tokens", "disableFrame")) {
     removeGbFramesIfAny(token);
-    setFrameOutline(token, false);
     const gb = ensureGbNS(token);
     if (gb.maskSprite) clearMaskInline(token);
     return;
@@ -266,7 +177,6 @@ async function applyFrameToToken(token, snapshot) {
   // Wenn global keinerlei Visuals aktiv sind, sofort aufräumen
   if (!runtime.hasAnyVisuals) {
     removeGbFramesIfAny(token);
-    setFrameOutline(token, false);
     const gb = ensureGbNS(token);
     if (gb.maskSprite) clearMaskInline(token);
     return;
@@ -360,10 +270,8 @@ async function applyFrameToToken(token, snapshot) {
       gb.f2.height = (kH * ty * (F2.scale || 1)) / sy;
       gb.f2.position.set(0, 0);
     }
-
   } else {
     removeGbFramesIfAny(token);
-    setFrameOutline(token, false);
   }
 
   // 4) Maske einmalig am Mesh (blockierend beibehalten)
