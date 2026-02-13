@@ -4,7 +4,12 @@ import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
 import { isHex, num, bool, oneOf, bindHexSync } from "./helpers.js";
 
-export class NameplateForm extends FormApplication {
+const BaseFormApplication = globalThis.FormApplication
+  ?? foundry?.applications?.api?.FormApplication
+  ?? foundry?.applications?.api?.ApplicationV2
+  ?? globalThis.Application;
+
+export class NameplateForm extends BaseFormApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "gb-nameplate-form",
