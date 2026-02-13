@@ -1,5 +1,5 @@
 // modules/greybearded-tokens/scripts/settings/snapshot.js
-import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK, DEFAULT_BORDER } from "./constants.js";
+import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "./constants.js";
 import { num, bool, str, readObjectSetting } from "./helpers.js";
 
 let _S = null;
@@ -24,7 +24,6 @@ function _readAll() {
   const FR = readObjectSetting(MOD_ID, "frames", {
     frame1: DEFAULT_FRAME1, frame2: DEFAULT_FRAME2, mask: DEFAULT_MASK
   });
-  const BR = readObjectSetting(MOD_ID, "border", DEFAULT_BORDER);
   const NP = readObjectSetting(MOD_ID, "nameplate", DEFAULT_NAMEPLATES);
   const CL = readObjectSetting(MOD_ID, "colors", DEFAULT_DISPOSITION_COLORS);
 
@@ -47,12 +46,6 @@ function _readAll() {
     mask: {
       enabled:        bool(FR?.mask?.enabled,       DEFAULT_MASK.enabled),
       path:           str(FR?.mask?.path,           DEFAULT_MASK.path)
-    },
-    border: {
-      enabled:        bool(BR?.enabled,             DEFAULT_BORDER.enabled),
-      color:          str(BR?.color,                DEFAULT_BORDER.color),
-      thickness:      num(BR?.thickness,            DEFAULT_BORDER.thickness),
-      quality:        num(BR?.quality,              DEFAULT_BORDER.quality)
     },
     nameplate: NP,
     colors:    CL
