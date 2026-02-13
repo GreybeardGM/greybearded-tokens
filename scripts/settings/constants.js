@@ -78,4 +78,3 @@ export const DEFAULT_MASK = {
   enabled: true,
   path: "modules/greybearded-tokens/assets/mask-round.png"
 };
-
