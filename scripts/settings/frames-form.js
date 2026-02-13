@@ -10,12 +10,7 @@ import {
   num, bool, str, oneOf, isHex, bindHexPairs, readObjectSetting
 } from "./helpers.js";
 
-const BaseFormApplication = globalThis.FormApplication
-  ?? foundry?.applications?.api?.FormApplication
-  ?? foundry?.applications?.api?.ApplicationV2
-  ?? globalThis.Application;
-
-export class FramesForm extends BaseFormApplication {
+export class FramesForm extends FormApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "gb-frames-form",
