@@ -79,11 +79,3 @@ export const DEFAULT_MASK = {
   path: "modules/greybearded-tokens/assets/mask-round.png"
 };
 
-// Legacy-Export (Kompatibilität): Wird von älteren gecachten snapshot.js-Versionen erwartet.
-// Die Outline-/Border-Funktion wurde entfernt; Wert bleibt ohne aktive Wirkung.
-export const DEFAULT_BORDER = {
-  enabled: false,
-  color: "#ffffff",
-  thickness: 1,
-  quality: 0.2
-};
