@@ -34,7 +34,8 @@ export function normalizeTokenToolsConfig(config = {}, defaults = DEFAULT_TOKEN_
     sizeMin: sizeRange.min,
     sizeMax: sizeRange.max,
     toggleFrame: normalizeBoolean(config.toggleFrame, defaults.toggleFrame),
-    disposition: normalizeBoolean(config.disposition, defaults.disposition)
+    disposition: normalizeBoolean(config.disposition, defaults.disposition),
+    mirrorArtwork: normalizeBoolean(config.mirrorArtwork, defaults.mirrorArtwork)
   };
 }
 

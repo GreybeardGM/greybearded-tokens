@@ -74,13 +74,17 @@
         "ToggleFrame": "Frame-Flag toggeln aktivieren",
         "Disposition": "Disposition-Tool aktivieren",
         "SizeMin": "Minimale Größe für Shrink/Grow",
-        "SizeMax": "Maximale Größe für Shrink/Grow"
+        "SizeMax": "Maximale Größe für Shrink/Grow",
+        "MirrorArtwork": "Artwork-Spiegeln-Tool aktivieren"
       },
       "Disposition": {
         "ToolTitle": "Disposition für ausgewählte Token setzen",
         "Title": "Disposition ändern",
         "Content": "Welche Disposition soll auf alle ausgewählten Token angewendet werden?",
         "NoneSelected": "Bitte wähle mindestens einen Token aus."
+      },
+      "MirrorArtwork": {
+        "ToolTitle": "Ausgewählte Token-Artworks vertikal spiegeln"
       }
     }
   }

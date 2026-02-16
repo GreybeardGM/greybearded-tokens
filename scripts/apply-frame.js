@@ -192,9 +192,11 @@ async function applyFrameToToken(token, snapshot) {
     const overlay = upsertOverlayOnToken(token);
     if (!overlay) return;
 
-    // Overlay relativ mittig platzieren und Transformationspfad spiegeln
+    // Overlay relativ mittig platzieren.
+    // Wichtig: Spiegelung des Token-Meshes wird absichtlich NICHT auf Frames übernommen,
+    // damit Rahmen bei gespiegelten Tokens immer gleich ausgerichtet bleiben.
     overlay.position.set(token.w / 2, token.h / 2);
-    overlay.scale.copyFrom(mesh.scale);
+    overlay.scale.set(Math.abs(mesh.scale.x || 1), Math.abs(mesh.scale.y || 1));
     overlay.rotation = mesh.rotation;
 
     const F1 = S.frame1;
@@ -258,7 +260,7 @@ async function applyFrameToToken(token, snapshot) {
 
     // Größenlogik mit Gegenrechnen der Overlay-Skalierung (wie zuvor)
     const kW = token.w, kH = token.h;
-    const sx = overlay.scale.x || 1, sy = overlay.scale.y || 1;
+    const sx = Math.abs(overlay.scale.x || 1), sy = Math.abs(overlay.scale.y || 1);
 
     if (gb.f1 && F1) {
       gb.f1.width  = (kW * tx * (F1.scale || 1)) / sx;
