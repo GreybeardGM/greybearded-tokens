@@ -6,9 +6,8 @@ import {
 } from "./constants.js";
 import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
-import {
-  num, bool, str, oneOf, isHex, bindHexPairs, readObjectSetting
-} from "./helpers.js";
+import { toFiniteNumber, normalizeBoolean } from "../utils/normalization.js";
+import { str, oneOf, isHex, bindHexPairs, readObjectSetting } from "./helpers.js";
 
 export class FramesForm extends FormApplication {
   static get defaultOptions() {
@@ -28,23 +27,23 @@ export class FramesForm extends FormApplication {
 
     const f1 = {
       path:           str(cur.frame1?.path,         DEFAULT_FRAME1.path),
-      scale:          num(cur.frame1?.scale,        DEFAULT_FRAME1.scale),
+      scale:          toFiniteNumber(cur.frame1?.scale,        DEFAULT_FRAME1.scale),
       tintMode:       oneOf(cur.frame1?.tintMode,   TINT_CHOICES, DEFAULT_FRAME1.tintMode),
-      usePlayerColor: bool(cur.frame1?.usePlayerColor, DEFAULT_FRAME1.usePlayerColor),
+      usePlayerColor: normalizeBoolean(cur.frame1?.usePlayerColor, DEFAULT_FRAME1.usePlayerColor),
       defaultColor:   isHex(cur.frame1?.defaultColor) ? cur.frame1.defaultColor : DEFAULT_FRAME1.defaultColor
     };
 
     const f2 = {
-      enabled:        bool(cur.frame2?.enabled,     DEFAULT_FRAME2.enabled),
+      enabled:        normalizeBoolean(cur.frame2?.enabled,     DEFAULT_FRAME2.enabled),
       path:           str(cur.frame2?.path,         DEFAULT_FRAME2.path),
-      scale:          num(cur.frame2?.scale,        DEFAULT_FRAME2.scale),
+      scale:          toFiniteNumber(cur.frame2?.scale,        DEFAULT_FRAME2.scale),
       tintMode:       oneOf(cur.frame2?.tintMode,   TINT_CHOICES, DEFAULT_FRAME2.tintMode),
-      usePlayerColor: bool(cur.frame2?.usePlayerColor, DEFAULT_FRAME2.usePlayerColor),
+      usePlayerColor: normalizeBoolean(cur.frame2?.usePlayerColor, DEFAULT_FRAME2.usePlayerColor),
       defaultColor:   isHex(cur.frame2?.defaultColor) ? cur.frame2.defaultColor : DEFAULT_FRAME2.defaultColor
     };
 
     const mk = {
-      enabled:        bool(cur.mask?.enabled,       DEFAULT_MASK.enabled),
+      enabled:        normalizeBoolean(cur.mask?.enabled,       DEFAULT_MASK.enabled),
       path:           str(cur.mask?.path,           DEFAULT_MASK.path)
     };
 
@@ -88,7 +87,7 @@ export class FramesForm extends FormApplication {
 
   async _updateObject(_event, formData) {
     // Primary frame controls
-    const f1Scale = num(formData["frame1-scale"], DEFAULT_FRAME1.scale);
+    const f1Scale = toFiniteNumber(formData["frame1-scale"], DEFAULT_FRAME1.scale);
     const f1Tint  = oneOf(String(formData["frame1-tintMode"] || ""), TINT_CHOICES, DEFAULT_FRAME1.tintMode);
     const f1Def   = isHex(formData["frame1-defaultColor-text"])
       ? formData["frame1-defaultColor-text"]
@@ -98,29 +97,29 @@ export class FramesForm extends FormApplication {
       path:           str(formData["frame1-path"], DEFAULT_FRAME1.path),
       scale:          f1Scale,
       tintMode:       f1Tint,
-      usePlayerColor: bool(formData["frame1-usePlayerColor"], DEFAULT_FRAME1.usePlayerColor),
+      usePlayerColor: normalizeBoolean(formData["frame1-usePlayerColor"], DEFAULT_FRAME1.usePlayerColor),
       defaultColor:   f1Def
     };
 
     // Secondary frame controls
-    const f2Scale = num(formData["frame2-scale"], DEFAULT_FRAME2.scale);
+    const f2Scale = toFiniteNumber(formData["frame2-scale"], DEFAULT_FRAME2.scale);
     const f2Tint  = oneOf(String(formData["frame2-tintMode"] || ""), TINT_CHOICES, DEFAULT_FRAME2.tintMode);
     const f2Def   = isHex(formData["frame2-defaultColor-text"])
       ? formData["frame2-defaultColor-text"]
       : (isHex(formData["frame2-defaultColor-color"]) ? formData["frame2-defaultColor-color"] : DEFAULT_FRAME2.defaultColor);
 
     const frame2 = {
-      enabled:        bool(formData["frame2-enabled"], DEFAULT_FRAME2.enabled),
+      enabled:        normalizeBoolean(formData["frame2-enabled"], DEFAULT_FRAME2.enabled),
       path:           str(formData["frame2-path"], DEFAULT_FRAME2.path),
       scale:          f2Scale,
       tintMode:       f2Tint,
-      usePlayerColor: bool(formData["frame2-usePlayerColor"], DEFAULT_FRAME2.usePlayerColor),
+      usePlayerColor: normalizeBoolean(formData["frame2-usePlayerColor"], DEFAULT_FRAME2.usePlayerColor),
       defaultColor:   f2Def
     };
 
     // Mask controls
     const mask = {
-      enabled: bool(formData["mask-enabled"], DEFAULT_MASK.enabled),
+      enabled: normalizeBoolean(formData["mask-enabled"], DEFAULT_MASK.enabled),
       path:    str(formData["mask-path"],     DEFAULT_MASK.path)
     };
 

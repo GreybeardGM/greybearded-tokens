@@ -4,15 +4,6 @@
 export const HEX_RE = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
 export const isHex  = (v) => (typeof v === "string") && HEX_RE.test(v);
 
-export function num(v, fb = 0) {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : fb;
-}
-
-export function bool(v, fb = false) {
-  return (typeof v === "boolean") ? v : (v == null ? fb : !!v);
-}
-
 export function str(v, fb = "") {
   return (typeof v === "string" && v.length) ? v : fb;
 }
