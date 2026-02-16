@@ -43,3 +43,23 @@ export function bindHexPairs(root, names) {
     bindHexSync(t, c);
   }
 }
+
+/** Scene Controls aktualisieren, ohne einen kompletten Seiten-Reload zu erzwingen. */
+export async function refreshSceneControls() {
+  if (!ui?.controls || !canvas?.ready) return;
+
+  const controls = ui.controls;
+  const activeLayer = canvas.activeLayer;
+  const activeControlName = controls.control?.name;
+  const activeToolName = controls.tool?.name;
+
+  await controls.render({
+    force: true,
+    controls: activeControlName,
+    tool: activeToolName
+  });
+
+  if (activeLayer && canvas.activeLayer !== activeLayer && typeof activeLayer.activate === "function") {
+    activeLayer.activate({ tool: activeToolName });
+  }
+}
