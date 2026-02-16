@@ -1,5 +1,6 @@
 import { MOD_ID } from "./constants.js";
 import { normalizeTokenToolsConfig } from "../utils/normalization.js";
+import { debugTokenToolsFlow } from "./helpers.js";
 
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -37,8 +38,22 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static async onSubmit(_event, _form, formData) {
     const data = formData.object;
-    const next = normalizeTokenToolsConfig(data);
+    const current = normalizeTokenToolsConfig(game.settings.get(MOD_ID, "tokenTools"));
+
+    const next = normalizeTokenToolsConfig({
+      ...current,
+      ...data,
+      size: Object.hasOwn(data, "size") ? data.size : false,
+      toggleFrame: Object.hasOwn(data, "toggleFrame") ? data.toggleFrame : false,
+      disposition: Object.hasOwn(data, "disposition") ? data.disposition : false
+    }, current);
+
+    debugTokenToolsFlow("tokenTools form submit", { data, current, next });
+
     await game.settings.set(MOD_ID, "tokenTools", next);
+
+    const afterSet = normalizeTokenToolsConfig(game.settings.get(MOD_ID, "tokenTools"));
+    debugTokenToolsFlow("tokenTools after set", { afterSet });
   }
 
   async _onClickAction(event, target) {
