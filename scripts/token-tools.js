@@ -2,16 +2,10 @@
 import { updateFrame } from "./apply-frame.js";
 import { MOD_ID, DEFAULT_DISPOSITION_COLORS } from "./settings/constants.js";
 import { normalizeTokenToolsConfig } from "./utils/normalization.js";
-import { debugTokenToolsFlow } from "./settings/helpers.js";
 
 Hooks.on('getSceneControlButtons', (controls) => {
   const toolConfig = normalizeTokenToolsConfig(game.settings.get(MOD_ID, 'tokenTools'));
 
-  debugTokenToolsFlow('getSceneControlButtons hook called', {
-    controlShape: Array.isArray(controls) ? 'array' : typeof controls,
-    hasTokenV13Path: !!(controls?.tokens ?? controls?.token),
-    toolConfig
-  });
 
   const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
   const currSize = (td) => Math.max(Number(td.width) || 1, Number(td.height) || 1);
