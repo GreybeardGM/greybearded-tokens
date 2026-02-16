@@ -48,18 +48,27 @@ export function bindHexPairs(root, names) {
 export async function refreshSceneControls() {
   if (!ui?.controls || !canvas?.ready) return;
 
-  const controls = ui.controls;
-  const activeLayer = canvas.activeLayer;
-  const activeControlName = controls.control?.name;
-  const activeToolName = controls.tool?.name;
+  const controlsApp = ui.controls;
+  const activeControlName = controlsApp.control?.name;
+  const activeToolName = controlsApp.tool?.name;
 
-  await controls.render({
+  let nextControls;
+  if (typeof controlsApp._getControlButtons === "function") {
+    nextControls = controlsApp._getControlButtons();
+  } else {
+    nextControls = foundry.utils.deepClone(controlsApp.controls ?? []);
+    Hooks.callAll("getSceneControlButtons", nextControls);
+  }
+
+  await controlsApp.render({
     force: true,
-    controls: activeControlName,
-    tool: activeToolName
+    controls: nextControls,
+    tool: activeToolName,
+    control: activeControlName
   });
 
-  if (activeLayer && canvas.activeLayer !== activeLayer && typeof activeLayer.activate === "function") {
-    activeLayer.activate({ tool: activeToolName });
+  if (activeControlName && controlsApp.control?.name !== activeControlName) {
+    const fallbackTool = activeToolName ?? controlsApp.tool?.name;
+    canvas?.[activeControlName]?.activate?.({ tool: fallbackTool });
   }
 }

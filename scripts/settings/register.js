@@ -39,7 +39,9 @@ export function registerSettings() {
     type: Object,
     default: DEFAULT_TOKEN_TOOLS,
     onChange: () => {
-      void refreshSceneControls();
+      void refreshSceneControls().catch((error) => {
+        console.error("[greybearded-tokens] Failed to refresh scene controls after tokenTools change", error);
+      });
     }
   });
 
