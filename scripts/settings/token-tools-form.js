@@ -48,8 +48,6 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
       disposition: Object.hasOwn(data, "disposition") ? data.disposition : false
     }, current);
 
-    debugTokenToolsFlow("tokenTools form submit", { data, current, next });
-
     await game.settings.set(MOD_ID, "tokenTools", next);
 
     const afterSet = normalizeTokenToolsConfig(game.settings.get(MOD_ID, "tokenTools"));

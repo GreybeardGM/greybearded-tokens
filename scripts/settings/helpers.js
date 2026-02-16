@@ -53,43 +53,43 @@ export function debugTokenToolsFlow(message, data) {
   console.debug(`[greybearded-tokens] ${message}`, data);
 }
 
-/** Scene Controls aktualisieren, ohne einen kompletten Seiten-Reload zu erzwingen. */
-export async function refreshSceneControls() {
-  if (!ui?.controls) {
-    debugTokenToolsFlow("refreshSceneControls aborted: ui.controls missing");
-    return;
-  }
+function setToolVisible(tool, visible) {
+  if (!tool || typeof tool !== "object") return;
+  tool.visible = visible;
+}
 
-  if (!canvas?.ready) {
-    debugTokenToolsFlow("refreshSceneControls aborted: canvas not ready", { canvasReady: canvas?.ready ?? false });
-    return;
-  }
+/**
+ * Aktualisiert ausschließlich die Sichtbarkeit bestehender Token-Tools.
+ * Es werden keine Controls hinzugefügt/entfernt, um Instabilitäten zu vermeiden.
+ */
+export async function refreshTokenToolVisibility(config) {
+  if (!ui?.controls || !canvas?.ready) return;
+
+  const isGM = !!game.user?.isGM;
+  const visibility = {
+    gbShrink: isGM && !!config?.size,
+    gbGrow: isGM && !!config?.size,
+    gbToggleFrame: isGM && !!config?.toggleFrame,
+    gbSetDisposition: isGM && !!config?.disposition
+  };
 
   const controlsApp = ui.controls;
-  const activeControlName = controlsApp.control?.name;
-  const activeToolName = controlsApp.tool?.name;
+  const controls = controlsApp.controls;
+  const tokenControl = controls?.tokens ?? controls?.token
+    ?? (Array.isArray(controls) ? controls.find((c) => c?.name === "tokens" || c?.name === "token") : null);
 
-  debugTokenToolsFlow("refreshSceneControls start", {
-    activeControlName,
-    activeToolName
-  });
+  const tokenTools = tokenControl?.tools;
+  if (!tokenTools) return;
 
-  await controlsApp.render({
-    force: true,
-    controls: activeControlName,
-    tool: activeToolName
-  });
-
-  debugTokenToolsFlow("refreshSceneControls rendered", {
-    activeControlNameAfterRender: controlsApp.control?.name,
-    activeToolNameAfterRender: controlsApp.tool?.name
-  });
-
-  if (activeControlName && controlsApp.control?.name !== activeControlName) {
-    debugTokenToolsFlow("refreshSceneControls reactivating previous control", {
-      previousControl: activeControlName,
-      previousTool: activeToolName
-    });
-    canvas?.[activeControlName]?.activate?.({ tool: activeToolName });
+  if (Array.isArray(tokenTools)) {
+    for (const tool of tokenTools) {
+      if (tool?.name in visibility) setToolVisible(tool, visibility[tool.name]);
+    }
+  } else if (typeof tokenTools === "object") {
+    for (const [name, visible] of Object.entries(visibility)) {
+      setToolVisible(tokenTools[name], visible);
+    }
   }
+
+  await controlsApp.render({ force: true, tool: controlsApp.tool?.name });
 }
