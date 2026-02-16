@@ -1,15 +1,18 @@
 // modules/greybearded-tokens/scripts/token-tools.js
 import { updateFrame } from "./apply-frame.js";
 import { MOD_ID, DEFAULT_DISPOSITION_COLORS } from "./settings/constants.js";
+import { normalizeTokenToolsConfig } from "./utils/normalization.js";
 
 Hooks.on('getSceneControlButtons', (controls) => {
+  const toolConfig = normalizeTokenToolsConfig(game.settings.get(MOD_ID, 'tokenTools'));
+
   const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
   const currSize = (td) => Math.max(Number(td.width) || 1, Number(td.height) || 1);
 
   const adjustToken = async (tokenDoc, direction) => {
     const current = currSize(tokenDoc);
     const base = direction < 0 ? Math.ceil(current) : Math.floor(current);
-    const next = clamp(base + direction, 1, 15);
+    const next = clamp(base + direction, toolConfig.sizeMin, toolConfig.sizeMax);
     if (next === current) return;
     await tokenDoc.update({ width: next, height: next });
   };
@@ -99,7 +102,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
 
   const shrinkTool = {
     name: 'gbShrink',
-    title: 'Token verkleinern (min 1)',
+    title: `Token verkleinern (min ${toolConfig.sizeMin})`,
     icon: 'fa-solid fa-down-left-and-up-right-to-center',
     button: true,
     visible: game.user.isGM,
@@ -108,7 +111,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
 
   const growTool = {
     name: 'gbGrow',
-    title: 'Token vergrößern (max 15)',
+    title: `Token vergrößern (max ${toolConfig.sizeMax})`,
     icon: 'fa-solid fa-up-right-and-down-left-from-center',
     button: true,
     visible: game.user.isGM,
@@ -135,16 +138,19 @@ Hooks.on('getSceneControlButtons', (controls) => {
 
   // Neuer Objekt-Pfad (Foundry V13+)
   const tokObj = controls?.tokens ?? controls?.token;
+  const enabledTools = [];
+  if (toolConfig.size) enabledTools.push(shrinkTool, growTool);
+  if (toolConfig.toggleFrame) enabledTools.push(toggleFrameTool);
+  if (toolConfig.disposition) enabledTools.push(setDispositionTool);
+
+  if (!enabledTools.length) return;
+
   if (tokObj && typeof tokObj.tools === 'object' && !Array.isArray(tokObj.tools)) {
     const base = Object.keys(tokObj.tools).length;
-    shrinkTool.order = base + 1;
-    growTool.order   = base + 2;
-    toggleFrameTool.order = base + 3;
-    setDispositionTool.order = base + 4;
-    tokObj.tools[shrinkTool.name]   = shrinkTool;
-    tokObj.tools[growTool.name]     = growTool;
-    tokObj.tools[toggleFrameTool.name] = toggleFrameTool;
-    tokObj.tools[setDispositionTool.name] = setDispositionTool;
+    enabledTools.forEach((tool, index) => {
+      tool.order = base + index + 1;
+      tokObj.tools[tool.name] = tool;
+    });
     return;
   }
 
@@ -153,6 +159,6 @@ Hooks.on('getSceneControlButtons', (controls) => {
   const tokenCtl = sets.find(c => c?.name === 'token' || c?.name === 'tokens');
   if (tokenCtl) {
     tokenCtl.tools ??= [];
-    tokenCtl.tools.push(shrinkTool, growTool, toggleFrameTool, setDispositionTool);
+    tokenCtl.tools.push(...enabledTools);
   }
 });

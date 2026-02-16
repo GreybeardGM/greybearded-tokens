@@ -67,6 +67,15 @@
       "DoneInfo": "Prototype Token image synchronized for {name}."
     },
     "Tools": {
+      "Config": {
+        "Name": "Token Tools",
+        "Label": "Configure Token Tools",
+        "Size": "Enable Shrink/Grow",
+        "ToggleFrame": "Enable Toggle Frame Flag",
+        "Disposition": "Enable Disposition Tool",
+        "SizeMin": "Minimum size for Shrink/Grow",
+        "SizeMax": "Maximum size for Shrink/Grow"
+      },
       "Disposition": {
         "ToolTitle": "Set disposition for selected tokens",
         "Title": "Change Disposition",

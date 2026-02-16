@@ -1,0 +1,37 @@
+<div class="gbt-token-tools">
+  <div class="form-group gbt-token-tools__row">
+    <label for="gb-token-tools-size">{{localize "GBT.Tools.Config.Size"}}</label>
+    <input id="gb-token-tools-size" type="checkbox" name="size" {{checked size}} />
+  </div>
+
+  <div class="form-group gbt-token-tools__row gbt-token-tools__size-field">
+    <label for="gb-token-tools-size-min">{{localize "GBT.Tools.Config.SizeMin"}}</label>
+    <input id="gb-token-tools-size-min" type="number" name="sizeMin" min="1" max="99" step="1" value="{{sizeMin}}" />
+  </div>
+
+  <div class="form-group gbt-token-tools__row gbt-token-tools__size-field">
+    <label for="gb-token-tools-size-max">{{localize "GBT.Tools.Config.SizeMax"}}</label>
+    <input id="gb-token-tools-size-max" type="number" name="sizeMax" min="1" max="99" step="1" value="{{sizeMax}}" />
+  </div>
+
+  <div class="form-group gbt-token-tools__row">
+    <label for="gb-token-tools-toggle-frame">{{localize "GBT.Tools.Config.ToggleFrame"}}</label>
+    <input id="gb-token-tools-toggle-frame" type="checkbox" name="toggleFrame" {{checked toggleFrame}} />
+  </div>
+
+  <div class="form-group gbt-token-tools__row">
+    <label for="gb-token-tools-disposition">{{localize "GBT.Tools.Config.Disposition"}}</label>
+    <input id="gb-token-tools-disposition" type="checkbox" name="disposition" {{checked disposition}} />
+  </div>
+
+  <div class="gbt-token-tools__actions">
+    <button type="button" class="dialog-button" data-action="cancel">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      {{localize "GBT.Common.Cancel"}}
+    </button>
+    <button type="submit" class="dialog-button">
+      <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+      {{localize "GBT.Common.Save"}}
+    </button>
+  </div>
+</div>

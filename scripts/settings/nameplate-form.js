@@ -2,7 +2,8 @@
 import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_NAMEPLATES } from "./constants.js";
 import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
-import { isHex, num, bool, oneOf, bindHexSync } from "./helpers.js";
+import { toFiniteNumber, normalizeBoolean } from "../utils/normalization.js";
+import { isHex, oneOf, bindHexSync } from "./helpers.js";
 
 export class NameplateForm extends FormApplication {
   static get defaultOptions() {
@@ -22,13 +23,13 @@ export class NameplateForm extends FormApplication {
   async getData() {
     const cur = game.settings.get(MOD_ID, "nameplate") ?? {};
     return {
-      enabled:        bool(cur.enabled,        DEFAULT_NAMEPLATES.enabled),
-      baseFontSize:   num(cur.baseFontSize,    DEFAULT_NAMEPLATES.baseFontSize),
+      enabled:        normalizeBoolean(cur.enabled,        DEFAULT_NAMEPLATES.enabled),
+      baseFontSize:   toFiniteNumber(cur.baseFontSize,    DEFAULT_NAMEPLATES.baseFontSize),
       fontFamily:     oneOf(cur.fontFamily,    FONT_CHOICES,       DEFAULT_NAMEPLATES.fontFamily),
-      usePlayerColor: bool(cur.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
+      usePlayerColor: normalizeBoolean(cur.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
       defaultColor:   isHex(cur.defaultColor) ? cur.defaultColor : DEFAULT_NAMEPLATES.defaultColor,
       tintMode:       oneOf(cur.tintMode,      TINT_CHOICES,       DEFAULT_NAMEPLATES.tintMode),
-      scaleWithToken: bool(cur.scaleWithToken, DEFAULT_NAMEPLATES.scaleWithToken),
+      scaleWithToken: normalizeBoolean(cur.scaleWithToken, DEFAULT_NAMEPLATES.scaleWithToken),
       TINT_CHOICES, FONT_CHOICES
     };
   }
@@ -43,7 +44,7 @@ export class NameplateForm extends FormApplication {
   }
 
   async _updateObject(_event, formData) {
-    const baseFontSize = num(formData.baseFontSize, DEFAULT_NAMEPLATES.baseFontSize);
+    const baseFontSize = toFiniteNumber(formData.baseFontSize, DEFAULT_NAMEPLATES.baseFontSize);
     const fontFamily   = oneOf(String(formData.fontFamily || ""), FONT_CHOICES, DEFAULT_NAMEPLATES.fontFamily);
     const tintMode     = oneOf(String(formData.tintMode || ""), TINT_CHOICES, DEFAULT_NAMEPLATES.tintMode);
     const defaultColor = isHex(formData["defaultColor-text"])
@@ -51,13 +52,13 @@ export class NameplateForm extends FormApplication {
       : (isHex(formData["defaultColor-color"]) ? formData["defaultColor-color"] : DEFAULT_NAMEPLATES.defaultColor);
 
     const next = {
-      enabled:        bool(formData.enabled,        DEFAULT_NAMEPLATES.enabled),
+      enabled:        normalizeBoolean(formData.enabled,        DEFAULT_NAMEPLATES.enabled),
       baseFontSize,
       fontFamily,
-      usePlayerColor: bool(formData.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
+      usePlayerColor: normalizeBoolean(formData.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
       defaultColor,
       tintMode,
-      scaleWithToken: bool(formData.scaleWithToken, DEFAULT_NAMEPLATES.scaleWithToken)
+      scaleWithToken: normalizeBoolean(formData.scaleWithToken, DEFAULT_NAMEPLATES.scaleWithToken)
     };
 
     await game.settings.set(MOD_ID, "nameplate", next);
