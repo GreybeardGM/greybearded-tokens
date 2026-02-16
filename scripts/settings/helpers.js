@@ -43,3 +43,22 @@ export function bindHexPairs(root, names) {
     bindHexSync(t, c);
   }
 }
+
+
+/**
+ * Rendert SceneControls neu und nutzt reset=true, damit Tool-Definitionen sauber neu aufgebaut werden.
+ */
+export async function refreshSceneControls() {
+  if (!ui?.controls || !canvas?.ready) return;
+
+  const prev = {
+    control: ui.controls.control?.name,
+    tool: ui.controls.tool?.name
+  };
+
+  await ui.controls.render({
+    ...prev,
+    reset: true,
+    force: true
+  });
+}

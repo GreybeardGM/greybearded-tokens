@@ -105,7 +105,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
     title: `Token verkleinern (min ${toolConfig.sizeMin})`,
     icon: 'fa-solid fa-down-left-and-up-right-to-center',
     button: true,
-    visible: game.user.isGM,
+    visible: game.user.isGM && toolConfig.size,
     onChange: () => runOnSelectionSize(-1)
   };
 
@@ -114,7 +114,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
     title: `Token vergrößern (max ${toolConfig.sizeMax})`,
     icon: 'fa-solid fa-up-right-and-down-left-from-center',
     button: true,
-    visible: game.user.isGM,
+    visible: game.user.isGM && toolConfig.size,
     onChange: () => runOnSelectionSize(1)
   };
 
@@ -123,7 +123,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
     title: 'Frame-Flag toggeln',
     icon: 'fa-solid fa-vector-square',
     button: true,
-    visible: game.user.isGM,
+    visible: game.user.isGM && toolConfig.toggleFrame,
     onChange: () => runToggleDisableFrame()
   };
 
@@ -132,33 +132,19 @@ Hooks.on('getSceneControlButtons', (controls) => {
     title: game.i18n.localize('GBT.Tools.Disposition.ToolTitle'),
     icon: 'fa-solid fa-people-arrows-left-right',
     button: true,
-    visible: game.user.isGM,
+    visible: game.user.isGM && toolConfig.disposition,
     onChange: () => runSetDisposition()
   };
 
-  // Neuer Objekt-Pfad (Foundry V13+)
-  const tokObj = controls?.tokens ?? controls?.token;
-  const enabledTools = [];
-  if (toolConfig.size) enabledTools.push(shrinkTool, growTool);
-  if (toolConfig.toggleFrame) enabledTools.push(toggleFrameTool);
-  if (toolConfig.disposition) enabledTools.push(setDispositionTool);
+  // Foundry V13-Zielpfad: objektbasierte Scene Controls
+  const tokenControl = controls?.tokens;
+  if (!tokenControl || typeof tokenControl.tools !== 'object' || Array.isArray(tokenControl.tools)) return;
 
-  if (!enabledTools.length) return;
+  const moduleTools = [shrinkTool, growTool, toggleFrameTool, setDispositionTool];
+  const base = Object.keys(tokenControl.tools).length;
 
-  if (tokObj && typeof tokObj.tools === 'object' && !Array.isArray(tokObj.tools)) {
-    const base = Object.keys(tokObj.tools).length;
-    enabledTools.forEach((tool, index) => {
-      tool.order = base + index + 1;
-      tokObj.tools[tool.name] = tool;
-    });
-    return;
-  }
-
-  // Älterer Array-Pfad
-  const sets = Array.isArray(controls) ? controls : [];
-  const tokenCtl = sets.find(c => c?.name === 'token' || c?.name === 'tokens');
-  if (tokenCtl) {
-    tokenCtl.tools ??= [];
-    tokenCtl.tools.push(...enabledTools);
-  }
+  moduleTools.forEach((tool, index) => {
+    tool.order = base + index + 1;
+    tokenControl.tools[tool.name] = tool;
+  });
 });
