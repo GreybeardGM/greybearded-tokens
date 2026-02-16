@@ -50,36 +50,16 @@ export async function refreshSceneControls() {
 
   const controls = ui.controls;
   const activeLayer = canvas.activeLayer;
-  const activeControl = controls.activeControl ?? controls.control?.name ?? controls.currentControl;
-  const activeTool = controls.activeTool ?? controls.tool;
-  const renderOptions = { controls: activeControl, tool: activeTool };
+  const activeControlName = controls.control?.name;
+  const activeToolName = controls.tool?.name;
 
-  let refreshed = false;
-
-  if (typeof controls.render === "function") {
-    try {
-      await controls.render({ force: true, ...renderOptions });
-      refreshed = true;
-    } catch {
-      try {
-        await controls.render(true, renderOptions);
-        refreshed = true;
-      } catch {
-        // Fallback auf legacy API folgt unten.
-      }
-    }
-  }
-
-  if (!refreshed && typeof controls.initialize === "function") {
-    await controls.initialize({
-      layer: activeLayer,
-      control: activeControl,
-      tool: activeTool
-    });
-    controls.render?.(true);
-  }
+  await controls.render({
+    force: true,
+    controls: activeControlName,
+    tool: activeToolName
+  });
 
   if (activeLayer && canvas.activeLayer !== activeLayer && typeof activeLayer.activate === "function") {
-    activeLayer.activate({ tool: activeTool });
+    activeLayer.activate({ tool: activeToolName });
   }
 }
