@@ -1,7 +1,16 @@
 // modules/greybearded-tokens/scripts/settings/snapshot.js
-import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK } from "./constants.js";
+import {
+  MOD_ID,
+  TINT_CHOICES,
+  FONT_CHOICES,
+  DEFAULT_DISPOSITION_COLORS,
+  DEFAULT_NAMEPLATES,
+  DEFAULT_FRAME1,
+  DEFAULT_FRAME2,
+  DEFAULT_MASK
+} from "./constants.js";
 import { toFiniteNumber, normalizeBoolean } from "../utils/normalization.js";
-import { str, readObjectSetting } from "./helpers.js";
+import { str, oneOf, isHex, readObjectSetting } from "./helpers.js";
 
 let _S = null;
 
@@ -28,28 +37,46 @@ function _readAll() {
   const NP = readObjectSetting(MOD_ID, "nameplate", DEFAULT_NAMEPLATES);
   const CL = readObjectSetting(MOD_ID, "colors", DEFAULT_DISPOSITION_COLORS);
 
+  const nameplate = {
+    enabled:        normalizeBoolean(NP?.enabled,        DEFAULT_NAMEPLATES.enabled),
+    baseFontSize:   toFiniteNumber(NP?.baseFontSize,     DEFAULT_NAMEPLATES.baseFontSize),
+    fontFamily:     oneOf(NP?.fontFamily, FONT_CHOICES,  DEFAULT_NAMEPLATES.fontFamily),
+    usePlayerColor: normalizeBoolean(NP?.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
+    defaultColor:   isHex(NP?.defaultColor) ? NP.defaultColor : DEFAULT_NAMEPLATES.defaultColor,
+    tintMode:       oneOf(NP?.tintMode, TINT_CHOICES,    DEFAULT_NAMEPLATES.tintMode),
+    scaleWithToken: normalizeBoolean(NP?.scaleWithToken, DEFAULT_NAMEPLATES.scaleWithToken)
+  };
+
+  const colors = {
+    hostile:   isHex(CL?.hostile)   ? CL.hostile   : DEFAULT_DISPOSITION_COLORS.hostile,
+    neutral:   isHex(CL?.neutral)   ? CL.neutral   : DEFAULT_DISPOSITION_COLORS.neutral,
+    friendly:  isHex(CL?.friendly)  ? CL.friendly  : DEFAULT_DISPOSITION_COLORS.friendly,
+    secret:    isHex(CL?.secret)    ? CL.secret    : DEFAULT_DISPOSITION_COLORS.secret,
+    character: isHex(CL?.character) ? CL.character : DEFAULT_DISPOSITION_COLORS.character
+  };
+
   const snap = {
     frame1: {
       path:           str(FR?.frame1?.path,         DEFAULT_FRAME1.path),
       scale:          toFiniteNumber(FR?.frame1?.scale,        DEFAULT_FRAME1.scale),
-      tintMode:       str(FR?.frame1?.tintMode,     DEFAULT_FRAME1.tintMode),
+      tintMode:       oneOf(FR?.frame1?.tintMode, TINT_CHOICES, DEFAULT_FRAME1.tintMode),
       usePlayerColor: normalizeBoolean(FR?.frame1?.usePlayerColor, DEFAULT_FRAME1.usePlayerColor),
-      defaultColor:   str(FR?.frame1?.defaultColor, DEFAULT_FRAME1.defaultColor)
+      defaultColor:   isHex(FR?.frame1?.defaultColor) ? FR.frame1.defaultColor : DEFAULT_FRAME1.defaultColor
     },
     frame2: {
       enabled:        normalizeBoolean(FR?.frame2?.enabled,     DEFAULT_FRAME2.enabled),
       path:           str(FR?.frame2?.path,         DEFAULT_FRAME2.path),
       scale:          toFiniteNumber(FR?.frame2?.scale,        DEFAULT_FRAME2.scale),
-      tintMode:       str(FR?.frame2?.tintMode,     DEFAULT_FRAME2.tintMode),
+      tintMode:       oneOf(FR?.frame2?.tintMode, TINT_CHOICES, DEFAULT_FRAME2.tintMode),
       usePlayerColor: normalizeBoolean(FR?.frame2?.usePlayerColor, DEFAULT_FRAME2.usePlayerColor),
-      defaultColor:   str(FR?.frame2?.defaultColor, DEFAULT_FRAME2.defaultColor)
+      defaultColor:   isHex(FR?.frame2?.defaultColor) ? FR.frame2.defaultColor : DEFAULT_FRAME2.defaultColor
     },
     mask: {
       enabled:        normalizeBoolean(FR?.mask?.enabled,       DEFAULT_MASK.enabled),
       path:           str(FR?.mask?.path,           DEFAULT_MASK.path)
     },
-    nameplate: NP,
-    colors:    CL
+    nameplate,
+    colors
   };
 
   snap.runtime = deriveRuntimeFlags(snap);
