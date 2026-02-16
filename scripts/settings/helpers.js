@@ -43,3 +43,32 @@ export function bindHexPairs(root, names) {
     bindHexSync(t, c);
   }
 }
+
+/** Scene Controls aktualisieren, ohne einen kompletten Seiten-Reload zu erzwingen. */
+export async function refreshSceneControls() {
+  if (!ui?.controls || !canvas?.ready) return;
+
+  const controlsApp = ui.controls;
+  const activeControlName = controlsApp.control?.name;
+  const activeToolName = controlsApp.tool?.name;
+
+  let nextControls;
+  if (typeof controlsApp._getControlButtons === "function") {
+    nextControls = controlsApp._getControlButtons();
+  } else {
+    nextControls = foundry.utils.deepClone(controlsApp.controls ?? []);
+    Hooks.callAll("getSceneControlButtons", nextControls);
+  }
+
+  await controlsApp.render({
+    force: true,
+    controls: nextControls,
+    tool: activeToolName,
+    control: activeControlName
+  });
+
+  if (activeControlName && controlsApp.control?.name !== activeControlName) {
+    const fallbackTool = activeToolName ?? controlsApp.tool?.name;
+    canvas?.[activeControlName]?.activate?.({ tool: fallbackTool });
+  }
+}
