@@ -38,7 +38,16 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static async onSubmit(_event, _form, formData) {
     const data = formData.object;
-    const next = normalizeTokenToolsConfig(data);
+    const current = normalizeTokenToolsConfig(game.settings.get(MOD_ID, "tokenTools"));
+
+    const next = normalizeTokenToolsConfig({
+      ...current,
+      ...data,
+      size: Object.hasOwn(data, "size") ? data.size : false,
+      toggleFrame: Object.hasOwn(data, "toggleFrame") ? data.toggleFrame : false,
+      disposition: Object.hasOwn(data, "disposition") ? data.disposition : false
+    }, current);
+
     await game.settings.set(MOD_ID, "tokenTools", next);
     await refreshSceneControls();
   }
