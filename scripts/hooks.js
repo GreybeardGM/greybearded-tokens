@@ -76,7 +76,9 @@ export function registerRenderingHooks() {
     if (canvas?.ready) sweepAllTokenFrames();
   });
 
-  // Update all tokens once the canvas has finished loading
+  // Single entry point for initial snapshot build: this is the first hook where
+  // we can atomically build settings, preload textures, and refresh rendered tokens.
+  // Keeping buildSnapshot() here avoids duplicate init work across module.js hooks.
   Hooks.on("canvasReady", async () => {
     rebuildPlayerColorSnapshot();
     const S = buildSnapshot();
