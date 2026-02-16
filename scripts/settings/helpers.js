@@ -43,3 +43,30 @@ export function bindHexPairs(root, names) {
     bindHexSync(t, c);
   }
 }
+
+export function debugTokenToolsFlow(message, data) {
+  if (data === undefined) {
+    console.debug(`[greybearded-tokens] ${message}`);
+    return;
+  }
+
+  console.debug(`[greybearded-tokens] ${message}`, data);
+}
+
+/**
+ * Rendert SceneControls neu und nutzt reset=true, damit Tool-Definitionen sauber neu aufgebaut werden.
+ */
+export async function refreshSceneControls() {
+  if (!ui?.controls || !canvas?.ready) return;
+
+  const prev = {
+    control: ui.controls.control?.name,
+    tool: ui.controls.tool?.name
+  };
+
+  await ui.controls.render({
+    ...prev,
+    reset: true,
+    force: true
+  });
+}
