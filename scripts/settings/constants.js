@@ -84,5 +84,6 @@ export const DEFAULT_TOKEN_TOOLS = {
   sizeMin: 1,
   sizeMax: 15,
   toggleFrame: true,
-  disposition: true
+  disposition: true,
+  mirrorArtwork: true
 };

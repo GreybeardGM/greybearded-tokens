@@ -74,13 +74,17 @@
         "ToggleFrame": "Enable Toggle Frame Flag",
         "Disposition": "Enable Disposition Tool",
         "SizeMin": "Minimum size for Shrink/Grow",
-        "SizeMax": "Maximum size for Shrink/Grow"
+        "SizeMax": "Maximum size for Shrink/Grow",
+        "MirrorArtwork": "Enable Mirror Artwork Tool"
       },
       "Disposition": {
         "ToolTitle": "Set disposition for selected tokens",
         "Title": "Change Disposition",
         "Content": "Which disposition should be applied to all selected tokens?",
         "NoneSelected": "Please select at least one token."
+      },
+      "MirrorArtwork": {
+        "ToolTitle": "Mirror selected token artwork (vertical axis)"
       }
     }
   }

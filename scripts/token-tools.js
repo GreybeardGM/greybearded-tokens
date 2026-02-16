@@ -40,6 +40,23 @@ Hooks.on('getSceneControlButtons', (controls) => {
     }));
   };
 
+  const runMirrorArtwork = async () => {
+    if (!game.user.isGM) return;
+
+    const docs = canvas.tokens.controlled.map((t) => t.document);
+    if (!docs.length) return;
+
+    await Promise.all(docs.map(async (td) => {
+      const currentScaleX = Number(td.texture?.scaleX);
+      const magnitude = Math.abs(Number.isFinite(currentScaleX) && currentScaleX !== 0 ? currentScaleX : 1);
+      await td.update({
+        texture: {
+          scaleX: -magnitude
+        }
+      });
+    }));
+  };
+
   const runSetDisposition = async () => {
     if (!game.user.isGM) return;
 
@@ -128,6 +145,15 @@ Hooks.on('getSceneControlButtons', (controls) => {
     onChange: () => runToggleDisableFrame()
   };
 
+  const mirrorArtworkTool = {
+    name: 'gbMirrorArtwork',
+    title: game.i18n.localize('GBT.Tools.MirrorArtwork.ToolTitle'),
+    icon: 'fa-solid fa-left-right',
+    button: true,
+    visible: game.user.isGM && toolConfig.mirrorArtwork,
+    onChange: () => runMirrorArtwork()
+  };
+
   const setDispositionTool = {
     name: 'gbSetDisposition',
     title: game.i18n.localize('GBT.Tools.Disposition.ToolTitle'),
@@ -141,7 +167,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
   const tokenControl = controls?.tokens;
   if (!tokenControl || typeof tokenControl.tools !== 'object' || Array.isArray(tokenControl.tools)) return;
 
-  const moduleTools = [shrinkTool, growTool, toggleFrameTool, setDispositionTool];
+  const moduleTools = [shrinkTool, growTool, toggleFrameTool, mirrorArtworkTool, setDispositionTool];
   const base = Object.keys(tokenControl.tools).length;
 
   moduleTools.forEach((tool, index) => {
