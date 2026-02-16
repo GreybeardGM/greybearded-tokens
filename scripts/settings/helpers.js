@@ -43,3 +43,53 @@ export function bindHexPairs(root, names) {
     bindHexSync(t, c);
   }
 }
+
+export function debugTokenToolsFlow(message, data) {
+  if (data === undefined) {
+    console.debug(`[greybearded-tokens] ${message}`);
+    return;
+  }
+
+  console.debug(`[greybearded-tokens] ${message}`, data);
+}
+
+/** Scene Controls aktualisieren, ohne einen kompletten Seiten-Reload zu erzwingen. */
+export async function refreshSceneControls() {
+  if (!ui?.controls) {
+    debugTokenToolsFlow("refreshSceneControls aborted: ui.controls missing");
+    return;
+  }
+
+  if (!canvas?.ready) {
+    debugTokenToolsFlow("refreshSceneControls aborted: canvas not ready", { canvasReady: canvas?.ready ?? false });
+    return;
+  }
+
+  const controlsApp = ui.controls;
+  const activeControlName = controlsApp.control?.name;
+  const activeToolName = controlsApp.tool?.name;
+
+  debugTokenToolsFlow("refreshSceneControls start", {
+    activeControlName,
+    activeToolName
+  });
+
+  await controlsApp.render({
+    force: true,
+    controls: activeControlName,
+    tool: activeToolName
+  });
+
+  debugTokenToolsFlow("refreshSceneControls rendered", {
+    activeControlNameAfterRender: controlsApp.control?.name,
+    activeToolNameAfterRender: controlsApp.tool?.name
+  });
+
+  if (activeControlName && controlsApp.control?.name !== activeControlName) {
+    debugTokenToolsFlow("refreshSceneControls reactivating previous control", {
+      previousControl: activeControlName,
+      previousTool: activeToolName
+    });
+    canvas?.[activeControlName]?.activate?.({ tool: activeToolName });
+  }
+}
