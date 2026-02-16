@@ -143,24 +143,15 @@ Hooks.on('getSceneControlButtons', (controls) => {
     onChange: () => runSetDisposition()
   };
 
-  // Neuer Objekt-Pfad (Foundry V13+)
-  const tokObj = controls?.tokens ?? controls?.token;
+  // Foundry V13-Zielpfad: objektbasierte Scene Controls
+  const tokenControl = controls?.tokens;
+  if (!tokenControl || typeof tokenControl.tools !== 'object' || Array.isArray(tokenControl.tools)) return;
+
   const moduleTools = [shrinkTool, growTool, toggleFrameTool, setDispositionTool];
+  const base = Object.keys(tokenControl.tools).length;
 
-  if (tokObj && typeof tokObj.tools === 'object' && !Array.isArray(tokObj.tools)) {
-    const base = Object.keys(tokObj.tools).length;
-    moduleTools.forEach((tool, index) => {
-      tool.order = base + index + 1;
-      tokObj.tools[tool.name] = tool;
-    });
-    return;
-  }
-
-  // Älterer Array-Pfad
-  const sets = Array.isArray(controls) ? controls : [];
-  const tokenCtl = sets.find(c => c?.name === 'token' || c?.name === 'tokens');
-  if (tokenCtl) {
-    tokenCtl.tools ??= [];
-    tokenCtl.tools.push(...moduleTools);
-  }
+  moduleTools.forEach((tool, index) => {
+    tool.order = base + index + 1;
+    tokenControl.tools[tool.name] = tool;
+  });
 });

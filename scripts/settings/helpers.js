@@ -44,14 +44,6 @@ export function bindHexPairs(root, names) {
   }
 }
 
-export function debugTokenToolsFlow(message, data) {
-  if (data === undefined) {
-    console.debug(`[greybearded-tokens] ${message}`);
-    return;
-  }
-
-  console.debug(`[greybearded-tokens] ${message}`, data);
-}
 
 /**
  * Rendert SceneControls neu und nutzt reset=true, damit Tool-Definitionen sauber neu aufgebaut werden.
