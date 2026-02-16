@@ -47,11 +47,11 @@ Hooks.on('getSceneControlButtons', (controls) => {
     if (!docs.length) return;
 
     await Promise.all(docs.map(async (td) => {
-      const currentScaleX = Number(td.texture?.scaleX);
-      const magnitude = Math.abs(Number.isFinite(currentScaleX) && currentScaleX !== 0 ? currentScaleX : 1);
+      const rawScaleX = Number(td.texture?.scaleX);
+      const currentScaleX = Number.isFinite(rawScaleX) && rawScaleX !== 0 ? rawScaleX : 1;
       await td.update({
         texture: {
-          scaleX: -magnitude
+          scaleX: -currentScaleX
         }
       });
     }));

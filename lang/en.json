@@ -84,7 +84,7 @@
         "NoneSelected": "Please select at least one token."
       },
       "MirrorArtwork": {
-        "ToolTitle": "Mirror selected token artwork (vertical axis)"
+        "ToolTitle": "Toggle mirror for selected token artwork (vertical axis)"
       }
     }
   }

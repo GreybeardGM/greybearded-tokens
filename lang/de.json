@@ -84,7 +84,7 @@
         "NoneSelected": "Bitte wähle mindestens einen Token aus."
       },
       "MirrorArtwork": {
-        "ToolTitle": "Ausgewählte Token-Artworks vertikal spiegeln"
+        "ToolTitle": "Spiegelung für ausgewählte Token-Artworks umschalten (vertikale Achse)"
       }
     }
   }
