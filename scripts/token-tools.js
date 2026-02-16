@@ -32,10 +32,10 @@ Hooks.on('getSceneControlButtons', (controls) => {
 
     // Pro Token invertieren: true -> false, false/undefined -> true
     await Promise.all(docs.map(async (td) => {
-      const cur = !!(await td.getFlag('greybearded-tokens', 'disableFrame'));
+      const cur = !!(await td.getFlag(MOD_ID, 'disableFrame'));
       const next = !cur;
       // setFlag statt unsetFlag für deterministisches Verhalten
-      await td.setFlag('greybearded-tokens', 'disableFrame', next);
+      await td.setFlag(MOD_ID, 'disableFrame', next);
       updateFrame(td);
     }));
   };
