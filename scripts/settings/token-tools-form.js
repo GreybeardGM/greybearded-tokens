@@ -1,5 +1,6 @@
 import { MOD_ID } from "./constants.js";
 import { normalizeTokenToolsConfig } from "../utils/normalization.js";
+import { refreshSceneControls } from "./helpers.js";
 
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -39,6 +40,7 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
     const data = formData.object;
     const next = normalizeTokenToolsConfig(data);
     await game.settings.set(MOD_ID, "tokenTools", next);
+    await refreshSceneControls();
   }
 
   async _onClickAction(event, target) {
