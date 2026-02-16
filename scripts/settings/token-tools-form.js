@@ -1,6 +1,6 @@
 import { MOD_ID } from "./constants.js";
 import { normalizeTokenToolsConfig } from "../utils/normalization.js";
-import { refreshSceneControls } from "./helpers.js";
+import { debugTokenToolsFlow } from "./helpers.js";
 
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -48,8 +48,12 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
       disposition: Object.hasOwn(data, "disposition") ? data.disposition : false
     }, current);
 
+    debugTokenToolsFlow("tokenTools form submit", { data, current, next });
+
     await game.settings.set(MOD_ID, "tokenTools", next);
-    await refreshSceneControls();
+
+    const afterSet = normalizeTokenToolsConfig(game.settings.get(MOD_ID, "tokenTools"));
+    debugTokenToolsFlow("tokenTools after set", { afterSet });
   }
 
   async _onClickAction(event, target) {

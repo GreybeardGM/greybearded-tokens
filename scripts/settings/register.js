@@ -4,7 +4,7 @@ import { ColorsForm } from "./colors-form.js";
 import { NameplateForm } from "./nameplate-form.js";
 import { FramesForm } from "./frames-form.js";
 import { TokenToolsForm } from "./token-tools-form.js";
-import { refreshSceneControls } from "./helpers.js";
+import { debugTokenToolsFlow, refreshSceneControls } from "./helpers.js";
 
 export function registerSettings() {
   // Hidden data containers used by the config forms
@@ -38,9 +38,10 @@ export function registerSettings() {
     config: false,
     type: Object,
     default: DEFAULT_TOKEN_TOOLS,
-    onChange: () => {
+    onChange: (value) => {
+      debugTokenToolsFlow("tokenTools onChange fired", { value });
       void refreshSceneControls().catch((error) => {
-        console.error("[greybearded-tokens] Failed to refresh scene controls after tokenTools change", error);
+        console.error("[greybearded-tokens] tokenTools onChange refresh failed", error);
       });
     }
   });

@@ -44,31 +44,52 @@ export function bindHexPairs(root, names) {
   }
 }
 
+export function debugTokenToolsFlow(message, data) {
+  if (data === undefined) {
+    console.debug(`[greybearded-tokens] ${message}`);
+    return;
+  }
+
+  console.debug(`[greybearded-tokens] ${message}`, data);
+}
+
 /** Scene Controls aktualisieren, ohne einen kompletten Seiten-Reload zu erzwingen. */
 export async function refreshSceneControls() {
-  if (!ui?.controls || !canvas?.ready) return;
+  if (!ui?.controls) {
+    debugTokenToolsFlow("refreshSceneControls aborted: ui.controls missing");
+    return;
+  }
+
+  if (!canvas?.ready) {
+    debugTokenToolsFlow("refreshSceneControls aborted: canvas not ready", { canvasReady: canvas?.ready ?? false });
+    return;
+  }
 
   const controlsApp = ui.controls;
   const activeControlName = controlsApp.control?.name;
   const activeToolName = controlsApp.tool?.name;
 
-  let nextControls;
-  if (typeof controlsApp._getControlButtons === "function") {
-    nextControls = controlsApp._getControlButtons();
-  } else {
-    nextControls = foundry.utils.deepClone(controlsApp.controls ?? []);
-    Hooks.callAll("getSceneControlButtons", nextControls);
-  }
+  debugTokenToolsFlow("refreshSceneControls start", {
+    activeControlName,
+    activeToolName
+  });
 
   await controlsApp.render({
     force: true,
-    controls: nextControls,
-    tool: activeToolName,
-    control: activeControlName
+    controls: activeControlName,
+    tool: activeToolName
+  });
+
+  debugTokenToolsFlow("refreshSceneControls rendered", {
+    activeControlNameAfterRender: controlsApp.control?.name,
+    activeToolNameAfterRender: controlsApp.tool?.name
   });
 
   if (activeControlName && controlsApp.control?.name !== activeControlName) {
-    const fallbackTool = activeToolName ?? controlsApp.tool?.name;
-    canvas?.[activeControlName]?.activate?.({ tool: fallbackTool });
+    debugTokenToolsFlow("refreshSceneControls reactivating previous control", {
+      previousControl: activeControlName,
+      previousTool: activeToolName
+    });
+    canvas?.[activeControlName]?.activate?.({ tool: activeToolName });
   }
 }
