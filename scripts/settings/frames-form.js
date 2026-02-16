@@ -57,7 +57,7 @@ export class FramesForm extends FormApplication {
   
     bindHexPairs(root, ["frame1-defaultColor", "frame2-defaultColor"]);
   
-    // FilePicker
+    // Wire FilePicker buttons to matching input fields
     root.querySelectorAll('[data-action="fp"]').forEach(btn => {
       btn.addEventListener("click", async (ev) => {
         ev.preventDefault();
@@ -76,7 +76,7 @@ export class FramesForm extends FormApplication {
       });
     });
   
-    // Textfeld → Preview
+    // Keep preview image in sync with manual path input
     ["frame1-path","frame2-path","mask-path"].forEach(name => {
       const inp = root.querySelector(`input[name="${name}"]`);
       const img = root.querySelector(`[data-preview-for="${name}"] img`);
@@ -87,7 +87,7 @@ export class FramesForm extends FormApplication {
   }
 
   async _updateObject(_event, formData) {
-    // Frame 1
+    // Primary frame controls
     const f1Scale = num(formData["frame1-scale"], DEFAULT_FRAME1.scale);
     const f1Tint  = oneOf(String(formData["frame1-tintMode"] || ""), TINT_CHOICES, DEFAULT_FRAME1.tintMode);
     const f1Def   = isHex(formData["frame1-defaultColor-text"])
@@ -102,7 +102,7 @@ export class FramesForm extends FormApplication {
       defaultColor:   f1Def
     };
 
-    // Frame 2
+    // Secondary frame controls
     const f2Scale = num(formData["frame2-scale"], DEFAULT_FRAME2.scale);
     const f2Tint  = oneOf(String(formData["frame2-tintMode"] || ""), TINT_CHOICES, DEFAULT_FRAME2.tintMode);
     const f2Def   = isHex(formData["frame2-defaultColor-text"])
@@ -118,7 +118,7 @@ export class FramesForm extends FormApplication {
       defaultColor:   f2Def
     };
 
-    // Mask
+    // Mask controls
     const mask = {
       enabled: bool(formData["mask-enabled"], DEFAULT_MASK.enabled),
       path:    str(formData["mask-path"],     DEFAULT_MASK.path)

@@ -5,7 +5,7 @@ import { NameplateForm } from "./nameplate-form.js";
 import { FramesForm } from "./frames-form.js";
 
 export function registerSettings() {
-  // Wertecontainer (nicht sichtbar)
+  // Hidden data containers used by the config forms
   game.settings.register(MOD_ID, "frames", {
     name: "Frames",
     scope: "world",
@@ -30,26 +30,26 @@ export function registerSettings() {
     default: DEFAULT_DISPOSITION_COLORS
   });
 
-  // Sichtbare Menüs
+  // Visible configuration menus
   game.settings.registerMenu(MOD_ID, "framesMenu", {
-    name: "GBT.Frames.Name",     // Frame Setting
-    label: "GBT.Frames.Label",   // Configure Frames
+    name: "GBT.Frames.Name",     // Settings menu: frame configuration
+    label: "GBT.Frames.Label",   // Open frame configuration dialog
     icon: "fas fa-images",
     type: FramesForm,
     restricted: true
   });
 
   game.settings.registerMenu(MOD_ID, "nameplateMenu", {
-    name: "GBT.Nameplate.Name",   // Nameplate Settings
-    label: "GBT.Nameplate.Label", // Configure Nameplate
+    name: "GBT.Nameplate.Name",   // Settings menu: nameplate configuration
+    label: "GBT.Nameplate.Label", // Open nameplate configuration dialog
     icon: "fas fa-font",
     type: NameplateForm,
     restricted: true
   });
 
   game.settings.registerMenu(MOD_ID, "colorsMenu", {
-    name: "GBT.Colors.Name",     // Disposition Colors
-    label: "GBT.Colors.Label",   // Configure Colors
+    name: "GBT.Colors.Name",     // Settings menu: disposition color mapping
+    label: "GBT.Colors.Label",   // Open color configuration dialog
     icon: "fas fa-palette",
     type: ColorsForm,
     restricted: true

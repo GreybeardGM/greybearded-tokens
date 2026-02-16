@@ -3,7 +3,7 @@ import { getGbFrameSettings, buildSnapshot } from "./settings/snapshot.js";
 import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
 import { updateFrame } from "./apply-frame.js";
 
-/* ---------- Preload-Cache ---------- */
+/* ---------- Texture preload cache ---------- */
 let _lastPreloaded = new Set();
 let _pendingSweepHandle = null;
 let _pendingSweepSnapshot = null;
@@ -76,7 +76,7 @@ export function registerRenderingHooks() {
     if (canvas?.ready) sweepAllTokenFrames();
   });
 
-  // Updaten für alle Tokes, wenn Canvas geladen
+  // Update all tokens once the canvas has finished loading
   Hooks.on("canvasReady", async () => {
     rebuildPlayerColorSnapshot();
     const S = buildSnapshot();

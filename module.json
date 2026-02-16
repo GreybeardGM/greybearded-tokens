@@ -3,7 +3,7 @@
   "title": "Greybearded Token Frames",
   "type": "module",
   "version": "0.1.1",
-  "description": "Adds scalable, tintable token overlays and masks.",
+  "description": "Configurable token frames, masks, and nameplate styling with tint and player-color support for Foundry VTT.",
   "author": "GreybeardGM",
   "languages": [
     {
@@ -24,7 +24,7 @@
   ],
   "compatibility": {
     "minimum": "12",
-    "verified": "13.350"
+    "verified": "13.351"
   },
   "url": "https://github.com/GreybeardGM/greybearded-tokens",
   "manifest": "https://raw.githubusercontent.com/GreybeardGM/greybearded-tokens/main/module.json",

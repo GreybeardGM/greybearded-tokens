@@ -5,14 +5,14 @@ import { buildSnapshot } from "./settings/snapshot.js";
 
 Hooks.once("init", () => {
   registerSettings();
-  registerRenderingHooks(); // Hooks früh registrieren
+  registerRenderingHooks(); // Register rendering hooks before other startup work
 });
 
 Hooks.once("ready", () => {
-  buildSnapshot(); // Settings jetzt sicher
+  buildSnapshot(); // Build initial settings snapshot once Foundry is ready
 });
 
 Hooks.on("canvasReady", () => {
-  // Szene-/Weltwechsel: Snapshot auffrischen
+  // Refresh cached settings when scenes/world state change
   buildSnapshot();
 });
