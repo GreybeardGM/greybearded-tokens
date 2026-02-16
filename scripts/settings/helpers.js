@@ -43,3 +43,27 @@ export function bindHexPairs(root, names) {
     bindHexSync(t, c);
   }
 }
+
+/** Scene Controls aktualisieren, ohne einen kompletten Seiten-Reload zu erzwingen. */
+export async function refreshSceneControls() {
+  if (!ui?.controls || !canvas?.ready) return;
+
+  const controls = ui.controls;
+  const activeLayer = canvas.activeLayer;
+  const activeControl = controls.activeControl ?? controls.control?.name ?? controls.currentControl;
+  const activeTool = controls.activeTool ?? controls.tool;
+
+  if (typeof controls.initialize === "function") {
+    await controls.initialize({
+      layer: activeLayer,
+      control: activeControl,
+      tool: activeTool
+    });
+  }
+
+  controls.render?.(true);
+
+  if (activeLayer && canvas.activeLayer !== activeLayer && typeof activeLayer.activate === "function") {
+    activeLayer.activate({ tool: activeTool });
+  }
+}

@@ -69,8 +69,7 @@ export function registerSettings() {
     label: "GBT.Tools.Config.Label",
     icon: "fas fa-screwdriver-wrench",
     type: TokenToolsForm,
-    restricted: true,
-    requiresReload: true
+    restricted: true
   });
 
 }
