@@ -48,11 +48,11 @@
   }
 }
 
-.gbtf-frames button.colored-icon i {
+.gbtf-token-tools-disposition-dialog button.colored-icon i {
   color: var(--gbtf-disposition-color);
 }
 
-.gbtf-frames button {
+.gbtf-token-tools-disposition-dialog button {
   min-width: 6.5rem;
 }
 
