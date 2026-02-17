@@ -68,36 +68,41 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
 
   async _onRender(context, options) {
     await super._onRender(context, options);
-    const root = this.element?.[0] ?? this.element;
-    if (!root) return;
+    const form = this.form;
+    if (!form) return;
 
-    bindHexPairs(root, ["frame1-defaultColor", "frame2-defaultColor"]);
-
-    root.querySelectorAll('[data-action="fp"]').forEach((btn) => {
-      btn.addEventListener("click", async (ev) => {
-        ev.preventDefault();
-        const targetName = btn.dataset.target;
-        const input = root.querySelector(`input[name="${targetName}"]`);
-        const fp = new FilePicker({
-          type: "image",
-          current: input?.value || "",
-          callback: (path) => {
-            if (input) input.value = path;
-            const box = root.querySelector(`[data-preview-for="${targetName}"] img`);
-            if (box) box.src = path;
-          }
-        });
-        fp.render(true);
-      });
-    });
+    bindHexPairs(form, ["frame1-defaultColor", "frame2-defaultColor"]);
 
     ["frame1-path", "frame2-path", "mask-path"].forEach((name) => {
-      const inp = root.querySelector(`input[name="${name}"]`);
-      const img = root.querySelector(`[data-preview-for="${name}"] img`);
+      const inp = form.querySelector(`input[name="${name}"]`);
+      const img = form.querySelector(`[data-preview-for="${name}"] img`);
       if (!inp || !img) return;
       inp.addEventListener("input", () => { img.src = inp.value || ""; });
       inp.addEventListener("change", () => { img.src = inp.value || ""; });
     });
+  }
+
+  async _onClickAction(event, target) {
+    const action = target.dataset.action;
+    if (action === "fp") {
+      event.preventDefault();
+      const form = this.form;
+      const targetName = target.dataset.target;
+      const input = form?.querySelector(`input[name="${targetName}"]`);
+      const fp = new FilePicker({
+        type: "image",
+        current: input?.value || "",
+        callback: (path) => {
+          if (input) input.value = path;
+          const box = form?.querySelector(`[data-preview-for="${targetName}"] img`);
+          if (box) box.src = path;
+        }
+      });
+      fp.render(true);
+      return;
+    }
+
+    return super._onClickAction(event, target);
   }
 
   static async onSubmit(_event, _form, formData) {

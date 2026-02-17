@@ -44,11 +44,11 @@ export class ColorsForm extends HandlebarsApplicationMixin(ApplicationV2) {
 
   async _onRender(context, options) {
     await super._onRender(context, options);
-    const root = this.element?.[0] ?? this.element;
-    if (!root) return;
+    const form = this.form;
+    if (!form) return;
 
-    bindHexPairs(root, DISPOSITION);
-    root.querySelector('[data-action="cancel"]')?.addEventListener("click", async (event) => {
+    bindHexPairs(form, DISPOSITION);
+    form.querySelector('[data-action="cancel"]')?.addEventListener("click", async (event) => {
       event.preventDefault();
       await this.close();
     });

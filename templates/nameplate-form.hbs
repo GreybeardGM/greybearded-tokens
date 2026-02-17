@@ -15,8 +15,8 @@
   <div class="form-group">
     <label>{{localize "GBT.Nameplate.FontFamily"}}</label>
     <select name="fontFamily">
-      {{#each FONT_CHOICES}}
-        <option value="{{@key}}" {{#if (eq ../fontFamily @key)}}selected{{/if}}>{{this}}</option>
+      {{#each fontChoices}}
+        <option value="{{this.value}}" {{#if (eq ../fontFamily this.value)}}selected{{/if}}>{{this.label}}</option>
       {{/each}}
     </select>
   </div>

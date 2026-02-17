@@ -31,8 +31,19 @@ export function readObjectSetting(modId, key, defaults) {
 /** Text- und Color-Input synchronisieren (HEX gewinnt). */
 export function bindHexSync(textEl, colorEl) {
   if (!textEl || !colorEl) return;
-  textEl.addEventListener("input", () => { if (isHex(textEl.value)) colorEl.value = textEl.value; });
-  colorEl.addEventListener("input", () => { if (isHex(colorEl.value)) textEl.value = colorEl.value; });
+
+  const syncTextToColor = () => {
+    if (isHex(textEl.value)) colorEl.value = textEl.value;
+  };
+
+  const syncColorToText = () => {
+    if (isHex(colorEl.value)) textEl.value = colorEl.value;
+  };
+
+  textEl.addEventListener("input", syncTextToColor);
+  textEl.addEventListener("change", syncTextToColor);
+  colorEl.addEventListener("input", syncColorToText);
+  colorEl.addEventListener("change", syncColorToText);
 }
 
 /** Mehrere Paare nach Namenskonvention "<name>-text" / "<name>-color" binden. */
