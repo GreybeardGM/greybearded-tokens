@@ -40,12 +40,6 @@
       "secret": "Geheimnisvoll",
       "character": "Spielercharakter"
     },
-    "Colors": {
-      "Name": "Disposition-Farben",
-      "Label": "Farben konfigurieren",
-      "Disposition": "Disposition",
-      "Hint": "Lege die Standardfärbungen für jede Token-Disposition fest."
-    },
     "Nameplate": {
       "Name": "Namensschild-Einstellungen",
       "Label": "Namensschilder konfigurieren",
@@ -93,6 +87,12 @@
       "Label": "Actor-Typ-Farben konfigurieren",
       "ActorType": "Actor-Typ",
       "Hint": "Lege Standardfarben für alle registrierten Actor-Typen fest."
+    },
+    "DispositionColors": {
+      "Name": "Disposition-Farben",
+      "Label": "Disposition-Farben konfigurieren",
+      "Disposition": "Disposition",
+      "Hint": "Lege die Standardfärbungen für jede Token-Disposition fest."
     }
   }
 }

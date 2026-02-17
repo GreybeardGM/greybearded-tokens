@@ -1,6 +1,6 @@
 // settings/register.js
 import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_ACTOR_TYPE_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK, DEFAULT_TOKEN_TOOLS } from "./constants.js";
-import { ColorsForm } from "./colors-form.js";
+import { DispositionColorsForm } from "./disposition-colors-form.js";
 import { ActorTypeColorsForm } from "./actor-type-colors-form.js";
 import { NameplateForm } from "./nameplate-form.js";
 import { FramesForm } from "./frames-form.js";
@@ -72,10 +72,10 @@ export function registerSettings() {
   });
 
   game.settings.registerMenu(MOD_ID, "colorsMenu", {
-    name: "GBT.Colors.Name",     // Settings menu: disposition color mapping
-    label: "GBT.Colors.Label",   // Open color configuration dialog
+    name: "GBT.DispositionColors.Name",     // Settings menu: disposition color mapping
+    label: "GBT.DispositionColors.Label",   // Open disposition color configuration dialog
     icon: "fas fa-palette",
-    type: ColorsForm,
+    type: DispositionColorsForm,
     restricted: true
   });
 
