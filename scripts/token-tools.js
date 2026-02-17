@@ -238,23 +238,23 @@ Hooks.on('getSceneControlButtons', (controls) => {
           callback: () => {
             const textValue = textInput?.value?.trim();
             const colorValue = colorInput?.value?.trim();
-            if (isHex(textValue)) return textValue;
-            if (isHex(colorValue)) return colorValue;
-            return null;
+            if (isHex(textValue)) return { action: 'save', value: textValue };
+            if (isHex(colorValue)) return { action: 'save', value: colorValue };
+            return { action: 'invalid' };
           }
         },
         {
           action: 'clear',
           label: game.i18n.localize('GBT.Tools.CustomTint.Clear'),
           icon: 'fa-solid fa-eraser',
-          callback: () => '__clear__'
+          callback: () => ({ action: 'clear' })
         },
         {
           action: 'cancel',
           label: game.i18n.localize('GBT.Common.Cancel'),
           icon: 'fa-regular fa-circle-xmark',
           default: true,
-          callback: () => null
+          callback: () => ({ action: 'cancel' })
         }
       ],
       render: (_event, dialog) => {
@@ -267,7 +267,9 @@ Hooks.on('getSceneControlButtons', (controls) => {
 
     if (result == null) return;
 
-    if (result === '__clear__') {
+    if (result?.action === 'cancel') return;
+
+    if (result?.action === 'clear') {
       await Promise.all(docs.map((td) => td.unsetFlag(MOD_ID, 'customTint')));
 
       for (const td of docs) {
@@ -278,12 +280,15 @@ Hooks.on('getSceneControlButtons', (controls) => {
       return;
     }
 
-    if (!isHex(result)) {
+    if (result?.action === 'invalid') {
       ui.notifications?.warn(game.i18n.localize('GBT.Common.InvalidHex'));
       return;
     }
 
-    await Promise.all(docs.map((td) => td.setFlag(MOD_ID, 'customTint', result)));
+    const nextColor = result?.action === 'save' ? result.value : null;
+    if (!isHex(nextColor)) return;
+
+    await Promise.all(docs.map((td) => td.setFlag(MOD_ID, 'customTint', nextColor)));
 
     for (const td of docs) {
       const tokenObj = getRenderedTokenObject(td);
