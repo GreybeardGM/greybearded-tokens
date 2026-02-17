@@ -86,6 +86,12 @@
       "MirrorArtwork": {
         "ToolTitle": "Toggle mirror for selected token artwork (vertical axis)"
       }
+    },
+    "ActorTypeColors": {
+      "Name": "Actor Type Colors",
+      "Label": "Configure Actor Type Colors",
+      "ActorType": "Actor Type",
+      "Hint": "Define default colors for all registered actor types."
     }
   }
 }

@@ -19,6 +19,9 @@ export const DEFAULT_DISPOSITION_COLORS = {
   "character": "#888888"
 };
 
+export const DEFAULT_ACTOR_TYPE_COLORS = {};
+export const DEFAULT_ACTOR_TYPE_COLOR = "#888888";
+
 export const DEFAULT_NAMEPLATES = {
   enabled: false,
   baseFontSize: 22,
