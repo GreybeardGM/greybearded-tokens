@@ -20,6 +20,7 @@ const DISPOSITION_META = {
 const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 const currSize = (td) => Math.max(Number(td.width) || 1, Number(td.height) || 1);
 const getControlledTokenDocs = () => canvas.tokens.controlled.map((t) => t.document);
+const getRenderedTokenObject = (tokenDoc) => tokenDoc?.object ?? canvas.tokens?.get(tokenDoc?.id) ?? null;
 
 const createSizeTools = ({ isGM, toolConfig, runOnSelectionSize }) => ([
   {
@@ -112,7 +113,10 @@ Hooks.on('getSceneControlButtons', (controls) => {
       const next = !cur;
       // setFlag statt unsetFlag für deterministisches Verhalten
       await td.setFlag(MOD_ID, 'disableFrame', next);
-      updateFrame(td);
+
+      const tokenObj = getRenderedTokenObject(td);
+      if (!tokenObj) return;
+      updateFrame(tokenObj);
     }));
   };
 
