@@ -153,7 +153,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
     const disposition = await foundry.applications.api.DialogV2.wait({
       window: {
         title: game.i18n.localize('GBT.Tools.Disposition.Title'),
-        contentClasses: ['gbt-frames']
+        contentClasses: ['gbt-token-tools-dialog']
       },
       content: `<p>${game.i18n.localize('GBT.Tools.Disposition.Content')}</p>`,
       buttons: dispositionEntries.map(({ key, label, colorKey }) => {
