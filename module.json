@@ -28,7 +28,7 @@
   },
   "url": "https://github.com/GreybeardGM/greybearded-tokens",
   "manifest": "https://raw.githubusercontent.com/GreybeardGM/greybearded-tokens/main/module.json",
-  "download": "https://github.com/GreybeardGM/greybearded-tokens/archive/refs/heads/main.zip",
+  "download": "https://github.com/GreybeardGM/greybearded-tokens/archive/refs/tags/0.2.0.zip",
   "styles": [
     "styles/gbtf.css"
   ]
