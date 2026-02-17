@@ -23,7 +23,7 @@
     "scripts/portrait-sync.js"
   ],
   "compatibility": {
-    "minimum": "12",
+    "minimum": "13",
     "verified": "13.351"
   },
   "url": "https://github.com/GreybeardGM/greybearded-tokens",
