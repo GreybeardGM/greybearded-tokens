@@ -36,6 +36,8 @@ The module supports the following tint modes in frame/nameplate settings:
 
 4. Install the module and enable it in your world setup.
 
+For release notes and upgrade details, see the [Changelog](./CHANGELOG.md).
+
 ## Compatibility
 
 - **Minimum:** Foundry VTT v12
@@ -65,6 +67,8 @@ If a scene starts stuttering or frametimes increase:
 Recommendation: apply one change at a time and re-check performance, so you can keep visual quality while removing only the most expensive settings.
 
 ## Development
+
+For release notes and upgrade details, see the [Changelog](./CHANGELOG.md).
 
 Clone the repository and place it in your Foundry modules directory:
 
