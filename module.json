@@ -2,7 +2,7 @@
   "id": "greybearded-tokens",
   "title": "Greybearded Token Frames",
   "type": "module",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Configurable token frames, masks, and nameplate styling with tint and player-color support for Foundry VTT.",
   "author": "GreybeardGM",
   "languages": [
