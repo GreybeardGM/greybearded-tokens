@@ -5,6 +5,7 @@ import {
   DEFAULT_DISPOSITION_COLORS,
   DEFAULT_ACTOR_TYPE_COLORS,
   DEFAULT_ACTOR_TYPE_COLOR,
+  DEFAULT_OWNERSHIP_COLORS,
   DEFAULT_NAMEPLATES,
   DEFAULT_FRAME1,
   DEFAULT_FRAME2,
@@ -16,6 +17,7 @@ import { str, oneOf, isHex, readObjectSetting, getConfiguredFontFamilies } from 
 let _S = null;
 
 const DISPOSITION_COLOR_KEYS = ["hostile", "neutral", "friendly", "secret", "character"];
+const OWNERSHIP_COLOR_KEYS = ["owner", "observer", "limited", "none"];
 
 function deriveRuntimeFlags(snapshot) {
   const hasFrame1 = !!snapshot?.frame1?.path;
@@ -60,6 +62,19 @@ function normalizeActorTypeColors(rawActorTypeColors) {
   return normalized;
 }
 
+function normalizeOwnershipColors(rawOwnershipColors) {
+  const source = (rawOwnershipColors && typeof rawOwnershipColors === "object")
+    ? rawOwnershipColors
+    : DEFAULT_OWNERSHIP_COLORS;
+
+  const normalized = {};
+  for (const key of OWNERSHIP_COLOR_KEYS) {
+    normalized[key] = isHex(source[key]) ? source[key] : DEFAULT_OWNERSHIP_COLORS[key];
+  }
+
+  return normalized;
+}
+
 function _readAll() {
   const FR = readObjectSetting(MOD_ID, "frames", {
     frame1: DEFAULT_FRAME1,
@@ -69,6 +84,7 @@ function _readAll() {
   const NP = readObjectSetting(MOD_ID, "nameplate", DEFAULT_NAMEPLATES);
   const rawDispositionColors = readObjectSetting(MOD_ID, "colors", DEFAULT_DISPOSITION_COLORS);
   const rawActorTypeColors = readObjectSetting(MOD_ID, "actorTypeColors", DEFAULT_ACTOR_TYPE_COLORS);
+  const rawOwnershipColors = readObjectSetting(MOD_ID, "ownershipColors", DEFAULT_OWNERSHIP_COLORS);
 
   const configuredFonts = Object.fromEntries(getConfiguredFontFamilies().map((family) => [family, true]));
 
@@ -84,6 +100,7 @@ function _readAll() {
 
   const dispositionColors = normalizeDispositionColors(rawDispositionColors);
   const actorTypeColors = normalizeActorTypeColors(rawActorTypeColors);
+  const ownershipColors = normalizeOwnershipColors(rawOwnershipColors);
 
   const snap = {
     frame1: {
@@ -107,7 +124,8 @@ function _readAll() {
     },
     nameplate,
     dispositionColors,
-    actorTypeColors
+    actorTypeColors,
+    ownershipColors
   };
 
   snap.runtime = deriveRuntimeFlags(snap);

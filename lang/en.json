@@ -15,9 +15,9 @@
       "None": "No Tint",
       "Disposition": "Disposition",
       "Unicolor": "Unicolor",
-      "Advanced": "Advanced",
       "Custom": "Custom",
-      "ActorType": "Actor Type"
+      "ActorType": "Actor Type",
+      "Ownership": "Ownership"
     },
     "Frames": {
       "Name": "Frame Settings",
@@ -93,6 +93,18 @@
       "Label": "Configure Disposition Colors",
       "Disposition": "Disposition",
       "Hint": "Define default tint colors for each token disposition."
+    },
+    "Ownership": {
+      "owner": "Owner",
+      "observer": "Observer",
+      "limited": "Limited",
+      "none": "None"
+    },
+    "OwnershipColors": {
+      "Name": "Ownership Colors",
+      "Label": "Configure Ownership Colors",
+      "Level": "Ownership",
+      "Hint": "Define default tint colors for each ownership level."
     }
   }
 }
