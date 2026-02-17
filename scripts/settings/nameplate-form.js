@@ -11,8 +11,6 @@ function buildFontChoices() {
   const fonts = new Set(Object.keys(FONT_CHOICES));
 
   for (const family of Object.keys(CONFIG?.fontDefinitions ?? {})) fonts.add(family);
-  for (const family of (game?.settings?.get("core", "fontFamilies") ?? [])) fonts.add(family);
-
   return [...fonts]
     .filter((family) => typeof family === "string" && family.trim().length)
     .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))

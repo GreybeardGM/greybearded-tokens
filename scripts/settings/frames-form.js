@@ -89,7 +89,10 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
       const form = this.form;
       const targetName = target.dataset.target;
       const input = form?.querySelector(`input[name="${targetName}"]`);
-      const fp = new FilePicker({
+      const FilePickerImpl = foundry?.applications?.apps?.FilePicker?.implementation ?? globalThis.FilePicker;
+      if (!FilePickerImpl) return;
+
+      const fp = new FilePickerImpl({
         type: "image",
         current: input?.value || "",
         callback: (path) => {
