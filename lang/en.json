@@ -86,7 +86,8 @@
         "ToolTitle": "Set custom color for selected tokens",
         "Title": "Set Custom Color",
         "Content": "Which custom color should be applied to all selected tokens?",
-        "NoneSelected": "Please select at least one token."
+        "NoneSelected": "Please select at least one token.",
+        "Clear": "Remove Custom Color"
       }
     },
     "ActorTypeColors": {

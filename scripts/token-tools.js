@@ -244,6 +244,12 @@ Hooks.on('getSceneControlButtons', (controls) => {
           }
         },
         {
+          action: 'clear',
+          label: game.i18n.localize('GBT.Tools.CustomTint.Clear'),
+          icon: 'fa-solid fa-eraser',
+          callback: () => '__clear__'
+        },
+        {
           action: 'cancel',
           label: game.i18n.localize('GBT.Common.Cancel'),
           icon: 'fa-regular fa-circle-xmark',
@@ -259,10 +265,21 @@ Hooks.on('getSceneControlButtons', (controls) => {
       }
     });
 
-    if (!isHex(result)) {
-      if (result !== null) {
-        ui.notifications?.warn(game.i18n.localize('GBT.Common.InvalidHex'));
+    if (result == null) return;
+
+    if (result === '__clear__') {
+      await Promise.all(docs.map((td) => td.unsetFlag(MOD_ID, 'customTint')));
+
+      for (const td of docs) {
+        const tokenObj = getRenderedTokenObject(td);
+        if (!tokenObj) continue;
+        updateFrame(tokenObj);
       }
+      return;
+    }
+
+    if (!isHex(result)) {
+      ui.notifications?.warn(game.i18n.localize('GBT.Common.InvalidHex'));
       return;
     }
 
