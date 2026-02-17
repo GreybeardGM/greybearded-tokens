@@ -12,11 +12,11 @@ import { DEFAULT_ACTOR_TYPE_COLOR } from "./settings/constants.js";
  *   - "PlayerColor"   → Spielerfarbe oder part.defaultColor (falls keine Spielerfarbe)
  *   - "Disposition"   → Farben aus S.dispositionColors.* (hostile, neutral, friendly, secret, character)
  *   - "ActorType"     → Farbe aus S.actorTypeColors[actor.type], sonst DEFAULT_ACTOR_TYPE_COLOR
- *   - "Advanced"      → aktuell wie Unicolor (Platzhalter für spätere Logik)
+ *   - "Ownership"    → Farbe anhand Nutzer-Berechtigung auf Token oder verlinktem Actor
  *   - "custom"|"Custom" → Token-Flag 'greybearded-tokens.customTint' (normalisiert), sonst part.defaultColor
  *
  * @param {Token} token            Foundry Token
- * @param {object} S               Gesamtsnapshot (muss S.dispositionColors und S.actorTypeColors enthalten)
+ * @param {object} S               Gesamtsnapshot (muss S.dispositionColors, S.actorTypeColors und S.ownershipColors enthalten)
  * @param {object} part            Teil-Settings: { tintMode, usePlayerColor, defaultColor }
  * @returns {string|null}          "#rrggbb" oder null (bei NoTint)
  */
@@ -41,8 +41,10 @@ export function getTintColor(token, S, part) {
       return null;
 
     case "Unicolor":
-    case "Advanced":
       return defaultColor;
+
+    case "Ownership":
+      return getOwnershipColor(token, S, defaultColor);
 
     case "Custom": {
       const raw = token?.document?.getFlag?.("greybearded-tokens", "customTint");
@@ -75,6 +77,32 @@ function getDispositionColor(token, snapshot, fallbackColor) {
   }
 }
 
+
+function getOwnershipColor(token, snapshot, fallbackColor) {
+  const ownershipColors = snapshot.ownershipColors ?? {};
+  const user = game?.user;
+  const tokenDoc = token?.document ?? null;
+  const actor = token?.actor ?? null;
+
+  if (hasOwnership(tokenDoc, user, "OWNER") || hasOwnership(actor, user, "OWNER")) {
+    return normalizeToHex(ownershipColors.owner) ?? fallbackColor;
+  }
+
+  if (hasOwnership(tokenDoc, user, "OBSERVER") || hasOwnership(actor, user, "OBSERVER")) {
+    return normalizeToHex(ownershipColors.observer) ?? fallbackColor;
+  }
+
+  if (hasOwnership(tokenDoc, user, "LIMITED") || hasOwnership(actor, user, "LIMITED")) {
+    return normalizeToHex(ownershipColors.limited) ?? fallbackColor;
+  }
+
+  return normalizeToHex(ownershipColors.none) ?? fallbackColor;
+}
+
+function hasOwnership(doc, user, level) {
+  if (!doc || !user || typeof doc.testUserPermission !== "function") return false;
+  return !!doc.testUserPermission(user, level, { exact: false });
+}
 function getActorTypeColor(token, snapshot) {
   const actorType = token?.actor?.type;
   if (typeof actorType !== "string" || !actorType.length) return DEFAULT_ACTOR_TYPE_COLOR;

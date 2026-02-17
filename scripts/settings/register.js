@@ -1,7 +1,8 @@
 // settings/register.js
-import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_ACTOR_TYPE_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK, DEFAULT_TOKEN_TOOLS } from "./constants.js";
+import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_ACTOR_TYPE_COLORS, DEFAULT_OWNERSHIP_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK, DEFAULT_TOKEN_TOOLS } from "./constants.js";
 import { DispositionColorsForm } from "./disposition-colors-form.js";
 import { ActorTypeColorsForm } from "./actor-type-colors-form.js";
+import { OwnershipColorsForm } from "./ownership-colors-form.js";
 import { NameplateForm } from "./nameplate-form.js";
 import { FramesForm } from "./frames-form.js";
 import { TokenToolsForm } from "./token-tools-form.js";
@@ -39,6 +40,14 @@ export function registerSettings() {
     config: false,
     type: Object,
     default: DEFAULT_ACTOR_TYPE_COLORS
+  });
+
+  game.settings.register(MOD_ID, "ownershipColors", {
+    name: "Ownership Colors",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: DEFAULT_OWNERSHIP_COLORS
   });
 
   game.settings.register(MOD_ID, "tokenTools", {
@@ -84,6 +93,14 @@ export function registerSettings() {
     label: "GBT.ActorTypeColors.Label",
     icon: "fas fa-users",
     type: ActorTypeColorsForm,
+    restricted: true
+  });
+
+  game.settings.registerMenu(MOD_ID, "ownershipColorsMenu", {
+    name: "GBT.OwnershipColors.Name",
+    label: "GBT.OwnershipColors.Label",
+    icon: "fas fa-user-shield",
+    type: OwnershipColorsForm,
     restricted: true
   });
 
