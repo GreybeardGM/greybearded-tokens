@@ -5,6 +5,7 @@ export const MOD_ID = "greybearded-tokens";
 export const TINT_CHOICES = {
   NoTint:      "GBT.Tint.None",
   Disposition: "GBT.Tint.Disposition",
+  ActorType:   "GBT.Tint.ActorType",
   Unicolor:    "GBT.Tint.Unicolor",
   Advanced:    "GBT.Tint.Advanced",
   Custom:      "GBT.Tint.Custom"

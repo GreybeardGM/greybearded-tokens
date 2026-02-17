@@ -45,11 +45,11 @@ export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV
 
   async _prepareContext() {
     const actorTypes = getActorTypes();
-    const cur = (game.settings.get(MOD_ID, "actorTypeColors") ?? DEFAULT_ACTOR_TYPE_COLORS) || DEFAULT_ACTOR_TYPE_COLORS;
+    const actorTypeColors = (game.settings.get(MOD_ID, "actorTypeColors") ?? DEFAULT_ACTOR_TYPE_COLORS) || DEFAULT_ACTOR_TYPE_COLORS;
     const rows = actorTypes.map((type) => ({
       type,
       label: getActorTypeLabel(type),
-      value: (typeof cur?.[type] === "string" && isHex(cur[type])) ? cur[type] : DEFAULT_ACTOR_TYPE_COLOR
+      value: (typeof actorTypeColors?.[type] === "string" && isHex(actorTypeColors[type])) ? actorTypeColors[type] : DEFAULT_ACTOR_TYPE_COLOR
     }));
 
     return {

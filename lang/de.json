@@ -16,7 +16,8 @@
       "Disposition": "Disposition",
       "Unicolor": "Einfarbig",
       "Advanced": "Erweitert",
-      "Custom": "Benutzerdefiniert"
+      "Custom": "Benutzerdefiniert",
+      "ActorType": "Actor-Typ"
     },
     "Frames": {
       "Name": "Rahmen-Einstellungen",

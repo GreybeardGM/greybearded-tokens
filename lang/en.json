@@ -16,7 +16,8 @@
       "Disposition": "Disposition",
       "Unicolor": "Unicolor",
       "Advanced": "Advanced",
-      "Custom": "Custom"
+      "Custom": "Custom",
+      "ActorType": "Actor Type"
     },
     "Frames": {
       "Name": "Frame Settings",

@@ -33,11 +33,11 @@ export class ColorsForm extends HandlebarsApplicationMixin(ApplicationV2) {
   };
 
   async _prepareContext() {
-    const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_DISPOSITION_COLORS) || DEFAULT_DISPOSITION_COLORS;
+    const dispositionColors = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_DISPOSITION_COLORS) || DEFAULT_DISPOSITION_COLORS;
     const rows = DISPOSITION.map((r) => ({
       tableName: "GBT.Colors.Disposition",
       role: r,
-      value: (typeof cur?.[r] === "string" && isHex(cur[r])) ? cur[r] : (DEFAULT_DISPOSITION_COLORS[r] ?? "#000000")
+      value: (typeof dispositionColors?.[r] === "string" && isHex(dispositionColors[r])) ? dispositionColors[r] : (DEFAULT_DISPOSITION_COLORS[r] ?? "#000000")
     }));
     return { rows };
   }
