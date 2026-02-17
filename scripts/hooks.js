@@ -48,6 +48,13 @@ function sweepAllTokenFrames(snapshot) {
 
 export function registerRenderingHooks() {
 
+  // Intentionally centralized to reduce duplication and keep future user-color
+  // refresh changes in one place.
+  const refreshPlayerColorDependentFrames = () => {
+    rebuildPlayerColorSnapshot();
+    if (canvas?.ready) sweepAllTokenFrames();
+  };
+
   Hooks.on("refreshToken", (t) => {
     updateFrame(t);
   });
@@ -71,22 +78,17 @@ export function registerRenderingHooks() {
     const colorOrCharChange = ("color" in change) || ("character" in change);
 
     if (colorOrCharChange) {
-      rebuildPlayerColorSnapshot();
-      if (canvas?.ready) {
-        sweepAllTokenFrames();
-      }
+      refreshPlayerColorDependentFrames();
     }
 
   });
 
   Hooks.on("createUser", () => {
-    rebuildPlayerColorSnapshot();
-    if (canvas?.ready) sweepAllTokenFrames();
+    refreshPlayerColorDependentFrames();
   });
 
   Hooks.on("deleteUser", () => {
-    rebuildPlayerColorSnapshot();
-    if (canvas?.ready) sweepAllTokenFrames();
+    refreshPlayerColorDependentFrames();
   });
 
   // Single entry point for initial snapshot build: this is the first hook where
