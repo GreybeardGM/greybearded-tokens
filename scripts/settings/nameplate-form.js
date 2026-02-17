@@ -5,60 +5,91 @@ import { updateFrame } from "../apply-frame.js";
 import { toFiniteNumber, normalizeBoolean } from "../utils/normalization.js";
 import { isHex, oneOf, bindHexSync } from "./helpers.js";
 
-export class NameplateForm extends FormApplication {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "gb-nameplate-form",
-      title: "GBT.Nameplate.Name",
-      template: "modules/greybearded-tokens/templates/nameplate-form.hbs",
-      classes: ["gb-nameplate-form"],
-      width: 330,
-      height: "auto",
-      resizable: true,
-      submitOnChange: false,
-      closeOnSubmit: true
-    });
-  }
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-  async getData() {
+function buildFontChoices() {
+  const fonts = new Set(Object.keys(FONT_CHOICES));
+
+  for (const family of Object.keys(CONFIG?.fontDefinitions ?? {})) fonts.add(family);
+  return [...fonts]
+    .filter((family) => typeof family === "string" && family.trim().length)
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
+    .map((family) => ({ value: family, label: family }));
+}
+
+export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
+  static DEFAULT_OPTIONS = {
+    id: "gb-nameplate-form",
+    tag: "form",
+    form: {
+      submitOnChange: false,
+      closeOnSubmit: true,
+      handler: NameplateForm.onSubmit
+    },
+    position: {
+      width: 330,
+      height: "auto"
+    },
+    window: {
+      title: "GBT.Nameplate.Name",
+      contentClasses: ["gbt-frames", "gb-nameplate-form"]
+    }
+  };
+
+  static PARTS = {
+    form: {
+      template: "modules/greybearded-tokens/templates/nameplate-form.hbs"
+    }
+  };
+
+  async _prepareContext() {
     const cur = game.settings.get(MOD_ID, "nameplate") ?? {};
+    const fontChoices = buildFontChoices();
+
     return {
-      enabled:        normalizeBoolean(cur.enabled,        DEFAULT_NAMEPLATES.enabled),
-      baseFontSize:   toFiniteNumber(cur.baseFontSize,    DEFAULT_NAMEPLATES.baseFontSize),
-      fontFamily:     oneOf(cur.fontFamily,    FONT_CHOICES,       DEFAULT_NAMEPLATES.fontFamily),
+      enabled: normalizeBoolean(cur.enabled, DEFAULT_NAMEPLATES.enabled),
+      baseFontSize: toFiniteNumber(cur.baseFontSize, DEFAULT_NAMEPLATES.baseFontSize),
+      fontFamily: oneOf(cur.fontFamily, Object.fromEntries(fontChoices.map((f) => [f.value, true])), DEFAULT_NAMEPLATES.fontFamily),
       usePlayerColor: normalizeBoolean(cur.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
-      defaultColor:   isHex(cur.defaultColor) ? cur.defaultColor : DEFAULT_NAMEPLATES.defaultColor,
-      tintMode:       oneOf(cur.tintMode,      TINT_CHOICES,       DEFAULT_NAMEPLATES.tintMode),
+      defaultColor: isHex(cur.defaultColor) ? cur.defaultColor : DEFAULT_NAMEPLATES.defaultColor,
+      tintMode: oneOf(cur.tintMode, TINT_CHOICES, DEFAULT_NAMEPLATES.tintMode),
       scaleWithToken: normalizeBoolean(cur.scaleWithToken, DEFAULT_NAMEPLATES.scaleWithToken),
-      TINT_CHOICES, FONT_CHOICES
+      TINT_CHOICES,
+      fontChoices
     };
   }
 
-  activateListeners(html) {
-    super.activateListeners(html);
-    const root = html[0] ?? html;
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    const form = this.form;
+    if (!form) return;
+
     bindHexSync(
-      root.querySelector('input[name="defaultColor-text"]'),
-      root.querySelector('input[name="defaultColor-color"]')
+      form.querySelector('input[name="defaultColor-text"]'),
+      form.querySelector('input[name="defaultColor-color"]')
     );
   }
 
-  async _updateObject(_event, formData) {
-    const baseFontSize = toFiniteNumber(formData.baseFontSize, DEFAULT_NAMEPLATES.baseFontSize);
-    const fontFamily   = oneOf(String(formData.fontFamily || ""), FONT_CHOICES, DEFAULT_NAMEPLATES.fontFamily);
-    const tintMode     = oneOf(String(formData.tintMode || ""), TINT_CHOICES, DEFAULT_NAMEPLATES.tintMode);
-    const defaultColor = isHex(formData["defaultColor-text"])
-      ? formData["defaultColor-text"]
-      : (isHex(formData["defaultColor-color"]) ? formData["defaultColor-color"] : DEFAULT_NAMEPLATES.defaultColor);
+  static async onSubmit(_event, _form, formData) {
+    const data = formData.object;
+
+    const baseFontSize = toFiniteNumber(data.baseFontSize, DEFAULT_NAMEPLATES.baseFontSize);
+    const fontChoices = buildFontChoices();
+    const allowedFonts = Object.fromEntries(fontChoices.map((f) => [f.value, true]));
+    const fontFamily = oneOf(String(data.fontFamily || ""), allowedFonts, DEFAULT_NAMEPLATES.fontFamily);
+    const tintMode = oneOf(String(data.tintMode || ""), TINT_CHOICES, DEFAULT_NAMEPLATES.tintMode);
+    const defaultColor = isHex(data["defaultColor-text"])
+      ? data["defaultColor-text"]
+      : (isHex(data["defaultColor-color"]) ? data["defaultColor-color"] : DEFAULT_NAMEPLATES.defaultColor);
 
     const next = {
-      enabled:        normalizeBoolean(formData.enabled,        DEFAULT_NAMEPLATES.enabled),
+      enabled: normalizeBoolean(Object.hasOwn(data, "enabled") ? data.enabled : false, DEFAULT_NAMEPLATES.enabled),
       baseFontSize,
       fontFamily,
-      usePlayerColor: normalizeBoolean(formData.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
+      usePlayerColor: normalizeBoolean(Object.hasOwn(data, "usePlayerColor") ? data.usePlayerColor : false, DEFAULT_NAMEPLATES.usePlayerColor),
       defaultColor,
       tintMode,
-      scaleWithToken: normalizeBoolean(formData.scaleWithToken, DEFAULT_NAMEPLATES.scaleWithToken)
+      scaleWithToken: normalizeBoolean(Object.hasOwn(data, "scaleWithToken") ? data.scaleWithToken : false, DEFAULT_NAMEPLATES.scaleWithToken)
     };
 
     await game.settings.set(MOD_ID, "nameplate", next);
