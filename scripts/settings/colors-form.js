@@ -5,25 +5,36 @@ import { updateFrame } from "../apply-frame.js";
 import { isHex, bindHexPairs } from "./helpers.js";
 
 const DISPOSITION = ["hostile", "neutral", "friendly", "secret", "character"];
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-export class ColorsForm extends FormApplication {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "gb-colors-form",
-      title: "GBT.Colors.Name",
-      template: "modules/greybearded-tokens/templates/colors-form.hbs",
-      classes: ["gb-colors-form"],
-      width: 330,
-      height: "auto",
-      resizable: true,
+export class ColorsForm extends HandlebarsApplicationMixin(ApplicationV2) {
+  static DEFAULT_OPTIONS = {
+    id: "gb-colors-form",
+    tag: "form",
+    form: {
       submitOnChange: false,
-      closeOnSubmit: true
-    });
-  }
+      closeOnSubmit: true,
+      handler: ColorsForm.onSubmit
+    },
+    position: {
+      width: 330,
+      height: "auto"
+    },
+    window: {
+      title: "GBT.Colors.Name",
+      contentClasses: ["gbt-frames", "gb-colors-form"]
+    }
+  };
 
-  async getData() {
+  static PARTS = {
+    form: {
+      template: "modules/greybearded-tokens/templates/colors-form.hbs"
+    }
+  };
+
+  async _prepareContext() {
     const cur = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_DISPOSITION_COLORS) || DEFAULT_DISPOSITION_COLORS;
-    const rows = DISPOSITION.map(r => ({
+    const rows = DISPOSITION.map((r) => ({
       tableName: "GBT.Colors.Disposition",
       role: r,
       value: (typeof cur?.[r] === "string" && isHex(cur[r])) ? cur[r] : (DEFAULT_DISPOSITION_COLORS[r] ?? "#000000")
@@ -31,19 +42,23 @@ export class ColorsForm extends FormApplication {
     return { rows };
   }
 
-  activateListeners(html) {
-    super.activateListeners(html);
-    bindHexPairs(html[0] ?? html, DISPOSITION);
-    (html.find?.('[data-action="cancel"]') ?? $(html).find('[data-action="cancel"]'))
-      .on("click", ev => { ev.preventDefault(); this.close(); });
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    const root = this.element?.[0] ?? this.element;
+    if (!root) return;
+
+    bindHexPairs(root, DISPOSITION);
+    root.querySelector('[data-action="cancel"]')?.addEventListener("click", async (event) => {
+      event.preventDefault();
+      await this.close();
+    });
   }
 
-  async _updateObject(_event, _formData) {
-    const el = this.element[0];
+  static async onSubmit(_event, _form, _formData) {
     const next = {};
     for (const r of DISPOSITION) {
-      const t = el.querySelector(`input[name="${r}-text"]`)?.value?.trim();
-      const c = el.querySelector(`input[name="${r}-color"]`)?.value?.trim();
+      const t = _form.querySelector(`input[name="${r}-text"]`)?.value?.trim();
+      const c = _form.querySelector(`input[name="${r}-color"]`)?.value?.trim();
       next[r] = isHex(t) ? t : (isHex(c) ? c : (DEFAULT_DISPOSITION_COLORS[r] ?? "#000000"));
     }
     await game.settings.set(MOD_ID, "colors", next);
