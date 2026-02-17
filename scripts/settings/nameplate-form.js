@@ -14,7 +14,7 @@ function buildFontChoices() {
 
 export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
-    id: "gb-nameplate-form",
+    id: "gbtf-nameplate-form",
     tag: "form",
     form: {
       submitOnChange: false,
@@ -27,7 +27,7 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
     },
     window: {
       title: "GBT.Nameplate.Name",
-      contentClasses: ["gbt-frames", "gb-nameplate-form"]
+      contentClasses: ["gbtf-frames", "gbtf-nameplate-form"]
     }
   };
 
