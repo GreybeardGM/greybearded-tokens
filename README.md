@@ -8,7 +8,7 @@ Designed for busy Game Masters who are tired of creating custom token artwork fo
 
 - Primary token frame plus an optional secondary token frame with separate image paths
 - Optional token mask
-- Tinting with selectable modes: No Tint, Unicolor, Disposition, Ownership, Actor Type, and Custom (plus optional player-color override where available)
+- Tinting with selectable modes (plus optional player-color override where available)
 - Nameplate customization (font family, size, and color)
 - Includes an additional set of configurable Scene Control tools for quick token manipulation
 
@@ -17,12 +17,12 @@ Designed for busy Game Masters who are tired of creating custom token artwork fo
 
 The module supports the following tint modes in frame/nameplate settings:
 
-- **No Tint** (`NoTint`)
-- **Unicolor** (`Unicolor`)
-- **Disposition** (`Disposition`)
-- **Ownership** (`Ownership`)
-- **Actor Type** (`ActorType`)
-- **Custom** (`Custom`)
+- **No Tint**
+- **Unicolor**
+- **Disposition**
+- **Ownership**
+- **Actor Type**
+- **Custom**
 
 ## Installation
 
