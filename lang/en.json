@@ -40,12 +40,6 @@
       "secret": "Secret",
       "character": "Player Character"
     },
-    "Colors": {
-      "Name": "Disposition Colors",
-      "Label": "Configure Colors",
-      "Disposition": "Disposition",
-      "Hint": "Define default tint colors for each token disposition."
-    },
     "Nameplate": {
       "Name": "Nameplate Settings",
       "Label": "Configure Nameplates",
@@ -93,6 +87,12 @@
       "Label": "Configure Actor Type Colors",
       "ActorType": "Actor Type",
       "Hint": "Define default colors for all registered actor types."
+    },
+    "DispositionColors": {
+      "Name": "Disposition Colors",
+      "Label": "Configure Disposition Colors",
+      "Disposition": "Disposition",
+      "Hint": "Define default tint colors for each token disposition."
     }
   }
 }
