@@ -87,8 +87,11 @@
         "Title": "Custom Color setzen",
         "Content": "Welche Custom Color soll auf alle ausgewählten Token angewendet werden?",
         "NoneSelected": "Bitte wähle mindestens einen Token aus.",
-        "Clear": "Custom Color entfernen"
-      }
+        "Clear": "Farbe entfernen"
+      },
+      "SizeShrinkTitle": "Token verkleinern (min {sizeMin})",
+      "SizeGrowTitle": "Token vergrößern (max {sizeMax})",
+      "ToggleFrameToolTitle": "Frame-Flag toggeln"
     },
     "ActorTypeColors": {
       "Name": "Actor-Typ-Farben",
