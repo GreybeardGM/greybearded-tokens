@@ -70,7 +70,8 @@
         "Disposition": "Disposition-Tool aktivieren",
         "SizeMin": "Minimale Größe für Shrink/Grow",
         "SizeMax": "Maximale Größe für Shrink/Grow",
-        "MirrorArtwork": "Artwork-Spiegeln-Tool aktivieren"
+        "MirrorArtwork": "Artwork-Spiegeln-Tool aktivieren",
+        "CustomTint": "Custom-Color-Tool aktivieren"
       },
       "Disposition": {
         "ToolTitle": "Disposition für ausgewählte Token setzen",
@@ -80,6 +81,13 @@
       },
       "MirrorArtwork": {
         "ToolTitle": "Spiegelung für ausgewählte Token-Artworks umschalten (vertikale Achse)"
+      },
+      "CustomTint": {
+        "ToolTitle": "Custom Color für ausgewählte Token setzen",
+        "Title": "Custom Color setzen",
+        "Content": "Welche Custom Color soll auf alle ausgewählten Token angewendet werden?",
+        "NoneSelected": "Bitte wähle mindestens einen Token aus.",
+        "Clear": "Custom Color entfernen"
       }
     },
     "ActorTypeColors": {
