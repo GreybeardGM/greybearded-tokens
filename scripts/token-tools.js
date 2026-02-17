@@ -3,12 +3,88 @@ import { updateFrame } from "./apply-frame.js";
 import { MOD_ID, DEFAULT_DISPOSITION_COLORS } from "./settings/constants.js";
 import { normalizeTokenToolsConfig } from "./utils/normalization.js";
 
+const DISPOSITION_ENTRIES = [
+  { key: "HOSTILE", label: "GBT.Disposition.hostile", colorKey: "hostile" },
+  { key: "NEUTRAL", label: "GBT.Disposition.neutral", colorKey: "neutral" },
+  { key: "FRIENDLY", label: "GBT.Disposition.friendly", colorKey: "friendly" },
+  { key: "SECRET", label: "GBT.Disposition.secret", colorKey: "secret" }
+];
+
+const DISPOSITION_META = {
+  HOSTILE: "fa-solid fa-skull-crossbones",
+  NEUTRAL: "fa-solid fa-scale-balanced",
+  FRIENDLY: "fa-solid fa-handshake",
+  SECRET: "fa-solid fa-user-secret"
+};
+
+const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+const currSize = (td) => Math.max(Number(td.width) || 1, Number(td.height) || 1);
+const getControlledTokenDocs = () => canvas.tokens.controlled.map((t) => t.document);
+
+const createSizeTools = ({ isGM, toolConfig, runOnSelectionSize }) => ([
+  {
+    name: "gbShrink",
+    title: `Token verkleinern (min ${toolConfig.sizeMin})`,
+    icon: "fa-solid fa-down-left-and-up-right-to-center",
+    button: true,
+    visible: isGM && toolConfig.size,
+    onChange: () => runOnSelectionSize(-1)
+  },
+  {
+    name: "gbGrow",
+    title: `Token vergrößern (max ${toolConfig.sizeMax})`,
+    icon: "fa-solid fa-up-right-and-down-left-from-center",
+    button: true,
+    visible: isGM && toolConfig.size,
+    onChange: () => runOnSelectionSize(1)
+  }
+]);
+
+const createToggleFrameTool = ({ isGM, visible, runToggleDisableFrame }) => ({
+  name: "gbToggleFrame",
+  title: "Frame-Flag toggeln",
+  icon: "fa-solid fa-vector-square",
+  button: true,
+  visible: isGM && visible,
+  onChange: () => runToggleDisableFrame()
+});
+
+const createMirrorArtworkTool = ({ isGM, visible, runMirrorArtwork }) => ({
+  name: "gbMirrorArtwork",
+  title: game.i18n.localize("GBT.Tools.MirrorArtwork.ToolTitle"),
+  icon: "fa-solid fa-left-right",
+  button: true,
+  visible: isGM && visible,
+  onChange: () => runMirrorArtwork()
+});
+
+const createDispositionTool = ({ isGM, visible, runSetDisposition }) => ({
+  name: "gbSetDisposition",
+  title: game.i18n.localize("GBT.Tools.Disposition.ToolTitle"),
+  icon: "fa-solid fa-people-arrows-left-right",
+  button: true,
+  visible: isGM && visible,
+  onChange: () => runSetDisposition()
+});
+
+const registerModuleTools = (tokenControl, tools) => {
+  const base = Object.keys(tokenControl.tools).length;
+
+  tools.forEach((tool, index) => {
+    tokenControl.tools[tool.name] = {
+      ...tool,
+      order: base + index + 1
+    };
+  });
+};
+
 Hooks.on('getSceneControlButtons', (controls) => {
   const toolConfig = normalizeTokenToolsConfig(game.settings.get(MOD_ID, 'tokenTools'));
+  const isGM = game.user.isGM;
 
-
-  const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
-  const currSize = (td) => Math.max(Number(td.width) || 1, Number(td.height) || 1);
+  // Foundry V13-Zielpfad: objektbasierte Scene Controls
+  const tokenControl = controls?.tokens;
+  if (!tokenControl || typeof tokenControl.tools !== 'object' || Array.isArray(tokenControl.tools)) return;
 
   const adjustToken = async (tokenDoc, direction) => {
     const current = currSize(tokenDoc);
@@ -19,15 +95,15 @@ Hooks.on('getSceneControlButtons', (controls) => {
   };
 
   const runOnSelectionSize = async (direction) => {
-    if (!game.user.isGM) return;
-    const docs = canvas.tokens.controlled.map(t => t.document);
+    if (!isGM) return;
+    const docs = getControlledTokenDocs();
     if (!docs.length) return;
     await Promise.all(docs.map(td => adjustToken(td, direction)));
   };
 
   const runToggleDisableFrame = async () => {
-    if (!game.user.isGM) return;
-    const docs = canvas.tokens.controlled.map(t => t.document);
+    if (!isGM) return;
+    const docs = getControlledTokenDocs();
     if (!docs.length) return;
 
     // Pro Token invertieren: true -> false, false/undefined -> true
@@ -41,9 +117,8 @@ Hooks.on('getSceneControlButtons', (controls) => {
   };
 
   const runMirrorArtwork = async () => {
-    if (!game.user.isGM) return;
-
-    const docs = canvas.tokens.controlled.map((t) => t.document);
+    if (!isGM) return;
+    const docs = getControlledTokenDocs();
     if (!docs.length) return;
 
     await Promise.all(docs.map(async (td) => {
@@ -58,29 +133,16 @@ Hooks.on('getSceneControlButtons', (controls) => {
   };
 
   const runSetDisposition = async () => {
-    if (!game.user.isGM) return;
-
-    const docs = canvas.tokens.controlled.map((t) => t.document);
+    if (!isGM) return;
+    const docs = getControlledTokenDocs();
     if (!docs.length) {
       ui.notifications?.warn(game.i18n.localize('GBT.Tools.Disposition.NoneSelected'));
       return;
     }
 
-    const dispositionEntries = [
-      { key: 'HOSTILE', label: 'GBT.Disposition.hostile', colorKey: 'hostile' },
-      { key: 'NEUTRAL', label: 'GBT.Disposition.neutral', colorKey: 'neutral' },
-      { key: 'FRIENDLY', label: 'GBT.Disposition.friendly', colorKey: 'friendly' },
-      { key: 'SECRET', label: 'GBT.Disposition.secret', colorKey: 'secret' }
-    ].filter(({ key }) => Number.isInteger(CONST.TOKEN_DISPOSITIONS?.[key]));
+    const dispositionEntries = DISPOSITION_ENTRIES.filter(({ key }) => Number.isInteger(CONST.TOKEN_DISPOSITIONS?.[key]));
 
     if (!dispositionEntries.length) return;
-
-    const dispositionMeta = {
-      HOSTILE: 'fa-solid fa-skull-crossbones',
-      NEUTRAL: 'fa-solid fa-scale-balanced',
-      FRIENDLY: 'fa-solid fa-handshake',
-      SECRET: 'fa-solid fa-user-secret'
-    };
 
     const dispositionColors = game.settings.get(MOD_ID, 'colors') ?? DEFAULT_DISPOSITION_COLORS;
 
@@ -96,7 +158,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
         return {
           action: key.toLowerCase(),
           label: game.i18n.localize(label),
-          icon: dispositionMeta[key] ?? 'fa-solid fa-circle',
+          icon: DISPOSITION_META[key] ?? 'fa-solid fa-circle',
           class: 'colored-icon',
           style: { '--gbt-disposition-color': dispositionColor },
           default: key === dispositionEntries[0].key,
@@ -118,60 +180,12 @@ Hooks.on('getSceneControlButtons', (controls) => {
     await Promise.all(Array.from(linkedActors, (actor) => actor.update({ 'prototypeToken.disposition': disposition })));
   };
 
-  const shrinkTool = {
-    name: 'gbShrink',
-    title: `Token verkleinern (min ${toolConfig.sizeMin})`,
-    icon: 'fa-solid fa-down-left-and-up-right-to-center',
-    button: true,
-    visible: game.user.isGM && toolConfig.size,
-    onChange: () => runOnSelectionSize(-1)
-  };
+  const moduleTools = [
+    ...createSizeTools({ isGM, toolConfig, runOnSelectionSize }),
+    createToggleFrameTool({ isGM, visible: toolConfig.toggleFrame, runToggleDisableFrame }),
+    createMirrorArtworkTool({ isGM, visible: toolConfig.mirrorArtwork, runMirrorArtwork }),
+    createDispositionTool({ isGM, visible: toolConfig.disposition, runSetDisposition })
+  ];
 
-  const growTool = {
-    name: 'gbGrow',
-    title: `Token vergrößern (max ${toolConfig.sizeMax})`,
-    icon: 'fa-solid fa-up-right-and-down-left-from-center',
-    button: true,
-    visible: game.user.isGM && toolConfig.size,
-    onChange: () => runOnSelectionSize(1)
-  };
-
-  const toggleFrameTool = {
-    name: 'gbToggleFrame',
-    title: 'Frame-Flag toggeln',
-    icon: 'fa-solid fa-vector-square',
-    button: true,
-    visible: game.user.isGM && toolConfig.toggleFrame,
-    onChange: () => runToggleDisableFrame()
-  };
-
-  const mirrorArtworkTool = {
-    name: 'gbMirrorArtwork',
-    title: game.i18n.localize('GBT.Tools.MirrorArtwork.ToolTitle'),
-    icon: 'fa-solid fa-left-right',
-    button: true,
-    visible: game.user.isGM && toolConfig.mirrorArtwork,
-    onChange: () => runMirrorArtwork()
-  };
-
-  const setDispositionTool = {
-    name: 'gbSetDisposition',
-    title: game.i18n.localize('GBT.Tools.Disposition.ToolTitle'),
-    icon: 'fa-solid fa-people-arrows-left-right',
-    button: true,
-    visible: game.user.isGM && toolConfig.disposition,
-    onChange: () => runSetDisposition()
-  };
-
-  // Foundry V13-Zielpfad: objektbasierte Scene Controls
-  const tokenControl = controls?.tokens;
-  if (!tokenControl || typeof tokenControl.tools !== 'object' || Array.isArray(tokenControl.tools)) return;
-
-  const moduleTools = [shrinkTool, growTool, toggleFrameTool, mirrorArtworkTool, setDispositionTool];
-  const base = Object.keys(tokenControl.tools).length;
-
-  moduleTools.forEach((tool, index) => {
-    tool.order = base + index + 1;
-    tokenControl.tools[tool.name] = tool;
-  });
+  registerModuleTools(tokenControl, moduleTools);
 });
