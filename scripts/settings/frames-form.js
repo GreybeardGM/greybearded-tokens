@@ -9,55 +9,71 @@ import { updateFrame } from "../apply-frame.js";
 import { toFiniteNumber, normalizeBoolean } from "../utils/normalization.js";
 import { str, oneOf, isHex, bindHexPairs, readObjectSetting } from "./helpers.js";
 
-export class FramesForm extends FormApplication {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "gb-frames-form",
-      title: "GBT.Frames.Name",
-      template: "modules/greybearded-tokens/templates/frames-form.hbs",
-      classes: ["gb-frames-form"],
-      width: 820
-    });
-  }
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-  async getData() {
+export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
+  static DEFAULT_OPTIONS = {
+    id: "gb-frames-form",
+    tag: "form",
+    form: {
+      submitOnChange: false,
+      closeOnSubmit: true,
+      handler: FramesForm.onSubmit
+    },
+    position: {
+      width: 820,
+      height: "auto"
+    },
+    window: {
+      title: "GBT.Frames.Name",
+      contentClasses: ["gbt-frames", "gb-frames-form"]
+    }
+  };
+
+  static PARTS = {
+    form: {
+      template: "modules/greybearded-tokens/templates/frames-form.hbs"
+    }
+  };
+
+  async _prepareContext() {
     const cur = readObjectSetting(MOD_ID, "frames", {
       frame1: DEFAULT_FRAME1, frame2: DEFAULT_FRAME2, mask: DEFAULT_MASK
     });
 
     const f1 = {
-      path:           str(cur.frame1?.path,         DEFAULT_FRAME1.path),
-      scale:          toFiniteNumber(cur.frame1?.scale,        DEFAULT_FRAME1.scale),
-      tintMode:       oneOf(cur.frame1?.tintMode,   TINT_CHOICES, DEFAULT_FRAME1.tintMode),
+      path: str(cur.frame1?.path, DEFAULT_FRAME1.path),
+      scale: toFiniteNumber(cur.frame1?.scale, DEFAULT_FRAME1.scale),
+      tintMode: oneOf(cur.frame1?.tintMode, TINT_CHOICES, DEFAULT_FRAME1.tintMode),
       usePlayerColor: normalizeBoolean(cur.frame1?.usePlayerColor, DEFAULT_FRAME1.usePlayerColor),
-      defaultColor:   isHex(cur.frame1?.defaultColor) ? cur.frame1.defaultColor : DEFAULT_FRAME1.defaultColor
+      defaultColor: isHex(cur.frame1?.defaultColor) ? cur.frame1.defaultColor : DEFAULT_FRAME1.defaultColor
     };
 
     const f2 = {
-      enabled:        normalizeBoolean(cur.frame2?.enabled,     DEFAULT_FRAME2.enabled),
-      path:           str(cur.frame2?.path,         DEFAULT_FRAME2.path),
-      scale:          toFiniteNumber(cur.frame2?.scale,        DEFAULT_FRAME2.scale),
-      tintMode:       oneOf(cur.frame2?.tintMode,   TINT_CHOICES, DEFAULT_FRAME2.tintMode),
+      enabled: normalizeBoolean(cur.frame2?.enabled, DEFAULT_FRAME2.enabled),
+      path: str(cur.frame2?.path, DEFAULT_FRAME2.path),
+      scale: toFiniteNumber(cur.frame2?.scale, DEFAULT_FRAME2.scale),
+      tintMode: oneOf(cur.frame2?.tintMode, TINT_CHOICES, DEFAULT_FRAME2.tintMode),
       usePlayerColor: normalizeBoolean(cur.frame2?.usePlayerColor, DEFAULT_FRAME2.usePlayerColor),
-      defaultColor:   isHex(cur.frame2?.defaultColor) ? cur.frame2.defaultColor : DEFAULT_FRAME2.defaultColor
+      defaultColor: isHex(cur.frame2?.defaultColor) ? cur.frame2.defaultColor : DEFAULT_FRAME2.defaultColor
     };
 
     const mk = {
-      enabled:        normalizeBoolean(cur.mask?.enabled,       DEFAULT_MASK.enabled),
-      path:           str(cur.mask?.path,           DEFAULT_MASK.path)
+      enabled: normalizeBoolean(cur.mask?.enabled, DEFAULT_MASK.enabled),
+      path: str(cur.mask?.path, DEFAULT_MASK.path)
     };
 
     return { f1, f2, mk, TINT_CHOICES };
   }
 
-  activateListeners(htmlJQ) {
-    super.activateListeners(htmlJQ);
-    const root = htmlJQ[0] ?? htmlJQ;
-  
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    const root = this.element?.[0] ?? this.element;
+    if (!root) return;
+
     bindHexPairs(root, ["frame1-defaultColor", "frame2-defaultColor"]);
-  
-    // Wire FilePicker buttons to matching input fields
-    root.querySelectorAll('[data-action="fp"]').forEach(btn => {
+
+    root.querySelectorAll('[data-action="fp"]').forEach((btn) => {
       btn.addEventListener("click", async (ev) => {
         ev.preventDefault();
         const targetName = btn.dataset.target;
@@ -74,9 +90,8 @@ export class FramesForm extends FormApplication {
         fp.render(true);
       });
     });
-  
-    // Keep preview image in sync with manual path input
-    ["frame1-path","frame2-path","mask-path"].forEach(name => {
+
+    ["frame1-path", "frame2-path", "mask-path"].forEach((name) => {
       const inp = root.querySelector(`input[name="${name}"]`);
       const img = root.querySelector(`[data-preview-for="${name}"] img`);
       if (!inp || !img) return;
@@ -85,42 +100,41 @@ export class FramesForm extends FormApplication {
     });
   }
 
-  async _updateObject(_event, formData) {
-    // Primary frame controls
-    const f1Scale = toFiniteNumber(formData["frame1-scale"], DEFAULT_FRAME1.scale);
-    const f1Tint  = oneOf(String(formData["frame1-tintMode"] || ""), TINT_CHOICES, DEFAULT_FRAME1.tintMode);
-    const f1Def   = isHex(formData["frame1-defaultColor-text"])
-      ? formData["frame1-defaultColor-text"]
-      : (isHex(formData["frame1-defaultColor-color"]) ? formData["frame1-defaultColor-color"] : DEFAULT_FRAME1.defaultColor);
+  static async onSubmit(_event, _form, formData) {
+    const data = formData.object;
+
+    const f1Scale = toFiniteNumber(data["frame1-scale"], DEFAULT_FRAME1.scale);
+    const f1Tint = oneOf(String(data["frame1-tintMode"] || ""), TINT_CHOICES, DEFAULT_FRAME1.tintMode);
+    const f1Def = isHex(data["frame1-defaultColor-text"])
+      ? data["frame1-defaultColor-text"]
+      : (isHex(data["frame1-defaultColor-color"]) ? data["frame1-defaultColor-color"] : DEFAULT_FRAME1.defaultColor);
 
     const frame1 = {
-      path:           str(formData["frame1-path"], DEFAULT_FRAME1.path),
-      scale:          f1Scale,
-      tintMode:       f1Tint,
-      usePlayerColor: normalizeBoolean(formData["frame1-usePlayerColor"], DEFAULT_FRAME1.usePlayerColor),
-      defaultColor:   f1Def
+      path: str(data["frame1-path"], DEFAULT_FRAME1.path),
+      scale: f1Scale,
+      tintMode: f1Tint,
+      usePlayerColor: normalizeBoolean(Object.hasOwn(data, "frame1-usePlayerColor") ? data["frame1-usePlayerColor"] : false, DEFAULT_FRAME1.usePlayerColor),
+      defaultColor: f1Def
     };
 
-    // Secondary frame controls
-    const f2Scale = toFiniteNumber(formData["frame2-scale"], DEFAULT_FRAME2.scale);
-    const f2Tint  = oneOf(String(formData["frame2-tintMode"] || ""), TINT_CHOICES, DEFAULT_FRAME2.tintMode);
-    const f2Def   = isHex(formData["frame2-defaultColor-text"])
-      ? formData["frame2-defaultColor-text"]
-      : (isHex(formData["frame2-defaultColor-color"]) ? formData["frame2-defaultColor-color"] : DEFAULT_FRAME2.defaultColor);
+    const f2Scale = toFiniteNumber(data["frame2-scale"], DEFAULT_FRAME2.scale);
+    const f2Tint = oneOf(String(data["frame2-tintMode"] || ""), TINT_CHOICES, DEFAULT_FRAME2.tintMode);
+    const f2Def = isHex(data["frame2-defaultColor-text"])
+      ? data["frame2-defaultColor-text"]
+      : (isHex(data["frame2-defaultColor-color"]) ? data["frame2-defaultColor-color"] : DEFAULT_FRAME2.defaultColor);
 
     const frame2 = {
-      enabled:        normalizeBoolean(formData["frame2-enabled"], DEFAULT_FRAME2.enabled),
-      path:           str(formData["frame2-path"], DEFAULT_FRAME2.path),
-      scale:          f2Scale,
-      tintMode:       f2Tint,
-      usePlayerColor: normalizeBoolean(formData["frame2-usePlayerColor"], DEFAULT_FRAME2.usePlayerColor),
-      defaultColor:   f2Def
+      enabled: normalizeBoolean(Object.hasOwn(data, "frame2-enabled") ? data["frame2-enabled"] : false, DEFAULT_FRAME2.enabled),
+      path: str(data["frame2-path"], DEFAULT_FRAME2.path),
+      scale: f2Scale,
+      tintMode: f2Tint,
+      usePlayerColor: normalizeBoolean(Object.hasOwn(data, "frame2-usePlayerColor") ? data["frame2-usePlayerColor"] : false, DEFAULT_FRAME2.usePlayerColor),
+      defaultColor: f2Def
     };
 
-    // Mask controls
     const mask = {
-      enabled: normalizeBoolean(formData["mask-enabled"], DEFAULT_MASK.enabled),
-      path:    str(formData["mask-path"],     DEFAULT_MASK.path)
+      enabled: normalizeBoolean(Object.hasOwn(data, "mask-enabled") ? data["mask-enabled"] : false, DEFAULT_MASK.enabled),
+      path: str(data["mask-path"], DEFAULT_MASK.path)
     };
 
     const next = { frame1, frame2, mask };
