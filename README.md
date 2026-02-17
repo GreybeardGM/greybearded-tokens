@@ -40,7 +40,7 @@ For release notes and upgrade details, see the [Changelog](./CHANGELOG.md).
 
 ## Compatibility
 
-- **Minimum:** Foundry VTT v12
+- **Minimum:** Foundry VTT v13
 - **Verified:** Foundry VTT v13.351
 
 ## ⚠️ Resource Usage & Operational Notes
