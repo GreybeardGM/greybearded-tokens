@@ -1,4 +1,4 @@
-<form class="gb-nameplate">
+<div class="gb-nameplate">
   <style>
     .gb-nameplate label { flex:3; }
   </style>
@@ -15,8 +15,8 @@
   <div class="form-group">
     <label>{{localize "GBT.Nameplate.FontFamily"}}</label>
     <select name="fontFamily">
-      {{#each FONT_CHOICES}}
-        <option value="{{@key}}" {{#if (eq ../fontFamily @key)}}selected{{/if}}>{{this}}</option>
+      {{#each fontChoices}}
+        <option value="{{this.value}}" {{#if (eq ../fontFamily this.value)}}selected{{/if}}>{{this.label}}</option>
       {{/each}}
     </select>
   </div>
@@ -53,4 +53,4 @@
   <footer class="sheet-footer flexrow" style="margin-top:8px; gap:8px; justify-content:flex-end;">
     <button type="submit" class="dialog-button">{{localize "GBT.Common.Save"}}</button>
   </footer>
-</form>
+</div>
