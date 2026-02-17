@@ -69,5 +69,6 @@ export const DEFAULT_TOKEN_TOOLS = {
   sizeMax: 15,
   toggleFrame: true,
   disposition: true,
-  mirrorArtwork: true
+  mirrorArtwork: true,
+  customTint: true
 };
