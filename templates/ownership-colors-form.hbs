@@ -1,0 +1,37 @@
+<div class="gbtf-ownership-colors">
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th>{{localize "GBT.OwnershipColors.Level"}}</th>
+        <th>{{localize "GBT.Common.ColorHex"}}</th>
+        <th>{{localize "GBT.Common.ColorPicker"}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each rows}}
+      <tr>
+        <td style="padding:4px 6px; width:30%;">
+          <label for="{{level}}-text">
+            {{localize (concat "GBT.Ownership." level)}}
+          </label>
+        </td>
+        <td style="padding:4px 6px; width:45%;">
+          <input id="{{level}}-text" type="text" name="{{level}}-text" value="{{value}}" placeholder="#RRGGBB" />
+        </td>
+        <td style="padding:4px 6px; width:25%;">
+          <input id="{{level}}-color" type="color" name="{{level}}-color" value="{{value}}" />
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;">
+    <button type="button" class="dialog-button" data-action="cancel">
+      {{localize "GBT.Common.Cancel"}}
+    </button>
+    <button type="submit" class="dialog-button">
+      {{localize "GBT.Common.Save"}}
+    </button>
+  </div>
+</div>
