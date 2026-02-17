@@ -10,33 +10,6 @@ export const TINT_CHOICES = {
   Custom:      "GBT.Tint.Custom"
 };
 
-export const FONT_CHOICES = {
-  "Arial": "Arial",
-  "Helvetica": "Helvetica",
-  "Verdana": "Verdana",
-  "Tahoma": "Tahoma",
-  "Trebuchet MS": "Trebuchet MS",
-  "Georgia": "Georgia",
-  "Garamond": "Garamond",
-  "Palatino Linotype": "Palatino Linotype",
-  "Book Antiqua": "Book Antiqua",
-
-  "Courier": "Courier",
-  "Courier New": "Courier New",
-  "Lucida Console": "Lucida Console",
-  "Lucida Sans": "Lucida Sans",
-  "Lucida Grande": "Lucida Grande",
-
-  "Impact": "Impact",
-
-  "Modesto": "Modesto",
-  "Modesto Condensed": "Modesto Condensed",
-  "Signika": "Signika",
-
-  "Times": "Times",
-  "Times New Roman": "Times New Roman"
-};
-
 
 export const DEFAULT_DISPOSITION_COLORS = {
   "hostile":   "#993333",

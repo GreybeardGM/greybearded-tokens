@@ -8,7 +8,7 @@ export function str(v, fb = "") {
   return (typeof v === "string" && v.length) ? v : fb;
 }
 
-/** Validiert String gegen Choice-Map (z. B. TINT_CHOICES, FONT_CHOICES). */
+/** Validiert String gegen Choice-Map (z. B. TINT_CHOICES). */
 export function oneOf(v, choices, fb) {
   return (typeof v === "string" && v in choices) ? v : fb;
 }
@@ -31,8 +31,19 @@ export function readObjectSetting(modId, key, defaults) {
 /** Text- und Color-Input synchronisieren (HEX gewinnt). */
 export function bindHexSync(textEl, colorEl) {
   if (!textEl || !colorEl) return;
-  textEl.addEventListener("input", () => { if (isHex(textEl.value)) colorEl.value = textEl.value; });
-  colorEl.addEventListener("input", () => { if (isHex(colorEl.value)) textEl.value = colorEl.value; });
+
+  const syncTextToColor = () => {
+    if (isHex(textEl.value)) colorEl.value = textEl.value;
+  };
+
+  const syncColorToText = () => {
+    if (isHex(colorEl.value)) textEl.value = colorEl.value;
+  };
+
+  textEl.addEventListener("input", syncTextToColor);
+  textEl.addEventListener("change", syncTextToColor);
+  colorEl.addEventListener("input", syncColorToText);
+  colorEl.addEventListener("change", syncColorToText);
 }
 
 /** Mehrere Paare nach Namenskonvention "<name>-text" / "<name>-color" binden. */
@@ -61,4 +72,13 @@ export async function refreshSceneControls() {
     reset: true,
     force: true
   });
+}
+
+
+/** Font-Familien ausschließlich aus Foundry-Config beziehen (alphabetisch, dedupliziert). */
+export function getConfiguredFontFamilies() {
+  const families = Object.keys(CONFIG?.fontDefinitions ?? {});
+  return [...new Set(families)]
+    .filter((family) => typeof family === "string" && family.trim().length)
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 }

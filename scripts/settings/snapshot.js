@@ -2,7 +2,6 @@
 import {
   MOD_ID,
   TINT_CHOICES,
-  FONT_CHOICES,
   DEFAULT_DISPOSITION_COLORS,
   DEFAULT_NAMEPLATES,
   DEFAULT_FRAME1,
@@ -10,7 +9,7 @@ import {
   DEFAULT_MASK
 } from "./constants.js";
 import { toFiniteNumber, normalizeBoolean } from "../utils/normalization.js";
-import { str, oneOf, isHex, readObjectSetting } from "./helpers.js";
+import { str, oneOf, isHex, readObjectSetting, getConfiguredFontFamilies } from "./helpers.js";
 
 let _S = null;
 
@@ -37,10 +36,12 @@ function _readAll() {
   const NP = readObjectSetting(MOD_ID, "nameplate", DEFAULT_NAMEPLATES);
   const CL = readObjectSetting(MOD_ID, "colors", DEFAULT_DISPOSITION_COLORS);
 
+  const configuredFonts = Object.fromEntries(getConfiguredFontFamilies().map((family) => [family, true]));
+
   const nameplate = {
     enabled:        normalizeBoolean(NP?.enabled,        DEFAULT_NAMEPLATES.enabled),
     baseFontSize:   toFiniteNumber(NP?.baseFontSize,     DEFAULT_NAMEPLATES.baseFontSize),
-    fontFamily:     oneOf(NP?.fontFamily, FONT_CHOICES,  DEFAULT_NAMEPLATES.fontFamily),
+    fontFamily:     oneOf(NP?.fontFamily, configuredFonts, DEFAULT_NAMEPLATES.fontFamily),
     usePlayerColor: normalizeBoolean(NP?.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
     defaultColor:   isHex(NP?.defaultColor) ? NP.defaultColor : DEFAULT_NAMEPLATES.defaultColor,
     tintMode:       oneOf(NP?.tintMode, TINT_CHOICES,    DEFAULT_NAMEPLATES.tintMode),
