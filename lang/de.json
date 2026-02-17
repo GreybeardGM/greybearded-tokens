@@ -17,7 +17,7 @@
       "Unicolor": "Einfarbig",
       "Custom": "Benutzerdefiniert",
       "ActorType": "Actor-Typ",
-      "Ownership": "Ownership"
+      "Ownership": "Berechtigung"
     },
     "Frames": {
       "Name": "Rahmen-Einstellungen",
@@ -103,16 +103,16 @@
       "Hint": "Lege die Standardfärbungen für jede Token-Disposition fest."
     },
     "Ownership": {
-      "owner": "Owner",
-      "observer": "Observer",
-      "limited": "Limited",
-      "none": "None"
+      "owner": "Besitzer",
+      "observer": "Beobachter",
+      "limited": "Eingeschränkt",
+      "none": "Kein Zugriff"
     },
     "OwnershipColors": {
-      "Name": "Ownership-Farben",
-      "Label": "Ownership-Farben konfigurieren",
-      "Level": "Zugriffsart",
-      "Hint": "Lege die Standardfärbungen für jede Ownership-Stufe fest."
+      "Name": "Berechtigungsfarben",
+      "Label": "Berechtigungsfarben konfigurieren",
+      "Level": "Berechtigung",
+      "Hint": "Lege die Standardfärbungen für jede Berechtigungsstufe fest."
     }
   }
 }
