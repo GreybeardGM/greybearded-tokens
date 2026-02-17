@@ -11,7 +11,7 @@ import { refreshSceneControls } from "./helpers.js";
 export function registerSettings() {
   // Hidden data containers used by the config forms
   game.settings.register(MOD_ID, "frames", {
-    name: "Frames",
+    name: "GBT.Frames.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -19,7 +19,7 @@ export function registerSettings() {
   });
 
   game.settings.register(MOD_ID, "nameplate", {
-    name: "Nameplate",
+    name: "GBT.Nameplate.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -27,7 +27,7 @@ export function registerSettings() {
   });
 
   game.settings.register(MOD_ID, "colors", {
-    name: "Colors",
+    name: "GBT.DispositionColors.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -35,7 +35,7 @@ export function registerSettings() {
   });
 
   game.settings.register(MOD_ID, "actorTypeColors", {
-    name: "Actor Type Colors",
+    name: "GBT.ActorTypeColors.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -43,7 +43,7 @@ export function registerSettings() {
   });
 
   game.settings.register(MOD_ID, "ownershipColors", {
-    name: "Ownership Colors",
+    name: "GBT.OwnershipColors.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -51,7 +51,7 @@ export function registerSettings() {
   });
 
   game.settings.register(MOD_ID, "tokenTools", {
-    name: "Token Tools",
+    name: "GBT.Tools.Config.Name",
     scope: "world",
     config: false,
     type: Object,

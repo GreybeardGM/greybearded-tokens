@@ -62,6 +62,9 @@
       "DoneInfo": "Prototype Token image synchronized for {name}."
     },
     "Tools": {
+      "SizeShrinkTitle": "Shrink token (min {sizeMin})",
+      "SizeGrowTitle": "Grow token (max {sizeMax})",
+      "ToggleFrameToolTitle": "Toggle frame flag",
       "Config": {
         "Name": "Token Tools",
         "Label": "Configure Token Tools",
@@ -87,7 +90,7 @@
         "Title": "Set Custom Color",
         "Content": "Which custom color should be applied to all selected tokens?",
         "NoneSelected": "Please select at least one token.",
-        "Clear": "Remove Custom Color"
+        "Clear": "Remove Color"
       }
     },
     "ActorTypeColors": {

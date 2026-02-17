@@ -26,7 +26,7 @@ const getRenderedTokenObject = (tokenDoc) => tokenDoc?.object ?? canvas.tokens?.
 const createSizeTools = ({ isGM, toolConfig, runOnSelectionSize }) => ([
   {
     name: "gbShrink",
-    title: `Token verkleinern (min ${toolConfig.sizeMin})`,
+    title: game.i18n.format("GBT.Tools.SizeShrinkTitle", { sizeMin: toolConfig.sizeMin }),
     icon: "fa-solid fa-down-left-and-up-right-to-center",
     button: true,
     visible: isGM && toolConfig.size,
@@ -34,7 +34,7 @@ const createSizeTools = ({ isGM, toolConfig, runOnSelectionSize }) => ([
   },
   {
     name: "gbGrow",
-    title: `Token vergrößern (max ${toolConfig.sizeMax})`,
+    title: game.i18n.format("GBT.Tools.SizeGrowTitle", { sizeMax: toolConfig.sizeMax }),
     icon: "fa-solid fa-up-right-and-down-left-from-center",
     button: true,
     visible: isGM && toolConfig.size,
@@ -44,7 +44,7 @@ const createSizeTools = ({ isGM, toolConfig, runOnSelectionSize }) => ([
 
 const createToggleFrameTool = ({ isGM, visible, runToggleDisableFrame }) => ({
   name: "gbToggleFrame",
-  title: "Frame-Flag toggeln",
+  title: game.i18n.localize("GBT.Tools.ToggleFrameToolTitle"),
   icon: "fa-solid fa-vector-square",
   button: true,
   visible: isGM && visible,
