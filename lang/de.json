@@ -16,7 +16,8 @@
       "Disposition": "Disposition",
       "Unicolor": "Einfarbig",
       "Advanced": "Erweitert",
-      "Custom": "Benutzerdefiniert"
+      "Custom": "Benutzerdefiniert",
+      "ActorType": "Actor-Typ"
     },
     "Frames": {
       "Name": "Rahmen-Einstellungen",
@@ -86,6 +87,12 @@
       "MirrorArtwork": {
         "ToolTitle": "Spiegelung für ausgewählte Token-Artworks umschalten (vertikale Achse)"
       }
+    },
+    "ActorTypeColors": {
+      "Name": "Actor-Typ-Farben",
+      "Label": "Actor-Typ-Farben konfigurieren",
+      "ActorType": "Actor-Typ",
+      "Hint": "Lege Standardfarben für alle registrierten Actor-Typen fest."
     }
   }
 }

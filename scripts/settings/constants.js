@@ -5,6 +5,7 @@ export const MOD_ID = "greybearded-tokens";
 export const TINT_CHOICES = {
   NoTint:      "GBT.Tint.None",
   Disposition: "GBT.Tint.Disposition",
+  ActorType:   "GBT.Tint.ActorType",
   Unicolor:    "GBT.Tint.Unicolor",
   Advanced:    "GBT.Tint.Advanced",
   Custom:      "GBT.Tint.Custom"
@@ -18,6 +19,9 @@ export const DEFAULT_DISPOSITION_COLORS = {
   "secret":    "#6B5E7A",
   "character": "#888888"
 };
+
+export const DEFAULT_ACTOR_TYPE_COLORS = {};
+export const DEFAULT_ACTOR_TYPE_COLOR = "#888888";
 
 export const DEFAULT_NAMEPLATES = {
   enabled: false,
