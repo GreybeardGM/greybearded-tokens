@@ -1,7 +1,7 @@
 // hooks.js
 import { getGbFrameSettings, buildSnapshot } from "./settings/snapshot.js";
 import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
-import { updateFrame } from "./apply-frame.js";
+import { updateFrame, syncTokenMaskMirror } from "./apply-frame.js";
 
 /* ---------- Texture preload cache ---------- */
 let _lastPreloaded = new Set();
@@ -50,6 +50,19 @@ export function registerRenderingHooks() {
 
   Hooks.on("refreshToken", (t) => {
     updateFrame(t);
+  });
+
+  Hooks.on("updateToken", (tokenDoc, changed) => {
+    const texture = changed?.texture;
+    if (!texture) return;
+
+    const hasScaleX = Object.prototype.hasOwnProperty.call(texture, "scaleX");
+    const hasScaleY = Object.prototype.hasOwnProperty.call(texture, "scaleY");
+    if (!hasScaleX && !hasScaleY) return;
+
+    const token = tokenDoc?.object;
+    if (!token) return;
+    syncTokenMaskMirror(token);
   });
 
   Hooks.on("updateUser", (user, change) => {

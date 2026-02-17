@@ -13,6 +13,12 @@ function ensureGbNS(token) {
   if (!("f1"         in gb)) gb.f1 = null;
   if (!("f2"         in gb)) gb.f2 = null;
   if (!("maskSprite" in gb)) gb.maskSprite = null;
+  if (!("maskScaleAbsX" in gb)) gb.maskScaleAbsX = null;
+  if (!("maskScaleAbsY" in gb)) gb.maskScaleAbsY = null;
+  if (!("maskSignX" in gb)) gb.maskSignX = null;
+  if (!("maskSignY" in gb)) gb.maskSignY = null;
+  if (!("maskBoundsW" in gb)) gb.maskBoundsW = null;
+  if (!("maskBoundsH" in gb)) gb.maskBoundsH = null;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
   //if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
@@ -44,6 +50,72 @@ function clearMaskInline(token) {
   if (gb.maskSprite?.parent) gb.maskSprite.parent.removeChild(gb.maskSprite);
   gb.maskSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
   gb.maskSprite = null;
+  gb.maskScaleAbsX = null;
+  gb.maskScaleAbsY = null;
+  gb.maskSignX = null;
+  gb.maskSignY = null;
+  gb.maskBoundsW = null;
+  gb.maskBoundsH = null;
+}
+
+function getScaleSign(value) {
+  return (Math.sign(value || 1) || 1);
+}
+
+function applyMaskScaleFromCache(token) {
+  const gb = ensureGbNS(token);
+  const mesh = token?.mesh;
+  const maskSprite = gb.maskSprite;
+  if (!mesh || !maskSprite) return false;
+
+  if (!isFinite(gb.maskScaleAbsX) || !isFinite(gb.maskScaleAbsY)) return false;
+
+  const signX = getScaleSign(mesh.scale.x);
+  const signY = getScaleSign(mesh.scale.y);
+
+  if (gb.maskSignX === signX && gb.maskSignY === signY) return false;
+
+  maskSprite.scale.set(gb.maskScaleAbsX * signX, gb.maskScaleAbsY * signY);
+  gb.maskSignX = signX;
+  gb.maskSignY = signY;
+  return true;
+}
+
+export function syncTokenMaskMirror(token) {
+  if (!token || token.destroyed) return false;
+  return applyMaskScaleFromCache(token);
+}
+
+function updateMaskScaleIfDirty(token) {
+  const gb = ensureGbNS(token);
+  const mesh = token?.mesh;
+  const maskSprite = gb.maskSprite;
+  if (!mesh || !maskSprite) return;
+
+  const tokenW = token.w || 0;
+  const tokenH = token.h || 0;
+
+  const boundsChanged =
+    !isFinite(gb.maskScaleAbsX) ||
+    !isFinite(gb.maskScaleAbsY) ||
+    gb.maskBoundsW !== tokenW ||
+    gb.maskBoundsH !== tokenH;
+
+  if (boundsChanged) {
+    const b = mesh.getLocalBounds?.();
+    if (!b || !isFinite(b.width) || !isFinite(b.height) || b.width <= 0 || b.height <= 0) return;
+
+    const texW = maskSprite.texture.width || maskSprite.texture.baseTexture?.realWidth || 1;
+    const texH = maskSprite.texture.height || maskSprite.texture.baseTexture?.realHeight || 1;
+    gb.maskScaleAbsX = b.width / texW;
+    gb.maskScaleAbsY = b.height / texH;
+    gb.maskBoundsW = tokenW;
+    gb.maskBoundsH = tokenH;
+    gb.maskSignX = null;
+    gb.maskSignY = null;
+  }
+
+  applyMaskScaleFromCache(token);
 }
 
 async function attachMaskIfNeeded(token, S) {
@@ -80,7 +152,14 @@ async function attachMaskIfNeeded(token, S) {
   const texW = maskSprite.texture.width  || maskSprite.texture.baseTexture?.realWidth  || 1;
   const texH = maskSprite.texture.height || maskSprite.texture.baseTexture?.realHeight || 1;
 
-  maskSprite.scale.set(b.width / texW, b.height / texH);
+  gb.maskScaleAbsX = b.width / texW;
+  gb.maskScaleAbsY = b.height / texH;
+  gb.maskBoundsW = token.w || 0;
+  gb.maskBoundsH = token.h || 0;
+  gb.maskSignX = null;
+  gb.maskSignY = null;
+
+  applyMaskScaleFromCache(token);
 
   mesh.mask = maskSprite;
   gb.maskSprite = maskSprite;
@@ -279,6 +358,7 @@ async function applyFrameToToken(token, snapshot) {
   // 4) Maske einmalig am Mesh (blockierend beibehalten)
   if (runtime.hasMask) {
     await attachMaskIfNeeded(token, S);
+    updateMaskScaleIfDirty(token);
   } else if (gb.maskSprite) {
     clearMaskInline(token);
   }
