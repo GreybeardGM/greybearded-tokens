@@ -45,7 +45,8 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
       size: Object.hasOwn(data, "size") ? data.size : false,
       toggleFrame: Object.hasOwn(data, "toggleFrame") ? data.toggleFrame : false,
       disposition: Object.hasOwn(data, "disposition") ? data.disposition : false,
-      mirrorArtwork: Object.hasOwn(data, "mirrorArtwork") ? data.mirrorArtwork : false
+      mirrorArtwork: Object.hasOwn(data, "mirrorArtwork") ? data.mirrorArtwork : false,
+      customTint: Object.hasOwn(data, "customTint") ? data.customTint : false
     }, current);
 
     await game.settings.set(MOD_ID, "tokenTools", next);
