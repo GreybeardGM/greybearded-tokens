@@ -1,21 +1,16 @@
 // modules/greybearded-tokens/scripts/settings/nameplate-form.js
-import { MOD_ID, TINT_CHOICES, FONT_CHOICES, DEFAULT_NAMEPLATES } from "./constants.js";
+import { MOD_ID, TINT_CHOICES, DEFAULT_NAMEPLATES } from "./constants.js";
 import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
 import { toFiniteNumber, normalizeBoolean } from "../utils/normalization.js";
-import { isHex, oneOf, bindHexSync } from "./helpers.js";
+import { isHex, oneOf, bindHexSync, getConfiguredFontFamilies } from "./helpers.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 function buildFontChoices() {
-  const fonts = new Set(Object.keys(FONT_CHOICES));
-
-  for (const family of Object.keys(CONFIG?.fontDefinitions ?? {})) fonts.add(family);
-  return [...fonts]
-    .filter((family) => typeof family === "string" && family.trim().length)
-    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
-    .map((family) => ({ value: family, label: family }));
+  return getConfiguredFontFamilies().map((family) => ({ value: family, label: family }));
 }
+
 
 export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {

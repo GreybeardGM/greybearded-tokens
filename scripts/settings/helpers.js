@@ -8,7 +8,7 @@ export function str(v, fb = "") {
   return (typeof v === "string" && v.length) ? v : fb;
 }
 
-/** Validiert String gegen Choice-Map (z. B. TINT_CHOICES, FONT_CHOICES). */
+/** Validiert String gegen Choice-Map (z. B. TINT_CHOICES). */
 export function oneOf(v, choices, fb) {
   return (typeof v === "string" && v in choices) ? v : fb;
 }
@@ -72,4 +72,13 @@ export async function refreshSceneControls() {
     reset: true,
     force: true
   });
+}
+
+
+/** Font-Familien ausschließlich aus Foundry-Config beziehen (alphabetisch, dedupliziert). */
+export function getConfiguredFontFamilies() {
+  const families = Object.keys(CONFIG?.fontDefinitions ?? {});
+  return [...new Set(families)]
+    .filter((family) => typeof family === "string" && family.trim().length)
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 }
