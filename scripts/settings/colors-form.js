@@ -9,7 +9,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 export class ColorsForm extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
-    id: "gb-colors-form",
+    id: "gbtf-colors-form",
     tag: "form",
     form: {
       submitOnChange: false,
@@ -22,7 +22,7 @@ export class ColorsForm extends HandlebarsApplicationMixin(ApplicationV2) {
     },
     window: {
       title: "GBT.Colors.Name",
-      contentClasses: ["gbt-frames", "gb-colors-form"]
+      contentClasses: ["gbtf-frames", "gbtf-colors-form"]
     }
   };
 

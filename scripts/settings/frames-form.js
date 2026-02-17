@@ -13,7 +13,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
-    id: "gb-frames-form",
+    id: "gbtf-frames-form",
     tag: "form",
     form: {
       submitOnChange: false,
@@ -26,7 +26,7 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
     },
     window: {
       title: "GBT.Frames.Name",
-      contentClasses: ["gbt-frames", "gb-frames-form"]
+      contentClasses: ["gbtf-frames", "gbtf-frames-form"]
     }
   };
 

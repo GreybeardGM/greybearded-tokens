@@ -153,7 +153,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
     const disposition = await foundry.applications.api.DialogV2.wait({
       window: {
         title: game.i18n.localize('GBT.Tools.Disposition.Title'),
-        contentClasses: ['gbt-frames']
+        contentClasses: ['gbtf-token-tools-disposition-dialog']
       },
       content: `<p>${game.i18n.localize('GBT.Tools.Disposition.Content')}</p>`,
       buttons: dispositionEntries.map(({ key, label, colorKey }) => {
@@ -164,7 +164,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
           label: game.i18n.localize(label),
           icon: DISPOSITION_META[key] ?? 'fa-solid fa-circle',
           class: 'colored-icon',
-          style: { '--gbt-disposition-color': dispositionColor },
+          style: { '--gbtf-disposition-color': dispositionColor },
           default: key === dispositionEntries[0].key,
           callback: () => CONST.TOKEN_DISPOSITIONS[key]
         };

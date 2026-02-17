@@ -6,9 +6,9 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
-    id: "gb-token-tools-form",
+    id: "gbtf-token-tools-dialog",
     tag: "form",
-    classes: ["gb-token-tools-form"],
+    classes: ["gbtf-token-tools-form"],
     form: {
       submitOnChange: false,
       closeOnSubmit: true,
@@ -20,7 +20,7 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
     },
     window: {
       title: "GBT.Tools.Config.Name",
-      contentClasses: ["gbt-frames"]
+      contentClasses: ["gbtf-frames"]
     }
   };
 

@@ -121,7 +121,7 @@ async function promptSyncDialog(actor, oldSrc, newImg) {
     content,
     window: {
       title: game.i18n.localize("GBT.Sync.DialogTitle"),
-      contentClasses: ["gbt-frames"]
+      contentClasses: ["gbtf-frames"]
     },
     buttons: [
       {

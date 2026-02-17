@@ -60,6 +60,16 @@ Clone the repository and place it in your Foundry modules directory:
 git clone https://github.com/GreybeardGM/greybearded-tokens.git
 ```
 
+
+### Konventionen & Checks
+
+- CSS/UI-Hook-Namenskonventionen: `docs/css-naming.md`
+- Statische Prüfung auf Altpräfixe:
+
+```bash
+node scripts/check-legacy-prefixes.js
+```
+
 ## License
 
 This project is licensed under the [MIT License](./LICENSE).
