@@ -133,7 +133,7 @@ async function attachMaskIfNeeded(token, S) {
 
   // Maske im lokalen Space des Meshes
   const maskSprite = new PIXI.Sprite(tex);
-  maskSprite.name = "gbt-mask";
+  maskSprite.name = "gbtf-mask";
   maskSprite.renderable = false;
   maskSprite.anchor?.set?.(0.5, 0.5);
   maskSprite.position.set(0, 0);
@@ -185,7 +185,7 @@ function upsertOverlayOnToken(token) {
 
   // Overlay am TOKEN, nicht am Mesh (Masken-Isolation)
   const overlay = new PIXI.Container();
-  overlay.name = "gb-overlay";
+  overlay.name = "gbtf-overlay";
   overlay.sortableChildren = false; // Reihenfolge statt Sorting
   token.addChild(overlay);
 
@@ -286,7 +286,7 @@ async function applyFrameToToken(token, snapshot) {
       if (!gb.f2) {
         const tex2 = PIXI.Texture.from(F2.path);
         const spr2 = new PIXI.Sprite(tex2);
-        spr2.name = "gb-frame-2";
+        spr2.name = "gbtf-frame-2";
         spr2._gbFrameSecondary = true;
         spr2.anchor.set(0.5);
         overlay.addChild(spr2);
@@ -305,7 +305,7 @@ async function applyFrameToToken(token, snapshot) {
       if (!gb.f1) {
         const tex1 = PIXI.Texture.from(F1.path);
         const spr1 = new PIXI.Sprite(tex1);
-        spr1.name = "gb-frame-1";
+        spr1.name = "gbtf-frame-1";
         spr1._gbFramePrimary = true;
         spr1.anchor.set(0.5);
         overlay.addChild(spr1);

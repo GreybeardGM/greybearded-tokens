@@ -20,7 +20,7 @@ function getActorTypeLabel(type) {
 
 export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
-    id: "gb-actor-type-colors-form",
+    id: "gbtf-actor-type-colors-form",
     tag: "form",
     form: {
       submitOnChange: false,
@@ -33,7 +33,7 @@ export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV
     },
     window: {
       title: "GBT.ActorTypeColors.Name",
-      contentClasses: ["gbt-frames", "gb-actor-type-colors-form"]
+      contentClasses: ["gbtf-frames", "gbtf-actor-type-colors-form"]
     }
   };
 
