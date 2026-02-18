@@ -89,7 +89,8 @@ const registerModuleTools = (tokenControl, tools) => {
   });
 };
 
-Hooks.on('getSceneControlButtons', (controls) => {
+export function registerTokenToolsHooks() {
+  Hooks.on('getSceneControlButtons', (controls) => {
   const toolConfig = normalizeTokenToolsConfig(game.settings.get(MOD_ID, 'tokenTools'));
   const isGM = game.user.isGM;
 
@@ -306,4 +307,5 @@ Hooks.on('getSceneControlButtons', (controls) => {
   ];
 
   registerModuleTools(tokenControl, moduleTools);
-});
+  });
+}
