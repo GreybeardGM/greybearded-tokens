@@ -29,6 +29,9 @@ export class OwnershipColorsForm extends HandlebarsApplicationMixin(ApplicationV
   static PARTS = {
     form: {
       template: "modules/greybearded-tokens/templates/ownership-colors-form.hbs"
+    },
+    actions: {
+      template: "modules/greybearded-tokens/templates/form-actions.hbs"
     }
   };
 
@@ -51,10 +54,6 @@ export class OwnershipColorsForm extends HandlebarsApplicationMixin(ApplicationV
     if (!form) return;
 
     bindHexPairs(form, OWNERSHIP_LEVELS);
-    form.querySelector('[data-action="cancel"]')?.addEventListener("click", async (event) => {
-      event.preventDefault();
-      await this.close();
-    });
   }
 
   static async onSubmit(_event, _form, _formData) {

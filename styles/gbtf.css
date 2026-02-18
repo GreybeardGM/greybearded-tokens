@@ -75,13 +75,18 @@
 
 
 .gbtf-setting-form__label-icon {
+  display: inline-flex;
+  justify-content: center;
+  width: 1rem;
   margin-right: 0.35rem;
 }
 
-.gbtf-setting-form__row > input:not([type="checkbox"]),
+.gbtf-setting-form__row > input:not([type="checkbox"]):not([type="color"]),
 .gbtf-setting-form__row > select,
 .gbtf-setting-form__input-pair {
-  flex: 0 0 auto;
+  flex: 0 1 11rem;
+  width: 11rem;
+  max-width: 100%;
 }
 
 .gbtf-setting-form__input-pair {
@@ -93,13 +98,6 @@
 .gbtf-setting-form__number {
   width: 5.25rem;
   text-align: right;
-}
-
-.gbtf-setting-form__actions {
-  margin-top: 0.5rem;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
 }
 
 .gbtf-color-form__table {
@@ -125,9 +123,29 @@
   width: 25%;
 }
 
-.gbtf-color-form__actions {
+
+.gbtf-setting-form__body {
+  width: 100%;
+}
+
+#gbtf-nameplate-form .gbtf-setting-form__row > input:not([type="checkbox"]):not([type="color"]),
+#gbtf-nameplate-form .gbtf-setting-form__row > select,
+#gbtf-nameplate-form .gbtf-setting-form__input-pair {
+  flex-basis: 10rem;
+  width: 10rem;
+}
+
+.gbtf-form-actions {
   margin-top: 0.5rem;
   display: flex;
+  width: 100%;
   gap: 0.5rem;
-  justify-content: flex-end;
+}
+
+.gbtf-form-actions__button {
+  flex: 1 1 0;
+}
+
+.gbtf-form-actions__button--secondary {
+  opacity: 0.9;
 }
