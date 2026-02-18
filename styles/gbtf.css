@@ -84,8 +84,8 @@
 .gbtf-setting-form__row > input:not([type="checkbox"]):not([type="color"]),
 .gbtf-setting-form__row > select,
 .gbtf-setting-form__input-pair {
-  flex: 0 1 11rem;
-  width: 11rem;
+  flex: 0 0 3rem;
+  width: 3rem;
   max-width: 100%;
 }
 
@@ -123,16 +123,10 @@
   width: 25%;
 }
 
-
-.gbtf-setting-form__body {
-  width: 100%;
-}
-
 #gbtf-nameplate-form .gbtf-setting-form__row > input:not([type="checkbox"]):not([type="color"]),
 #gbtf-nameplate-form .gbtf-setting-form__row > select,
 #gbtf-nameplate-form .gbtf-setting-form__input-pair {
   flex-basis: 10rem;
-  width: 10rem;
 }
 
 .gbtf-form-actions {
