@@ -26,12 +26,17 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
   static PARTS = {
     form: {
       template: "modules/greybearded-tokens/templates/token-tools-form.hbs"
+    },
+    actions: {
+      template: "modules/greybearded-tokens/templates/form-actions.hbs"
     }
   };
 
   async _prepareContext() {
     const cur = game.settings.get(MOD_ID, "tokenTools");
-    return normalizeTokenToolsConfig(cur);
+    return {
+      ...normalizeTokenToolsConfig(cur)
+    };
   }
 
   static async onSubmit(_event, _form, formData) {
@@ -50,15 +55,5 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
 
     await game.settings.set(MOD_ID, "tokenTools", next);
 
-  }
-
-  async _onClickAction(event, target) {
-    if (target.dataset.action === "cancel") {
-      event.preventDefault();
-      await this.close();
-      return;
-    }
-
-    return super._onClickAction(event, target);
   }
 }

@@ -29,6 +29,9 @@ export class DispositionColorsForm extends HandlebarsApplicationMixin(Applicatio
   static PARTS = {
     form: {
       template: "modules/greybearded-tokens/templates/disposition-colors-form.hbs"
+    },
+    actions: {
+      template: "modules/greybearded-tokens/templates/form-actions.hbs"
     }
   };
 
@@ -50,10 +53,6 @@ export class DispositionColorsForm extends HandlebarsApplicationMixin(Applicatio
     if (!form) return;
 
     bindHexPairs(form, DISPOSITION);
-    form.querySelector('[data-action="cancel"]')?.addEventListener("click", async (event) => {
-      event.preventDefault();
-      await this.close();
-    });
   }
 
   static async onSubmit(_event, _form, _formData) {

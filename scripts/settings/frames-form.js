@@ -33,6 +33,9 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
   static PARTS = {
     form: {
       template: "modules/greybearded-tokens/templates/frames-form.hbs"
+    },
+    actions: {
+      template: "modules/greybearded-tokens/templates/form-actions.hbs"
     }
   };
 
@@ -63,7 +66,12 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
       path: str(cur.mask?.path, DEFAULT_MASK.path)
     };
 
-    return { f1, f2, mk, TINT_CHOICES };
+    return {
+      f1,
+      f2,
+      mk,
+      TINT_CHOICES
+    };
   }
 
   async _onRender(context, options) {
@@ -104,6 +112,7 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
       fp.render(true);
       return;
     }
+
 
     return super._onClickAction(event, target);
   }

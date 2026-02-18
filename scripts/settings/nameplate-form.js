@@ -34,6 +34,9 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
   static PARTS = {
     form: {
       template: "modules/greybearded-tokens/templates/nameplate-form.hbs"
+    },
+    actions: {
+      template: "modules/greybearded-tokens/templates/form-actions.hbs"
     }
   };
 
