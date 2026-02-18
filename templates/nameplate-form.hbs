@@ -1,42 +1,39 @@
-<div class="gbtf-nameplate">
-  <style>
-    .gbtf-nameplate label { flex:3; }
-  </style>
-  <div class="form-group">
-    <label>{{localize "GBT.Common.Enabled"}}</label>
-    <input type="checkbox" name="enabled" {{#if enabled}}checked{{/if}} />
+<div class="gbtf-setting-form__body">
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-enabled">{{localize "GBT.Common.Enabled"}}</label>
+    <input id="gbtf-setting-form-nameplate-enabled" type="checkbox" name="enabled" {{#if enabled}}checked{{/if}} />
   </div>
 
-  <div class="form-group">
-    <label>{{localize "GBT.Nameplate.BaseFontSize"}}</label>
-    <input type="number" name="baseFontSize" min="6" max="96" step="1" value="{{baseFontSize}}" />
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-base-font-size">{{localize "GBT.Nameplate.BaseFontSize"}}</label>
+    <input id="gbtf-setting-form-nameplate-base-font-size" type="number" name="baseFontSize" min="6" max="96" step="1" value="{{baseFontSize}}" />
   </div>
 
-  <div class="form-group">
-    <label>{{localize "GBT.Nameplate.FontFamily"}}</label>
-    <select name="fontFamily">
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-font-family">{{localize "GBT.Nameplate.FontFamily"}}</label>
+    <select id="gbtf-setting-form-nameplate-font-family" name="fontFamily">
       {{#each fontChoices}}
         <option value="{{this.value}}" {{#if (eq ../fontFamily this.value)}}selected{{/if}}>{{this.label}}</option>
       {{/each}}
     </select>
   </div>
 
-  <div class="form-group">
-    <label>{{localize "GBT.Common.UsePlayerColor"}}</label>
-    <input type="checkbox" name="usePlayerColor" {{#if usePlayerColor}}checked{{/if}} />
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-use-player-color">{{localize "GBT.Common.UsePlayerColor"}}</label>
+    <input id="gbtf-setting-form-nameplate-use-player-color" type="checkbox" name="usePlayerColor" {{#if usePlayerColor}}checked{{/if}} />
   </div>
 
-  <div class="form-group">
-    <label>{{localize "GBT.Common.DefaultColor"}}</label>
-    <div style="display:flex; gap:8px; align-items:center;">
-      <input type="text"  name="defaultColor-text"  value="{{defaultColor}}" placeholder="#RRGGBB" />
-      <input type="color" name="defaultColor-color" value="{{defaultColor}}" />
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-default-color-text">{{localize "GBT.Common.DefaultColor"}}</label>
+    <div class="gbtf-setting-form__input-pair">
+      <input id="gbtf-setting-form-nameplate-default-color-text" type="text" name="defaultColor-text" value="{{defaultColor}}" placeholder="#RRGGBB" />
+      <input id="gbtf-setting-form-nameplate-default-color" type="color" name="defaultColor-color" value="{{defaultColor}}" />
     </div>
   </div>
 
-  <div class="form-group">
-    <label>{{localize "GBT.Common.TintMode"}}</label>
-    <select name="tintMode">
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-tint-mode">{{localize "GBT.Common.TintMode"}}</label>
+    <select id="gbtf-setting-form-nameplate-tint-mode" name="tintMode">
       {{#each TINT_CHOICES}}
         <option value="{{@key}}" {{#if (eq ../tintMode @key)}}selected{{/if}}>
           {{localize this}}
@@ -45,12 +42,12 @@
     </select>
   </div>
 
-  <div class="form-group">
-    <label>{{localize "GBT.Nameplate.ScaleWithToken"}}</label>
-    <input type="checkbox" name="scaleWithToken" {{#if scaleWithToken}}checked{{/if}} />
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-scale-with-token">{{localize "GBT.Nameplate.ScaleWithToken"}}</label>
+    <input id="gbtf-setting-form-nameplate-scale-with-token" type="checkbox" name="scaleWithToken" {{#if scaleWithToken}}checked{{/if}} />
   </div>
 
-  <footer class="sheet-footer flexrow" style="margin-top:8px; gap:8px; justify-content:flex-end;">
+  <div class="gbtf-setting-form__actions">
     <button type="submit" class="dialog-button">{{localize "GBT.Common.Save"}}</button>
-  </footer>
+  </div>
 </div>

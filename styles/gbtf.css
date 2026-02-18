@@ -56,12 +56,12 @@
   min-width: 6.5rem;
 }
 
-.gbtf-token-tools {
+.gbtf-setting-form__body {
   display: grid;
   gap: 0.35rem;
 }
 
-.gbtf-token-tools__row {
+.gbtf-setting-form__row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -69,19 +69,65 @@
   margin: 0;
 }
 
-.gbtf-token-tools__actions {
+.gbtf-setting-form__row > label {
+  flex: 1 1 auto;
+}
+
+
+.gbtf-setting-form__label-icon {
+  margin-right: 0.35rem;
+}
+
+.gbtf-setting-form__row > input:not([type="checkbox"]),
+.gbtf-setting-form__row > select,
+.gbtf-setting-form__input-pair {
+  flex: 0 0 auto;
+}
+
+.gbtf-setting-form__input-pair {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.gbtf-setting-form__number {
+  width: 5.25rem;
+  text-align: right;
+}
+
+.gbtf-setting-form__actions {
   margin-top: 0.5rem;
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
 }
 
-.gbtf-token-tools__actions button i {
-  margin-right: 0.35rem;
+.gbtf-color-form__table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
+.gbtf-color-form__label-cell,
+.gbtf-color-form__text-cell,
+.gbtf-color-form__picker-cell {
+  padding: 0.25rem 0.375rem;
+}
 
-.gbtf-token-tools__size-field input[type="number"] {
-  width: 5.25rem;
-  text-align: right;
+.gbtf-color-form__label-cell {
+  width: 30%;
+}
+
+.gbtf-color-form__text-cell {
+  width: 45%;
+}
+
+.gbtf-color-form__picker-cell {
+  width: 25%;
+}
+
+.gbtf-color-form__actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
