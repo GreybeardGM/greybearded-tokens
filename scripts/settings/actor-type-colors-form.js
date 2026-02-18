@@ -35,7 +35,7 @@ export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV
     },
     window: {
       title: "GBT.ActorTypeColors.Name",
-      contentClasses: ["gbtf-frames", "gbtf-actor-type-colors-form"]
+      contentClasses: ["gbtf-frames", "gbtf-color-form"]
     }
   };
 

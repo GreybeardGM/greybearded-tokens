@@ -1,46 +1,66 @@
-<div class="gbtf-token-tools">
-  <div class="form-group gbtf-token-tools__row">
-    <label for="gbtf-token-tools-size">{{localize "GBT.Tools.Config.Size"}}</label>
-    <input id="gbtf-token-tools-size" type="checkbox" name="size" {{checked size}} />
+<div class="gbtf-setting-form__body">
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-token-tools-size">
+      <i class="gbtf-setting-form__label-icon fa-solid fa-down-left-and-up-right-to-center" aria-hidden="true"></i>
+      <i class="gbtf-setting-form__label-icon fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i>
+      {{localize "GBT.Tools.Config.Size"}}
+    </label>
+    <input id="gbtf-setting-form-token-tools-size" type="checkbox" name="size" {{checked size}} />
   </div>
 
-  <div class="form-group gbtf-token-tools__row gbtf-token-tools__size-field">
-    <label for="gbtf-token-tools-size-min">{{localize "GBT.Tools.Config.SizeMin"}}</label>
-    <input id="gbtf-token-tools-size-min" type="number" name="sizeMin" min="1" max="99" step="1" value="{{sizeMin}}" />
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-token-tools-size-min">
+      <i class="gbtf-setting-form__label-icon fa-solid fa-down-left-and-up-right-to-center" aria-hidden="true"></i>
+      {{localize "GBT.Tools.Config.SizeMin"}}
+    </label>
+    <input class="gbtf-setting-form__number" id="gbtf-setting-form-token-tools-size-min" type="number" name="sizeMin" min="1" max="99" step="1" value="{{sizeMin}}" />
   </div>
 
-  <div class="form-group gbtf-token-tools__row gbtf-token-tools__size-field">
-    <label for="gbtf-token-tools-size-max">{{localize "GBT.Tools.Config.SizeMax"}}</label>
-    <input id="gbtf-token-tools-size-max" type="number" name="sizeMax" min="1" max="99" step="1" value="{{sizeMax}}" />
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-token-tools-size-max">
+      <i class="gbtf-setting-form__label-icon fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i>
+      {{localize "GBT.Tools.Config.SizeMax"}}
+    </label>
+    <input class="gbtf-setting-form__number" id="gbtf-setting-form-token-tools-size-max" type="number" name="sizeMax" min="1" max="99" step="1" value="{{sizeMax}}" />
   </div>
 
-  <div class="form-group gbtf-token-tools__row">
-    <label for="gbtf-token-tools-toggle-frame">{{localize "GBT.Tools.Config.ToggleFrame"}}</label>
-    <input id="gbtf-token-tools-toggle-frame" type="checkbox" name="toggleFrame" {{checked toggleFrame}} />
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-token-tools-toggle-frame">
+      <i class="gbtf-setting-form__label-icon fa-solid fa-vector-square" aria-hidden="true"></i>
+      {{localize "GBT.Tools.Config.ToggleFrame"}}
+    </label>
+    <input id="gbtf-setting-form-token-tools-toggle-frame" type="checkbox" name="toggleFrame" {{checked toggleFrame}} />
   </div>
 
-  <div class="form-group gbtf-token-tools__row">
-    <label for="gbtf-token-tools-disposition">{{localize "GBT.Tools.Config.Disposition"}}</label>
-    <input id="gbtf-token-tools-disposition" type="checkbox" name="disposition" {{checked disposition}} />
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-token-tools-disposition">
+      <i class="gbtf-setting-form__label-icon fa-solid fa-people-arrows-left-right" aria-hidden="true"></i>
+      {{localize "GBT.Tools.Config.Disposition"}}
+    </label>
+    <input id="gbtf-setting-form-token-tools-disposition" type="checkbox" name="disposition" {{checked disposition}} />
   </div>
 
-  <div class="form-group gbtf-token-tools__row">
-    <label for="gbtf-token-tools-mirror-artwork">{{localize "GBT.Tools.Config.MirrorArtwork"}}</label>
-    <input id="gbtf-token-tools-mirror-artwork" type="checkbox" name="mirrorArtwork" {{checked mirrorArtwork}} />
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-token-tools-mirror-artwork">
+      <i class="gbtf-setting-form__label-icon fa-solid fa-left-right" aria-hidden="true"></i>
+      {{localize "GBT.Tools.Config.MirrorArtwork"}}
+    </label>
+    <input id="gbtf-setting-form-token-tools-mirror-artwork" type="checkbox" name="mirrorArtwork" {{checked mirrorArtwork}} />
   </div>
 
-  <div class="form-group gbtf-token-tools__row">
-    <label for="gbtf-token-tools-custom-tint">{{localize "GBT.Tools.Config.CustomTint"}}</label>
-    <input id="gbtf-token-tools-custom-tint" type="checkbox" name="customTint" {{checked customTint}} />
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-token-tools-custom-tint">
+      <i class="gbtf-setting-form__label-icon fa-solid fa-eye-dropper" aria-hidden="true"></i>
+      {{localize "GBT.Tools.Config.CustomTint"}}
+    </label>
+    <input id="gbtf-setting-form-token-tools-custom-tint" type="checkbox" name="customTint" {{checked customTint}} />
   </div>
 
-  <div class="gbtf-token-tools__actions">
+  <div class="gbtf-setting-form__actions">
     <button type="button" class="dialog-button" data-action="cancel">
-      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
       {{localize "GBT.Common.Cancel"}}
     </button>
     <button type="submit" class="dialog-button">
-      <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
       {{localize "GBT.Common.Save"}}
     </button>
   </div>

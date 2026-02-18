@@ -22,7 +22,7 @@ export class DispositionColorsForm extends HandlebarsApplicationMixin(Applicatio
     },
     window: {
       title: "GBT.DispositionColors.Name",
-      contentClasses: ["gbtf-frames", "gbtf-disposition-colors-form"]
+      contentClasses: ["gbtf-frames", "gbtf-color-form"]
     }
   };
 
@@ -35,11 +35,13 @@ export class DispositionColorsForm extends HandlebarsApplicationMixin(Applicatio
   async _prepareContext() {
     const dispositionColors = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_DISPOSITION_COLORS) || DEFAULT_DISPOSITION_COLORS;
     const rows = DISPOSITION.map((r) => ({
-      tableName: "GBT.DispositionColors.Disposition",
       role: r,
       value: (typeof dispositionColors?.[r] === "string" && isHex(dispositionColors[r])) ? dispositionColors[r] : (DEFAULT_DISPOSITION_COLORS[r] ?? "#000000")
     }));
-    return { rows };
+    return {
+      tableName: game.i18n.localize("GBT.DispositionColors.Disposition"),
+      rows
+    };
   }
 
   async _onRender(context, options) {

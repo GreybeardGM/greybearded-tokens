@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `scripts/hooks.js` to `scripts/rendering-hooks.js` to clarify that the file contains rendering-focused hook registration logic.
 - Consolidated module startup hook orchestration so rendering hooks, portrait-sync settings, and token-tools hooks are registered through the module init entrypoint.
 - Centralized `updateToken` handling to avoid split registration paths and reduce duplicated token update guard logic.
+- Reworked and unified settings UI styling: color configuration dialogs now share the `color-form` structure/classes, Nameplate and Token Tools now share the `setting-form` layout, and redundant inline/legacy selectors were removed in favor of centralized CSS rules.
 
 ## [0.2.0] - 2026-02-17
 

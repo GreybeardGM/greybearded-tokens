@@ -27,7 +27,7 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
     },
     window: {
       title: "GBT.Nameplate.Name",
-      contentClasses: ["gbtf-frames", "gbtf-nameplate-form"]
+      contentClasses: ["gbtf-frames", "gbtf-setting-form"]
     }
   };
 

@@ -22,7 +22,7 @@ export class OwnershipColorsForm extends HandlebarsApplicationMixin(ApplicationV
     },
     window: {
       title: "GBT.OwnershipColors.Name",
-      contentClasses: ["gbtf-frames", "gbtf-ownership-colors-form"]
+      contentClasses: ["gbtf-frames", "gbtf-color-form"]
     }
   };
 
@@ -35,12 +35,14 @@ export class OwnershipColorsForm extends HandlebarsApplicationMixin(ApplicationV
   async _prepareContext() {
     const ownershipColors = (game.settings.get(MOD_ID, "ownershipColors") ?? DEFAULT_OWNERSHIP_COLORS) || DEFAULT_OWNERSHIP_COLORS;
     const rows = OWNERSHIP_LEVELS.map((level) => ({
-      tableName: "GBT.OwnershipColors.Level",
       level,
       value: (typeof ownershipColors?.[level] === "string" && isHex(ownershipColors[level])) ? ownershipColors[level] : (DEFAULT_OWNERSHIP_COLORS[level] ?? "#000000")
     }));
 
-    return { rows };
+    return {
+      tableName: game.i18n.localize("GBT.OwnershipColors.Level"),
+      rows
+    };
   }
 
   async _onRender(context, options) {

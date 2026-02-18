@@ -8,7 +8,6 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: "gbtf-token-tools-dialog",
     tag: "form",
-    classes: ["gbtf-token-tools-form"],
     form: {
       submitOnChange: false,
       closeOnSubmit: true,
@@ -20,7 +19,7 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
     },
     window: {
       title: "GBT.Tools.Config.Name",
-      contentClasses: ["gbtf-frames"]
+      contentClasses: ["gbtf-frames", "gbtf-setting-form"]
     }
   };
 

@@ -1,35 +1,38 @@
-<div class="gbtf-colors">
-  <table style="width:100%; border-collapse:collapse;">
-    <thead>
-      <tr>
-        <th>{{tableName}}</th>
-        <th>{{localize "GBT.Common.ColorHex"}}</th>
-        <th>{{localize "GBT.Common.ColorPicker"}}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#each rows}}
-      <tr>
-        <td style="padding:4px 6px; width:30%;">
-          <label for="{{type}}-text">{{label}}</label>
-        </td>
-        <td style="padding:4px 6px; width:45%;">
-          <input id="{{type}}-text" type="text" name="{{type}}-text" value="{{value}}" placeholder="#RRGGBB" />
-        </td>
-        <td style="padding:4px 6px; width:25%;">
-          <input id="{{type}}-color" type="color" name="{{type}}-color" value="{{value}}" />
-        </td>
-      </tr>
-      {{/each}}
-    </tbody>
-  </table>
-
-  <div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;">
-    <button type="button" class="dialog-button" data-action="cancel">
-      {{localize "GBT.Common.Cancel"}}
-    </button>
-    <button type="submit" class="dialog-button">
-      {{localize "GBT.Common.Save"}}
-    </button>
-  </div>
-</div>
+<table class="gbtf-color-form__table">
+  <thead>
+    <tr>
+      <th>{{tableName}}</th>
+      <th>{{localize "GBT.Common.ColorHex"}}</th>
+      <th>{{localize "GBT.Common.ColorPicker"}}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each rows}}
+    <tr>
+      <td class="gbtf-color-form__label-cell">
+        <label for="{{type}}-text">{{label}}</label>
+      </td>
+      <td class="gbtf-color-form__text-cell">
+        <input id="{{type}}-text" type="text" name="{{type}}-text" value="{{value}}" placeholder="#RRGGBB" />
+      </td>
+      <td class="gbtf-color-form__picker-cell">
+        <input id="{{type}}-color" type="color" name="{{type}}-color" value="{{value}}" />
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">
+        <div class="gbtf-color-form__actions">
+          <button type="button" class="dialog-button" data-action="cancel">
+            {{localize "GBT.Common.Cancel"}}
+          </button>
+          <button type="submit" class="dialog-button">
+            {{localize "GBT.Common.Save"}}
+          </button>
+        </div>
+      </td>
+    </tr>
+  </tfoot>
+</table>
