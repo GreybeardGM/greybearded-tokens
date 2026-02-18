@@ -50,7 +50,8 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
       tintMode: oneOf(cur.tintMode, TINT_CHOICES, DEFAULT_NAMEPLATES.tintMode),
       scaleWithToken: normalizeBoolean(cur.scaleWithToken, DEFAULT_NAMEPLATES.scaleWithToken),
       TINT_CHOICES,
-      fontChoices
+      fontChoices,
+      formActions: await renderTemplate("modules/greybearded-tokens/templates/form-actions.hbs")
     };
   }
 
@@ -63,6 +64,17 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
       form.querySelector('input[name="defaultColor-text"]'),
       form.querySelector('input[name="defaultColor-color"]')
     );
+  }
+
+
+  async _onClickAction(event, target) {
+    if (target.dataset.action === "cancel") {
+      event.preventDefault();
+      await this.close();
+      return;
+    }
+
+    return super._onClickAction(event, target);
   }
 
   static async onSubmit(_event, _form, formData) {

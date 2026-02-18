@@ -63,7 +63,13 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
       path: str(cur.mask?.path, DEFAULT_MASK.path)
     };
 
-    return { f1, f2, mk, TINT_CHOICES };
+    return {
+      f1,
+      f2,
+      mk,
+      TINT_CHOICES,
+      formActions: await renderTemplate("modules/greybearded-tokens/templates/form-actions.hbs")
+    };
   }
 
   async _onRender(context, options) {
@@ -102,6 +108,12 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
       fp.render(true);
+      return;
+    }
+
+    if (action === "cancel") {
+      event.preventDefault();
+      await this.close();
       return;
     }
 

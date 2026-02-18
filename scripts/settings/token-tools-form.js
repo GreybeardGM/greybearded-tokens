@@ -31,7 +31,10 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
 
   async _prepareContext() {
     const cur = game.settings.get(MOD_ID, "tokenTools");
-    return normalizeTokenToolsConfig(cur);
+    return {
+      ...normalizeTokenToolsConfig(cur),
+      formActions: await renderTemplate("modules/greybearded-tokens/templates/form-actions.hbs")
+    };
   }
 
   static async onSubmit(_event, _form, formData) {

@@ -41,7 +41,8 @@ export class OwnershipColorsForm extends HandlebarsApplicationMixin(ApplicationV
 
     return {
       tableName: game.i18n.localize("GBT.OwnershipColors.Level"),
-      rows
+      rows,
+      formActions: await renderTemplate("modules/greybearded-tokens/templates/form-actions.hbs")
     };
   }
 

@@ -56,7 +56,8 @@ export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV
 
     return {
       tableName: game.i18n.localize("GBT.ActorTypeColors.ActorType"),
-      rows
+      rows,
+      formActions: await renderTemplate("modules/greybearded-tokens/templates/form-actions.hbs")
     };
   }
 

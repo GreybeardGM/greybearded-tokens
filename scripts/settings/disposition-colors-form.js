@@ -40,7 +40,8 @@ export class DispositionColorsForm extends HandlebarsApplicationMixin(Applicatio
     }));
     return {
       tableName: game.i18n.localize("GBT.DispositionColors.Disposition"),
-      rows
+      rows,
+      formActions: await renderTemplate("modules/greybearded-tokens/templates/form-actions.hbs")
     };
   }
 
