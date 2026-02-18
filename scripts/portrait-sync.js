@@ -11,7 +11,7 @@ const SYNC_SOURCES = {
   TOKEN_TO_EMBEDDED_ACTOR: "token-to-embedded-actor"
 };
 
-Hooks.once("init", () => {
+export function registerPortraitSyncSetting() {
   game.settings.register(MOD_ID, SETTING_KEY, {
     name: "GBT.Sync.Name",          // <-- Key, nicht localize(...)
     hint: "GBT.Sync.Hint",
@@ -25,58 +25,70 @@ Hooks.once("init", () => {
     },
     default: SYNC_MODES.DIALOG
   });
-});
+}
+
+function withPortraitSyncErrorBoundary(context, fn) {
+  return async (...args) => {
+    try {
+      await fn(...args);
+    } catch (err) {
+      console.error(`${MOD_ID} | ${context} failed:`, err);
+    }
+  };
+}
+
+function isSyncDisabled() {
+  return game.settings.get(MOD_ID, SETTING_KEY) === SYNC_MODES.NOTHING;
+}
+
+function isTriggeringUser(userId) {
+  return userId === game.user.id;
+}
 
 /**
  * Nach einem Actor-Update reagieren wir nur, wenn das Portrait (img) geändert wurde.
  * Wir führen die Aktion ausschließlich auf einem GM-Client aus, um Doppeltrigger zu vermeiden.
  */
-Hooks.on("updateActor", async (actor, changed, options, userId) => {
-  try {
-    if (!("img" in changed)) return;                 // nichts zu tun, wenn Portrait unverändert
-    if (options?.[SYNC_SOURCE_FLAG] === SYNC_SOURCES.TOKEN_TO_EMBEDDED_ACTOR) return;
-    if (isEmbeddedActor(actor)) return;
+Hooks.on("updateActor", withPortraitSyncErrorBoundary("Portrait sync", async (actor, changed, options, userId) => {
+  if (!("img" in changed)) return;                 // nichts zu tun, wenn Portrait unverändert
+  if (options?.[SYNC_SOURCE_FLAG] === SYNC_SOURCES.TOKEN_TO_EMBEDDED_ACTOR) return;
+  if (isEmbeddedActor(actor)) return;
+  if (isSyncDisabled()) return;
+  if (!isTriggeringUser(userId)) return;            // Nur für auslösenden Nutzer anzeigen
 
-    const mode = game.settings.get(MOD_ID, SETTING_KEY);
-    if (mode === SYNC_MODES.NOTHING) return;
-    if (userId !== game.user.id) return;            // Nur für auslösenden Nutzer anzeigen
+  const newImg = actor.img;                         // bereits persistierter Wert
+  if (!newImg) return;
 
-    const newImg = actor.img;                        // bereits persistierter Wert
-    if (!newImg) return;
+  if (!actor.prototypeToken) return;                // Fallback-Guard (sollte nie passieren)
+  const currentProtoSrc = actor.prototypeToken.texture?.src;
 
-    if (!actor.prototypeToken) return;               // Fallback-Guard (sollte nie passieren)
-    const currentProtoSrc = actor.prototypeToken.texture?.src;
+  // nichts tun, wenn bereits synchron
+  if (currentProtoSrc === newImg) return;
 
-    // nichts tun, wenn bereits synchron
-    if (currentProtoSrc === newImg) return;
+  const mode = game.settings.get(MOD_ID, SETTING_KEY);
 
-    // Modusbehandlung
-    if (mode === SYNC_MODES.ALWAYS) {
-      await syncPrototypeTokenImage(actor, newImg);
-      return;
-    }
-
-    if (mode === SYNC_MODES.DIALOG) {
-      await promptSyncDialog(actor, currentProtoSrc, newImg);
-    }
-  } catch (err) {
-    console.error(`${MOD_ID} | Portrait sync failed:`, err);
+  // Modusbehandlung
+  if (mode === SYNC_MODES.ALWAYS) {
+    await syncPrototypeTokenImage(actor, newImg);
+    return;
   }
-});
+
+  if (mode === SYNC_MODES.DIALOG) {
+    await promptSyncDialog(actor, currentProtoSrc, newImg);
+  }
+}));
 
 /**
  * Unverlinkte Token mit eingebettetem Actor: Wird das Token-Bild geändert,
  * synchronisieren wir das Portrait des eingebetteten Actors.
  */
-Hooks.on("updateToken", async (tokenDoc, changed, options, userId) => {
-  try {
+export const handlePortraitSyncTokenUpdate = withPortraitSyncErrorBoundary(
+  "Token → embedded actor portrait sync",
+  async (tokenDoc, changed, _options, userId) => {
     const newTokenImg = changed?.texture?.src;
     if (!newTokenImg) return;
-    if (userId !== game.user.id) return;
-
-    const mode = game.settings.get(MOD_ID, SETTING_KEY);
-    if (mode === SYNC_MODES.NOTHING) return;
-
+    if (!isTriggeringUser(userId)) return;
+    if (isSyncDisabled()) return;
     if (tokenDoc.actorLink) return;
 
     const embeddedActor = tokenDoc.actor;
@@ -87,10 +99,8 @@ Hooks.on("updateToken", async (tokenDoc, changed, options, userId) => {
       { img: newTokenImg },
       { [SYNC_SOURCE_FLAG]: SYNC_SOURCES.TOKEN_TO_EMBEDDED_ACTOR }
     );
-  } catch (err) {
-    console.error(`${MOD_ID} | Token → embedded actor portrait sync failed:`, err);
   }
-});
+);
 
 /** Setzt das Prototype-Token-Image auf das Actor-Portrait. */
 async function syncPrototypeTokenImage(actor, img) {

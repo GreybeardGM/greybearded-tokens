@@ -7,8 +7,11 @@ import { NameplateForm } from "./nameplate-form.js";
 import { FramesForm } from "./frames-form.js";
 import { TokenToolsForm } from "./token-tools-form.js";
 import { refreshSceneControls } from "./helpers.js";
+import { registerPortraitSyncSetting } from "../portrait-sync.js";
 
 export function registerSettings() {
+  registerPortraitSyncSetting();
+
   // Hidden data containers used by the config forms
   game.settings.register(MOD_ID, "frames", {
     name: "GBT.Frames.Name",

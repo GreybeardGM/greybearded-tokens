@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - _No entries yet._
 
+### Changed
+- Renamed `scripts/hooks.js` to `scripts/rendering-hooks.js` to clarify that the file contains rendering-focused hook registration logic.
+- Consolidated module startup hook orchestration so rendering hooks, portrait-sync settings, and token-tools hooks are registered through the module init entrypoint.
+- Centralized `updateToken` handling to avoid split registration paths and reduce duplicated token update guard logic.
+
 ## [0.2.0] - 2026-02-17
 
 Baseline release of **Greybearded Token Frames** for Foundry VTT with dynamic, configurable token styling.

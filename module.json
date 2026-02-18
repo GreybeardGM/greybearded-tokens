@@ -18,9 +18,7 @@
     }
   ],
   "esmodules": [
-    "scripts/module.js",
-    "scripts/token-tools.js",
-    "scripts/portrait-sync.js"
+    "scripts/module.js"
   ],
   "compatibility": {
     "minimum": "13",
