@@ -1,9 +1,9 @@
 {
   "id": "greybearded-tokens",
-  "title": "Greybearded Token Frames",
+  "title": "Greybearded Token Frames (Dev)",
   "type": "module",
-  "version": "0.2.0",
-  "description": "Configurable token frames, masks, and nameplate styling with tint and player-color support for Foundry VTT.",
+  "version": "0.2.1",
+  "description": "[DEV] Configurable token frames, masks, and nameplate styling with tint and player-color support for Foundry VTT.",
   "author": "GreybeardGM",
   "languages": [
     {
@@ -27,8 +27,8 @@
     "verified": "13.351"
   },
   "url": "https://github.com/GreybeardGM/greybearded-tokens",
-  "manifest": "https://raw.githubusercontent.com/GreybeardGM/greybearded-tokens/main/module.json",
-  "download": "https://github.com/GreybeardGM/greybearded-tokens/archive/refs/tags/0.2.0.zip",
+  "manifest": "https://raw.githubusercontent.com/GreybeardGM/greybearded-tokens/dev/module.json",
+  "download": "https://github.com/GreybeardGM/greybearded-tokens/archive/refs/heads/dev.zip",
   "styles": [
     "styles/gbtf.css"
   ]
