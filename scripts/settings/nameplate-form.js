@@ -23,7 +23,7 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
       handler: NameplateForm.onSubmit
     },
     position: {
-      width: 330,
+      width: 360,
       height: "auto"
     },
     window: {
