@@ -26,7 +26,7 @@ export class DispositionColorsForm extends HandlebarsApplicationMixin(Applicatio
       handler: DispositionColorsForm.onSubmit
     },
     position: {
-      width: 330,
+      width: 360,
       height: "auto"
     },
     window: {
