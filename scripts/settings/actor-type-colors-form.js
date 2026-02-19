@@ -20,7 +20,17 @@ function getActorTypeLabel(type) {
   return type;
 }
 
+function buildRows(actorTypes, source) {
+  return actorTypes.map((type) => ({
+    type,
+    label: getActorTypeLabel(type),
+    value: (typeof source?.[type] === "string" && isHex(source[type])) ? source[type] : DEFAULT_ACTOR_TYPE_COLOR
+  }));
+}
+
 export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV2) {
+  #showDefaults = false;
+
   static DEFAULT_OPTIONS = {
     id: "gbtf-actor-type-colors-form",
     tag: "form",
@@ -50,16 +60,13 @@ export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV
 
   async _prepareContext() {
     const actorTypes = getActorTypes();
-    const actorTypeColors = (game.settings.get(MOD_ID, "actorTypeColors") ?? DEFAULT_ACTOR_TYPE_COLORS) || DEFAULT_ACTOR_TYPE_COLORS;
-    const rows = actorTypes.map((type) => ({
-      type,
-      label: getActorTypeLabel(type),
-      value: (typeof actorTypeColors?.[type] === "string" && isHex(actorTypeColors[type])) ? actorTypeColors[type] : DEFAULT_ACTOR_TYPE_COLOR
-    }));
+    const actorTypeColors = this.#showDefaults
+      ? DEFAULT_ACTOR_TYPE_COLORS
+      : ((game.settings.get(MOD_ID, "actorTypeColors") ?? DEFAULT_ACTOR_TYPE_COLORS) || DEFAULT_ACTOR_TYPE_COLORS);
 
     return {
       tableName: game.i18n.localize("GBT.ActorTypeColors.ActorType"),
-      rows
+      rows: buildRows(actorTypes, actorTypeColors)
     };
   }
 
@@ -69,6 +76,24 @@ export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV
     if (!form) return;
 
     bindHexPairs(form, getActorTypes());
+  }
+
+  async _onClickAction(event, target) {
+    if (target.dataset.action === "reset-form") {
+      event.preventDefault();
+      this.#showDefaults = false;
+      await this.render({ force: true });
+      return;
+    }
+
+    if (target.dataset.action === "defaults-form") {
+      event.preventDefault();
+      this.#showDefaults = true;
+      await this.render({ force: true });
+      return;
+    }
+
+    return super._onClickAction(event, target);
   }
 
   static async onSubmit(_event, form, _formData) {

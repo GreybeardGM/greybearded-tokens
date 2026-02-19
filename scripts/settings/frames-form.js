@@ -12,6 +12,8 @@ import { str, oneOf, isHex, bindHexPairs, readObjectSetting } from "./helpers.js
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
+  #showDefaults = false;
+
   static DEFAULT_OPTIONS = {
     id: "gbtf-frames-form",
     tag: "form",
@@ -40,9 +42,15 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
   };
 
   async _prepareContext() {
-    const cur = readObjectSetting(MOD_ID, "frames", {
-      frame1: DEFAULT_FRAME1, frame2: DEFAULT_FRAME2, mask: DEFAULT_MASK
-    });
+    const cur = this.#showDefaults
+      ? {
+        frame1: DEFAULT_FRAME1,
+        frame2: DEFAULT_FRAME2,
+        mask: DEFAULT_MASK
+      }
+      : readObjectSetting(MOD_ID, "frames", {
+        frame1: DEFAULT_FRAME1, frame2: DEFAULT_FRAME2, mask: DEFAULT_MASK
+      });
 
     const f1 = {
       path: str(cur.frame1?.path, DEFAULT_FRAME1.path),
@@ -92,6 +100,20 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
 
   async _onClickAction(event, target) {
     const action = target.dataset.action;
+    if (action === "reset-form") {
+      event.preventDefault();
+      this.#showDefaults = false;
+      await this.render({ force: true });
+      return;
+    }
+
+    if (action === "defaults-form") {
+      event.preventDefault();
+      this.#showDefaults = true;
+      await this.render({ force: true });
+      return;
+    }
+
     if (action === "fp") {
       event.preventDefault();
       const form = this.form;
@@ -112,7 +134,6 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
       fp.render(true);
       return;
     }
-
 
     return super._onClickAction(event, target);
   }

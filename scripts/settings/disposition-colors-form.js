@@ -7,7 +7,16 @@ import { isHex, bindHexPairs } from "./helpers.js";
 const DISPOSITION = ["hostile", "neutral", "friendly", "secret", "character"];
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
+function buildRows(source) {
+  return DISPOSITION.map((r) => ({
+    role: r,
+    value: (typeof source?.[r] === "string" && isHex(source[r])) ? source[r] : (DEFAULT_DISPOSITION_COLORS[r] ?? "#000000")
+  }));
+}
+
 export class DispositionColorsForm extends HandlebarsApplicationMixin(ApplicationV2) {
+  #showDefaults = false;
+
   static DEFAULT_OPTIONS = {
     id: "gbtf-disposition-colors-form",
     tag: "form",
@@ -36,14 +45,13 @@ export class DispositionColorsForm extends HandlebarsApplicationMixin(Applicatio
   };
 
   async _prepareContext() {
-    const dispositionColors = (game.settings.get(MOD_ID, "colors") ?? DEFAULT_DISPOSITION_COLORS) || DEFAULT_DISPOSITION_COLORS;
-    const rows = DISPOSITION.map((r) => ({
-      role: r,
-      value: (typeof dispositionColors?.[r] === "string" && isHex(dispositionColors[r])) ? dispositionColors[r] : (DEFAULT_DISPOSITION_COLORS[r] ?? "#000000")
-    }));
+    const dispositionColors = this.#showDefaults
+      ? DEFAULT_DISPOSITION_COLORS
+      : ((game.settings.get(MOD_ID, "colors") ?? DEFAULT_DISPOSITION_COLORS) || DEFAULT_DISPOSITION_COLORS);
+
     return {
       tableName: game.i18n.localize("GBT.DispositionColors.Disposition"),
-      rows
+      rows: buildRows(dispositionColors)
     };
   }
 
@@ -53,6 +61,24 @@ export class DispositionColorsForm extends HandlebarsApplicationMixin(Applicatio
     if (!form) return;
 
     bindHexPairs(form, DISPOSITION);
+  }
+
+  async _onClickAction(event, target) {
+    if (target.dataset.action === "reset-form") {
+      event.preventDefault();
+      this.#showDefaults = false;
+      await this.render({ force: true });
+      return;
+    }
+
+    if (target.dataset.action === "defaults-form") {
+      event.preventDefault();
+      this.#showDefaults = true;
+      await this.render({ force: true });
+      return;
+    }
+
+    return super._onClickAction(event, target);
   }
 
   static async onSubmit(_event, _form, _formData) {

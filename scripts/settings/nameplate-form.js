@@ -11,8 +11,9 @@ function buildFontChoices() {
   return getConfiguredFontFamilies().map((family) => ({ value: family, label: family }));
 }
 
-
 export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
+  #showDefaults = false;
+
   static DEFAULT_OPTIONS = {
     id: "gbtf-nameplate-form",
     tag: "form",
@@ -41,7 +42,7 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
   };
 
   async _prepareContext() {
-    const cur = game.settings.get(MOD_ID, "nameplate") ?? {};
+    const cur = this.#showDefaults ? DEFAULT_NAMEPLATES : (game.settings.get(MOD_ID, "nameplate") ?? {});
     const fontChoices = buildFontChoices();
 
     return {
@@ -66,6 +67,24 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
       form.querySelector('input[name="defaultColor-text"]'),
       form.querySelector('input[name="defaultColor-color"]')
     );
+  }
+
+  async _onClickAction(event, target) {
+    if (target.dataset.action === "reset-form") {
+      event.preventDefault();
+      this.#showDefaults = false;
+      await this.render({ force: true });
+      return;
+    }
+
+    if (target.dataset.action === "defaults-form") {
+      event.preventDefault();
+      this.#showDefaults = true;
+      await this.render({ force: true });
+      return;
+    }
+
+    return super._onClickAction(event, target);
   }
 
   static async onSubmit(_event, _form, formData) {

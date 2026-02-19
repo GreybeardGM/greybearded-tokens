@@ -7,7 +7,16 @@ import { isHex, bindHexPairs } from "./helpers.js";
 const OWNERSHIP_LEVELS = ["owner", "observer", "limited", "none"];
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
+function buildRows(source) {
+  return OWNERSHIP_LEVELS.map((level) => ({
+    level,
+    value: (typeof source?.[level] === "string" && isHex(source[level])) ? source[level] : (DEFAULT_OWNERSHIP_COLORS[level] ?? "#000000")
+  }));
+}
+
 export class OwnershipColorsForm extends HandlebarsApplicationMixin(ApplicationV2) {
+  #showDefaults = false;
+
   static DEFAULT_OPTIONS = {
     id: "gbtf-ownership-colors-form",
     tag: "form",
@@ -36,15 +45,13 @@ export class OwnershipColorsForm extends HandlebarsApplicationMixin(ApplicationV
   };
 
   async _prepareContext() {
-    const ownershipColors = (game.settings.get(MOD_ID, "ownershipColors") ?? DEFAULT_OWNERSHIP_COLORS) || DEFAULT_OWNERSHIP_COLORS;
-    const rows = OWNERSHIP_LEVELS.map((level) => ({
-      level,
-      value: (typeof ownershipColors?.[level] === "string" && isHex(ownershipColors[level])) ? ownershipColors[level] : (DEFAULT_OWNERSHIP_COLORS[level] ?? "#000000")
-    }));
+    const ownershipColors = this.#showDefaults
+      ? DEFAULT_OWNERSHIP_COLORS
+      : ((game.settings.get(MOD_ID, "ownershipColors") ?? DEFAULT_OWNERSHIP_COLORS) || DEFAULT_OWNERSHIP_COLORS);
 
     return {
       tableName: game.i18n.localize("GBT.OwnershipColors.Level"),
-      rows
+      rows: buildRows(ownershipColors)
     };
   }
 
@@ -54,6 +61,24 @@ export class OwnershipColorsForm extends HandlebarsApplicationMixin(ApplicationV
     if (!form) return;
 
     bindHexPairs(form, OWNERSHIP_LEVELS);
+  }
+
+  async _onClickAction(event, target) {
+    if (target.dataset.action === "reset-form") {
+      event.preventDefault();
+      this.#showDefaults = false;
+      await this.render({ force: true });
+      return;
+    }
+
+    if (target.dataset.action === "defaults-form") {
+      event.preventDefault();
+      this.#showDefaults = true;
+      await this.render({ force: true });
+      return;
+    }
+
+    return super._onClickAction(event, target);
   }
 
   static async onSubmit(_event, _form, _formData) {

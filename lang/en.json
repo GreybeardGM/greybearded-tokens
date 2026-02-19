@@ -4,6 +4,8 @@
       "Enabled": "Enabled",
       "Save": "Save",
       "Cancel": "Cancel",
+      "Reset": "Reset",
+      "Default": "Default",
       "TintMode": "Tint Mode",
       "UsePlayerColor": "Use Player Color",
       "ColorHex": "Color Hex",
