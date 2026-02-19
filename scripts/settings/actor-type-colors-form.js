@@ -40,7 +40,7 @@ export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV
       handler: ActorTypeColorsForm.onSubmit
     },
     position: {
-      width: 330,
+      width: 360,
       height: "auto"
     },
     window: {
