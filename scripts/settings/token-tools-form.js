@@ -1,10 +1,11 @@
-import { MOD_ID } from "./constants.js";
+import { MOD_ID, DEFAULT_TOKEN_TOOLS } from "./constants.js";
 import { normalizeTokenToolsConfig } from "../utils/normalization.js";
-
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
+  #showDefaults = false;
+
   static DEFAULT_OPTIONS = {
     id: "gbtf-token-tools-dialog",
     tag: "form",
@@ -33,10 +34,28 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
   };
 
   async _prepareContext() {
-    const cur = game.settings.get(MOD_ID, "tokenTools");
+    const cur = this.#showDefaults ? DEFAULT_TOKEN_TOOLS : game.settings.get(MOD_ID, "tokenTools");
     return {
       ...normalizeTokenToolsConfig(cur)
     };
+  }
+
+  async _onClickAction(event, target) {
+    if (target.dataset.action === "reset-form") {
+      event.preventDefault();
+      this.#showDefaults = false;
+      await this.render({ force: true });
+      return;
+    }
+
+    if (target.dataset.action === "defaults-form") {
+      event.preventDefault();
+      this.#showDefaults = true;
+      await this.render({ force: true });
+      return;
+    }
+
+    return super._onClickAction(event, target);
   }
 
   static async onSubmit(_event, _form, formData) {
@@ -54,6 +73,5 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
     }, current);
 
     await game.settings.set(MOD_ID, "tokenTools", next);
-
   }
 }
