@@ -8,9 +8,9 @@ Designed for busy Game Masters who are tired of creating custom token artwork fo
 
 - Primary token frame plus an optional secondary token frame with separate image paths
 - Optional token mask
-- Tinting with selectable modes (plus optional player-color override where available)
-- Nameplate customization (font family, size, and color)
-- Includes an additional set of configurable Scene Control tools for quick token manipulation
+- Tinting with selectable modes (plus optional player-color override)
+- Nameplate customization (font family, size, and colour)
+- Includes an additional set of configurable Scene Control tools for token manipulation
 
 
 ### Tint Modes
@@ -22,7 +22,7 @@ The module supports the following tint modes in frame/nameplate settings:
 - **Disposition**
 - **Ownership**
 - **Actor Type**
-- **Custom**
+- **Custom** (set colour manually per token)
 
 ## Installation
 
@@ -45,13 +45,13 @@ For release notes and upgrade details, see the [Changelog](./CHANGELOG.md).
 
 ## ⚠️ Resource Usage & Operational Notes
 
-This module hooks into the token rendering lifecycle (including `refreshToken`, `updateToken`, and global sweeps across all canvas tokens). In larger scenes with many visible tokens, this can increase GPU/CPU load.
+This module hooks into the token rendering lifecycle (including `refreshToken`, `updateToken`, and some global sweeps across all canvas tokens). In larger scenes with many visible tokens, this can increase GPU/CPU load.
 
 ### Critical High-Load Areas
 
 - **Many visible tokens:** Each refresh can trigger frame/mask updates.
 - **Masks enabled:** Mask sprites are managed per token and updated for size/mirroring changes.
-- **Color/user changes:** Relevant user updates can trigger another sweep across all tokens.
+- **Colour/user changes:** Relevant user updates can trigger another sweep across all tokens.
 - **Large frame/mask textures:** Higher resolutions increase memory usage and GPU upload costs.
 
 ### Quick Emergency Mitigation Guide
@@ -62,7 +62,7 @@ If a scene starts stuttering or frametimes increase:
 2. **Reduce visible token count** (split scenes, keep fewer active tokens in view).
 3. **Use smaller/compressed frame and mask images** (lower texture sizes).
 4. **Simplify nameplate scaling** (disable it or reduce aggressive font scaling).
-5. **Disable frame per problematic token** via token flag (`disableFrame`).
+5. **Disable frame per problematic token** (tool included).
 
 Recommendation: apply one change at a time and re-check performance, so you can keep visual quality while removing only the most expensive settings.
 
