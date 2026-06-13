@@ -205,13 +205,15 @@ function updateNameplate(token, S, tx, ty) {
 
   const basePx = Number(NP.baseFontSize ?? 22) || 22;
   let fontPx = basePx;
+  let nameplateScale = 1;
 
   if (NP.scaleWithToken) {
     const wSquares = token?.document?.width  ?? 1;
     const hSquares = token?.document?.height ?? 1;
     const sizeFactor = Math.max(wSquares, hSquares);
     const textureScale = Math.max(tx, ty);
-    fontPx = Math.max(8, Math.round(basePx * sizeFactor * textureScale));
+    nameplateScale = sizeFactor * textureScale;
+    fontPx = Math.max(8, Math.round(basePx * nameplateScale));
   }
 
   label.style.fontSize = fontPx;
@@ -219,10 +221,13 @@ function updateNameplate(token, S, tx, ty) {
   const tint = getTintColor(token, S, NP);
   if (tint != null) label.style.fill = tint;
    
-  const distance = Math.max(0, Number(NP.distance ?? 2) || 0);
-  label.y = (token.h * (1 + ty) / 2) + distance;
-
   label.updateText?.();
+
+  const distance = Math.max(0, Number(NP.distance ?? 2) || 0) * nameplateScale;
+  const tokenTextureBottom = token.h * (1 + ty) / 2;
+  const labelBounds = label.getLocalBounds?.();
+  const labelTopInset = Number.isFinite(labelBounds?.y) ? labelBounds.y : 0;
+  label.y = tokenTextureBottom + distance - labelTopInset;
 }
 
 /* =========================
