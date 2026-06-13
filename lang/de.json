@@ -45,7 +45,7 @@
     "Nameplate": {
       "Name": "Namensschild-Einstellungen",
       "Label": "Namensschilder konfigurieren",
-      "Distance": "Abstand zum Token (px)",
+      "Distance": "Abstand zum Token (px; negative Werte verschieben nach oben)",
       "BaseFontSize": "Grundschriftgröße (px)",
       "FontFamily": "Schriftfamilie",
       "ScaleWithToken": "Mit Token skalieren"

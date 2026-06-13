@@ -45,7 +45,7 @@
     "Nameplate": {
       "Name": "Nameplate Settings",
       "Label": "Configure Nameplates",
-      "Distance": "Distance to Token (px)",
+      "Distance": "Distance to Token (px; negative values move up)",
       "BaseFontSize": "Base Font Size (px)",
       "FontFamily": "Font Family",
       "ScaleWithToken": "Scale With Token"
