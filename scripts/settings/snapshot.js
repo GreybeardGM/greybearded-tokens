@@ -91,6 +91,7 @@ function _readAll() {
   const nameplate = {
     enabled: normalizeBoolean(NP?.enabled, DEFAULT_NAMEPLATES.enabled),
     baseFontSize: toFiniteNumber(NP?.baseFontSize, DEFAULT_NAMEPLATES.baseFontSize),
+    distance: Math.max(0, toFiniteNumber(NP?.distance, DEFAULT_NAMEPLATES.distance)),
     fontFamily: oneOf(NP?.fontFamily, configuredFonts, DEFAULT_NAMEPLATES.fontFamily),
     usePlayerColor: normalizeBoolean(NP?.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
     defaultColor: isHex(NP?.defaultColor) ? NP.defaultColor : DEFAULT_NAMEPLATES.defaultColor,

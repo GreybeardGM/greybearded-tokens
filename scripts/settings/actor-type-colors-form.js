@@ -44,7 +44,7 @@ export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV
       height: "auto"
     },
     window: {
-      title: "GBT.ActorTypeColors.Name",
+      title: "GBTF.ActorTypeColors.Name",
       contentClasses: ["gbtf-frames", "gbtf-color-form"]
     }
   };
@@ -65,7 +65,7 @@ export class ActorTypeColorsForm extends HandlebarsApplicationMixin(ApplicationV
       : ((game.settings.get(MOD_ID, "actorTypeColors") ?? DEFAULT_ACTOR_TYPE_COLORS) || DEFAULT_ACTOR_TYPE_COLORS);
 
     return {
-      tableName: game.i18n.localize("GBT.ActorTypeColors.ActorType"),
+      tableName: game.i18n.localize("GBTF.ActorTypeColors.ActorType"),
       rows: buildRows(actorTypes, actorTypeColors)
     };
   }
