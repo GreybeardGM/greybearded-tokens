@@ -1,5 +1,5 @@
 {
-  "GBT": {
+  "GBTF": {
     "Common": {
       "Enabled": "Enabled",
       "Save": "Save",
@@ -45,6 +45,7 @@
     "Nameplate": {
       "Name": "Nameplate Settings",
       "Label": "Configure Nameplates",
+      "Distance": "Distance to Token (px)",
       "BaseFontSize": "Base Font Size (px)",
       "FontFamily": "Font Family",
       "ScaleWithToken": "Scale With Token"

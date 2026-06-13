@@ -1,16 +1,21 @@
 <div class="gbtf-setting-form__body">
   <div class="gbtf-setting-form__row">
-    <label for="gbtf-setting-form-nameplate-enabled">{{localize "GBT.Common.Enabled"}}</label>
+    <label for="gbtf-setting-form-nameplate-enabled">{{localize "GBTF.Common.Enabled"}}</label>
     <input id="gbtf-setting-form-nameplate-enabled" type="checkbox" name="enabled" {{#if enabled}}checked{{/if}} />
   </div>
 
   <div class="gbtf-setting-form__row">
-    <label for="gbtf-setting-form-nameplate-base-font-size">{{localize "GBT.Nameplate.BaseFontSize"}}</label>
+    <label for="gbtf-setting-form-nameplate-base-font-size">{{localize "GBTF.Nameplate.BaseFontSize"}}</label>
     <input id="gbtf-setting-form-nameplate-base-font-size" type="number" name="baseFontSize" min="6" max="96" step="1" value="{{baseFontSize}}" />
   </div>
 
   <div class="gbtf-setting-form__row">
-    <label for="gbtf-setting-form-nameplate-font-family">{{localize "GBT.Nameplate.FontFamily"}}</label>
+    <label for="gbtf-setting-form-nameplate-distance">{{localize "GBTF.Nameplate.Distance"}}</label>
+    <input id="gbtf-setting-form-nameplate-distance" type="number" name="distance" min="0" max="200" step="1" value="{{distance}}" />
+  </div>
+
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-font-family">{{localize "GBTF.Nameplate.FontFamily"}}</label>
     <select id="gbtf-setting-form-nameplate-font-family" name="fontFamily">
       {{#each fontChoices}}
         <option value="{{this.value}}" {{#if (eq ../fontFamily this.value)}}selected{{/if}}>{{this.label}}</option>
@@ -19,12 +24,12 @@
   </div>
 
   <div class="gbtf-setting-form__row">
-    <label for="gbtf-setting-form-nameplate-use-player-color">{{localize "GBT.Common.UsePlayerColor"}}</label>
+    <label for="gbtf-setting-form-nameplate-use-player-color">{{localize "GBTF.Common.UsePlayerColor"}}</label>
     <input id="gbtf-setting-form-nameplate-use-player-color" type="checkbox" name="usePlayerColor" {{#if usePlayerColor}}checked{{/if}} />
   </div>
 
   <div class="gbtf-setting-form__row">
-    <label for="gbtf-setting-form-nameplate-default-color-text">{{localize "GBT.Common.DefaultColor"}}</label>
+    <label for="gbtf-setting-form-nameplate-default-color-text">{{localize "GBTF.Common.DefaultColor"}}</label>
     <div class="gbtf-setting-form__input-pair">
       <input id="gbtf-setting-form-nameplate-default-color-text" type="text" name="defaultColor-text" value="{{defaultColor}}" placeholder="#RRGGBB" />
       <input id="gbtf-setting-form-nameplate-default-color" type="color" name="defaultColor-color" value="{{defaultColor}}" />
@@ -32,7 +37,7 @@
   </div>
 
   <div class="gbtf-setting-form__row">
-    <label for="gbtf-setting-form-nameplate-tint-mode">{{localize "GBT.Common.TintMode"}}</label>
+    <label for="gbtf-setting-form-nameplate-tint-mode">{{localize "GBTF.Common.TintMode"}}</label>
     <select id="gbtf-setting-form-nameplate-tint-mode" name="tintMode">
       {{#each TINT_CHOICES}}
         <option value="{{@key}}" {{#if (eq ../tintMode @key)}}selected{{/if}}>
@@ -43,7 +48,7 @@
   </div>
 
   <div class="gbtf-setting-form__row">
-    <label for="gbtf-setting-form-nameplate-scale-with-token">{{localize "GBT.Nameplate.ScaleWithToken"}}</label>
+    <label for="gbtf-setting-form-nameplate-scale-with-token">{{localize "GBTF.Nameplate.ScaleWithToken"}}</label>
     <input id="gbtf-setting-form-nameplate-scale-with-token" type="checkbox" name="scaleWithToken" {{#if scaleWithToken}}checked{{/if}} />
   </div>
 

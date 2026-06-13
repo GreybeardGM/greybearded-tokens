@@ -27,7 +27,7 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
       height: "auto"
     },
     window: {
-      title: "GBT.Nameplate.Name",
+      title: "GBTF.Nameplate.Name",
       contentClasses: ["gbtf-frames", "gbtf-setting-form"]
     }
   };
@@ -48,6 +48,7 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
     return {
       enabled: normalizeBoolean(cur.enabled, DEFAULT_NAMEPLATES.enabled),
       baseFontSize: toFiniteNumber(cur.baseFontSize, DEFAULT_NAMEPLATES.baseFontSize),
+      distance: Math.max(0, toFiniteNumber(cur.distance, DEFAULT_NAMEPLATES.distance)),
       fontFamily: oneOf(cur.fontFamily, Object.fromEntries(fontChoices.map((f) => [f.value, true])), DEFAULT_NAMEPLATES.fontFamily),
       usePlayerColor: normalizeBoolean(cur.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
       defaultColor: isHex(cur.defaultColor) ? cur.defaultColor : DEFAULT_NAMEPLATES.defaultColor,
@@ -91,6 +92,7 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
     const data = formData.object;
 
     const baseFontSize = toFiniteNumber(data.baseFontSize, DEFAULT_NAMEPLATES.baseFontSize);
+    const distance = Math.max(0, toFiniteNumber(data.distance, DEFAULT_NAMEPLATES.distance));
     const fontChoices = buildFontChoices();
     const allowedFonts = Object.fromEntries(fontChoices.map((f) => [f.value, true]));
     const fontFamily = oneOf(String(data.fontFamily || ""), allowedFonts, DEFAULT_NAMEPLATES.fontFamily);
@@ -102,6 +104,7 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
     const next = {
       enabled: normalizeBoolean(Object.hasOwn(data, "enabled") ? data.enabled : false, DEFAULT_NAMEPLATES.enabled),
       baseFontSize,
+      distance,
       fontFamily,
       usePlayerColor: normalizeBoolean(Object.hasOwn(data, "usePlayerColor") ? data.usePlayerColor : false, DEFAULT_NAMEPLATES.usePlayerColor),
       defaultColor,

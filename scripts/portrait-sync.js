@@ -13,15 +13,15 @@ const SYNC_SOURCES = {
 
 export function registerPortraitSyncSetting() {
   game.settings.register(MOD_ID, SETTING_KEY, {
-    name: "GBT.Sync.Name",          // <-- Key, nicht localize(...)
-    hint: "GBT.Sync.Hint",
+    name: "GBTF.Sync.Name",          // <-- Key, nicht localize(...)
+    hint: "GBTF.Sync.Hint",
     scope: "world",
     config: true,
     type: String,
     choices: {
-      [SYNC_MODES.ALWAYS]: "GBT.Sync.ChoiceAlways", // <-- Keys
-      [SYNC_MODES.DIALOG]: "GBT.Sync.ChoiceDialog",
-      [SYNC_MODES.NOTHING]: "GBT.Sync.ChoiceNothing"
+      [SYNC_MODES.ALWAYS]: "GBTF.Sync.ChoiceAlways", // <-- Keys
+      [SYNC_MODES.DIALOG]: "GBTF.Sync.ChoiceDialog",
+      [SYNC_MODES.NOTHING]: "GBTF.Sync.ChoiceNothing"
     },
     default: SYNC_MODES.DIALOG
   });
@@ -106,7 +106,7 @@ export const handlePortraitSyncTokenUpdate = withPortraitSyncErrorBoundary(
 async function syncPrototypeTokenImage(actor, img) {
   // Dot-path Update für v10+ Dokumente
   await actor.prototypeToken.update({ "texture.src": img });
-  ui.notifications?.info(game.i18n.format("GBT.Sync.DoneInfo", { name: actor.name }));
+  ui.notifications?.info(game.i18n.format("GBTF.Sync.DoneInfo", { name: actor.name }));
 }
 
 /** Einfache Bestätigungsabfrage mit zwei Buttons: Synchronize / Cancel. */
@@ -118,11 +118,11 @@ async function promptSyncDialog(actor, oldSrc, newImg) {
   }
 
   const content = await renderTemplate(SYNC_DIALOG_TEMPLATE, {
-    text: game.i18n.localize("GBT.Sync.DialogText"),
-    actorPortraitLabel: game.i18n.localize("GBT.Sync.ActorPortrait"),
+    text: game.i18n.localize("GBTF.Sync.DialogText"),
+    actorPortraitLabel: game.i18n.localize("GBTF.Sync.ActorPortrait"),
     actorPortraitSrc: newImg,
     actorPortraitPath: newImg,
-    protoTokenLabel: game.i18n.localize("GBT.Sync.ProtoToken"),
+    protoTokenLabel: game.i18n.localize("GBTF.Sync.ProtoToken"),
     protoTokenSrc: oldSrc ?? "",
     protoTokenPath: oldSrc ?? ""
   });
@@ -130,20 +130,20 @@ async function promptSyncDialog(actor, oldSrc, newImg) {
   const result = await DialogV2.wait({
     content,
     window: {
-      title: game.i18n.localize("GBT.Sync.DialogTitle"),
+      title: game.i18n.localize("GBTF.Sync.DialogTitle"),
       contentClasses: ["gbtf-frames"]
     },
     buttons: [
       {
         action: "sync",
         icon: "fa-solid fa-link",
-        label: game.i18n.localize("GBT.Sync.ButtonSync"),
+        label: game.i18n.localize("GBTF.Sync.ButtonSync"),
         callback: () => "sync"
       },
       {
         action: "cancel",
         icon: "fa-regular fa-circle-xmark",
-        label: game.i18n.localize("GBT.Sync.ButtonCancel"),
+        label: game.i18n.localize("GBTF.Sync.ButtonCancel"),
         callback: () => "cancel",
         default: true
       }

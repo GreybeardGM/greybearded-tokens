@@ -30,7 +30,7 @@ export class OwnershipColorsForm extends HandlebarsApplicationMixin(ApplicationV
       height: "auto"
     },
     window: {
-      title: "GBT.OwnershipColors.Name",
+      title: "GBTF.OwnershipColors.Name",
       contentClasses: ["gbtf-frames", "gbtf-color-form"]
     }
   };
@@ -50,7 +50,7 @@ export class OwnershipColorsForm extends HandlebarsApplicationMixin(ApplicationV
       : ((game.settings.get(MOD_ID, "ownershipColors") ?? DEFAULT_OWNERSHIP_COLORS) || DEFAULT_OWNERSHIP_COLORS);
 
     return {
-      tableName: game.i18n.localize("GBT.OwnershipColors.Level"),
+      tableName: game.i18n.localize("GBTF.OwnershipColors.Level"),
       rows: buildRows(ownershipColors)
     };
   }

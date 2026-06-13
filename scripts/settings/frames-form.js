@@ -27,7 +27,7 @@ export class FramesForm extends HandlebarsApplicationMixin(ApplicationV2) {
       height: "auto"
     },
     window: {
-      title: "GBT.Frames.Name",
+      title: "GBTF.Frames.Name",
       contentClasses: ["gbtf-frames", "gbtf-frames-form"]
     }
   };

@@ -1,5 +1,5 @@
 {
-  "GBT": {
+  "GBTF": {
     "Common": {
       "Enabled": "Aktiviert",
       "Save": "Speichern",
@@ -45,6 +45,7 @@
     "Nameplate": {
       "Name": "Namensschild-Einstellungen",
       "Label": "Namensschilder konfigurieren",
+      "Distance": "Abstand zum Token (px)",
       "BaseFontSize": "Grundschriftgröße (px)",
       "FontFamily": "Schriftfamilie",
       "ScaleWithToken": "Mit Token skalieren"

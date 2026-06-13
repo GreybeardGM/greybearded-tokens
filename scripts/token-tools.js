@@ -5,10 +5,10 @@ import { normalizeTokenToolsConfig } from "./utils/normalization.js";
 import { isHex, bindHexSync } from "./settings/helpers.js";
 
 const DISPOSITION_ENTRIES = [
-  { key: "HOSTILE", label: "GBT.Disposition.hostile", colorKey: "hostile" },
-  { key: "NEUTRAL", label: "GBT.Disposition.neutral", colorKey: "neutral" },
-  { key: "FRIENDLY", label: "GBT.Disposition.friendly", colorKey: "friendly" },
-  { key: "SECRET", label: "GBT.Disposition.secret", colorKey: "secret" }
+  { key: "HOSTILE", label: "GBTF.Disposition.hostile", colorKey: "hostile" },
+  { key: "NEUTRAL", label: "GBTF.Disposition.neutral", colorKey: "neutral" },
+  { key: "FRIENDLY", label: "GBTF.Disposition.friendly", colorKey: "friendly" },
+  { key: "SECRET", label: "GBTF.Disposition.secret", colorKey: "secret" }
 ];
 
 const DISPOSITION_META = {
@@ -26,7 +26,7 @@ const getRenderedTokenObject = (tokenDoc) => tokenDoc?.object ?? canvas.tokens?.
 const createSizeTools = ({ isGM, toolConfig, runOnSelectionSize }) => ([
   {
     name: "gbShrink",
-    title: game.i18n.format("GBT.Tools.SizeShrinkTitle", { sizeMin: toolConfig.sizeMin }),
+    title: game.i18n.format("GBTF.Tools.SizeShrinkTitle", { sizeMin: toolConfig.sizeMin }),
     icon: "fa-solid fa-down-left-and-up-right-to-center",
     button: true,
     visible: isGM && toolConfig.size,
@@ -34,7 +34,7 @@ const createSizeTools = ({ isGM, toolConfig, runOnSelectionSize }) => ([
   },
   {
     name: "gbGrow",
-    title: game.i18n.format("GBT.Tools.SizeGrowTitle", { sizeMax: toolConfig.sizeMax }),
+    title: game.i18n.format("GBTF.Tools.SizeGrowTitle", { sizeMax: toolConfig.sizeMax }),
     icon: "fa-solid fa-up-right-and-down-left-from-center",
     button: true,
     visible: isGM && toolConfig.size,
@@ -44,7 +44,7 @@ const createSizeTools = ({ isGM, toolConfig, runOnSelectionSize }) => ([
 
 const createToggleFrameTool = ({ isGM, visible, runToggleDisableFrame }) => ({
   name: "gbToggleFrame",
-  title: game.i18n.localize("GBT.Tools.ToggleFrameToolTitle"),
+  title: game.i18n.localize("GBTF.Tools.ToggleFrameToolTitle"),
   icon: "fa-solid fa-vector-square",
   button: true,
   visible: isGM && visible,
@@ -53,7 +53,7 @@ const createToggleFrameTool = ({ isGM, visible, runToggleDisableFrame }) => ({
 
 const createMirrorArtworkTool = ({ isGM, visible, runMirrorArtwork }) => ({
   name: "gbMirrorArtwork",
-  title: game.i18n.localize("GBT.Tools.MirrorArtwork.ToolTitle"),
+  title: game.i18n.localize("GBTF.Tools.MirrorArtwork.ToolTitle"),
   icon: "fa-solid fa-left-right",
   button: true,
   visible: isGM && visible,
@@ -62,7 +62,7 @@ const createMirrorArtworkTool = ({ isGM, visible, runMirrorArtwork }) => ({
 
 const createDispositionTool = ({ isGM, visible, runSetDisposition }) => ({
   name: "gbSetDisposition",
-  title: game.i18n.localize("GBT.Tools.Disposition.ToolTitle"),
+  title: game.i18n.localize("GBTF.Tools.Disposition.ToolTitle"),
   icon: "fa-solid fa-people-arrows-left-right",
   button: true,
   visible: isGM && visible,
@@ -71,7 +71,7 @@ const createDispositionTool = ({ isGM, visible, runSetDisposition }) => ({
 
 const createCustomTintTool = ({ isGM, visible, runSetCustomTint }) => ({
   name: "gbSetCustomTint",
-  title: game.i18n.localize("GBT.Tools.CustomTint.ToolTitle"),
+  title: game.i18n.localize("GBTF.Tools.CustomTint.ToolTitle"),
   icon: "fa-solid fa-eye-dropper",
   button: true,
   visible: isGM && visible,
@@ -151,7 +151,7 @@ export function registerTokenToolsHooks() {
     if (!isGM) return;
     const docs = getControlledTokenDocs();
     if (!docs.length) {
-      ui.notifications?.warn(game.i18n.localize('GBT.Tools.Disposition.NoneSelected'));
+      ui.notifications?.warn(game.i18n.localize('GBTF.Tools.Disposition.NoneSelected'));
       return;
     }
 
@@ -163,10 +163,10 @@ export function registerTokenToolsHooks() {
 
     const disposition = await foundry.applications.api.DialogV2.wait({
       window: {
-        title: game.i18n.localize('GBT.Tools.Disposition.Title'),
+        title: game.i18n.localize('GBTF.Tools.Disposition.Title'),
         contentClasses: ['gbtf-token-tools-disposition-dialog']
       },
-      content: `<p>${game.i18n.localize('GBT.Tools.Disposition.Content')}</p>`,
+      content: `<p>${game.i18n.localize('GBTF.Tools.Disposition.Content')}</p>`,
       buttons: dispositionEntries.map(({ key, label, colorKey }) => {
         const dispositionColor = dispositionColors[colorKey] ?? DEFAULT_DISPOSITION_COLORS[colorKey];
 
@@ -200,7 +200,7 @@ export function registerTokenToolsHooks() {
     if (!isGM) return;
     const docs = getControlledTokenDocs();
     if (!docs.length) {
-      ui.notifications?.warn(game.i18n.localize('GBT.Tools.CustomTint.NoneSelected'));
+      ui.notifications?.warn(game.i18n.localize('GBTF.Tools.CustomTint.NoneSelected'));
       return;
     }
 
@@ -210,13 +210,13 @@ export function registerTokenToolsHooks() {
 
     const content = `
       <div class="gbtf-token-tools-custom-tint-dialog">
-        <p>${game.i18n.localize('GBT.Tools.CustomTint.Content')}</p>
+        <p>${game.i18n.localize('GBTF.Tools.CustomTint.Content')}</p>
         <div class="form-group">
-          <label for="gbtf-custom-tint-text">${game.i18n.localize('GBT.Common.ColorHex')}</label>
+          <label for="gbtf-custom-tint-text">${game.i18n.localize('GBTF.Common.ColorHex')}</label>
           <input id="gbtf-custom-tint-text" type="text" name="custom-tint-text" value="${firstColor}" placeholder="#RRGGBB" />
         </div>
         <div class="form-group">
-          <label for="gbtf-custom-tint-color">${game.i18n.localize('GBT.Common.ColorPicker')}</label>
+          <label for="gbtf-custom-tint-color">${game.i18n.localize('GBTF.Common.ColorPicker')}</label>
           <input id="gbtf-custom-tint-color" type="color" name="custom-tint-color" value="${firstColor}" />
         </div>
       </div>
@@ -227,14 +227,14 @@ export function registerTokenToolsHooks() {
 
     const result = await foundry.applications.api.DialogV2.wait({
       window: {
-        title: game.i18n.localize('GBT.Tools.CustomTint.Title'),
+        title: game.i18n.localize('GBTF.Tools.CustomTint.Title'),
         contentClasses: ['gbtf-token-tools-custom-tint-dialog']
       },
       content,
       buttons: [
         {
           action: 'save',
-          label: game.i18n.localize('GBT.Common.Save'),
+          label: game.i18n.localize('GBTF.Common.Save'),
           icon: 'fa-solid fa-floppy-disk',
           callback: () => {
             const textValue = textInput?.value?.trim();
@@ -246,13 +246,13 @@ export function registerTokenToolsHooks() {
         },
         {
           action: 'clear',
-          label: game.i18n.localize('GBT.Tools.CustomTint.Clear'),
+          label: game.i18n.localize('GBTF.Tools.CustomTint.Clear'),
           icon: 'fa-solid fa-eraser',
           callback: () => ({ action: 'clear' })
         },
         {
           action: 'cancel',
-          label: game.i18n.localize('GBT.Common.Cancel'),
+          label: game.i18n.localize('GBTF.Common.Cancel'),
           icon: 'fa-regular fa-circle-xmark',
           default: true,
           callback: () => ({ action: 'cancel' })
@@ -282,7 +282,7 @@ export function registerTokenToolsHooks() {
     }
 
     if (result?.action === 'invalid') {
-      ui.notifications?.warn(game.i18n.localize('GBT.Common.InvalidHex'));
+      ui.notifications?.warn(game.i18n.localize('GBTF.Common.InvalidHex'));
       return;
     }
 

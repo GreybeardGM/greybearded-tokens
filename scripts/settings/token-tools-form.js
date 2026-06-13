@@ -19,7 +19,7 @@ export class TokenToolsForm extends HandlebarsApplicationMixin(ApplicationV2) {
       height: "auto"
     },
     window: {
-      title: "GBT.Tools.Config.Name",
+      title: "GBTF.Tools.Config.Name",
       contentClasses: ["gbtf-frames", "gbtf-setting-form"]
     }
   };

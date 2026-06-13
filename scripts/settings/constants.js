@@ -3,12 +3,12 @@
 export const MOD_ID = "greybearded-tokens";
 
 export const TINT_CHOICES = {
-  NoTint:      "GBT.Tint.None",
-  Disposition: "GBT.Tint.Disposition",
-  Ownership:   "GBT.Tint.Ownership",
-  ActorType:   "GBT.Tint.ActorType",
-  Unicolor:    "GBT.Tint.Unicolor",
-  Custom:      "GBT.Tint.Custom"
+  NoTint:      "GBTF.Tint.None",
+  Disposition: "GBTF.Tint.Disposition",
+  Ownership:   "GBTF.Tint.Ownership",
+  ActorType:   "GBTF.Tint.ActorType",
+  Unicolor:    "GBTF.Tint.Unicolor",
+  Custom:      "GBTF.Tint.Custom"
 };
 
 
@@ -33,6 +33,7 @@ export const DEFAULT_OWNERSHIP_COLORS = {
 export const DEFAULT_NAMEPLATES = {
   enabled: false,
   baseFontSize: 22,
+  distance: 2,
   fontFamily: "Signika",
   usePlayerColor: false,
   defaultColor: "#ffffff",

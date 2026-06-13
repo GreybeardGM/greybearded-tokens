@@ -30,7 +30,7 @@ export class DispositionColorsForm extends HandlebarsApplicationMixin(Applicatio
       height: "auto"
     },
     window: {
-      title: "GBT.DispositionColors.Name",
+      title: "GBTF.DispositionColors.Name",
       contentClasses: ["gbtf-frames", "gbtf-color-form"]
     }
   };
@@ -50,7 +50,7 @@ export class DispositionColorsForm extends HandlebarsApplicationMixin(Applicatio
       : ((game.settings.get(MOD_ID, "colors") ?? DEFAULT_DISPOSITION_COLORS) || DEFAULT_DISPOSITION_COLORS);
 
     return {
-      tableName: game.i18n.localize("GBT.DispositionColors.Disposition"),
+      tableName: game.i18n.localize("GBTF.DispositionColors.Disposition"),
       rows: buildRows(dispositionColors)
     };
   }

@@ -14,7 +14,7 @@ export function registerSettings() {
 
   // Hidden data containers used by the config forms
   game.settings.register(MOD_ID, "frames", {
-    name: "GBT.Frames.Name",
+    name: "GBTF.Frames.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -22,7 +22,7 @@ export function registerSettings() {
   });
 
   game.settings.register(MOD_ID, "nameplate", {
-    name: "GBT.Nameplate.Name",
+    name: "GBTF.Nameplate.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -30,7 +30,7 @@ export function registerSettings() {
   });
 
   game.settings.register(MOD_ID, "colors", {
-    name: "GBT.DispositionColors.Name",
+    name: "GBTF.DispositionColors.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -38,7 +38,7 @@ export function registerSettings() {
   });
 
   game.settings.register(MOD_ID, "actorTypeColors", {
-    name: "GBT.ActorTypeColors.Name",
+    name: "GBTF.ActorTypeColors.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -46,7 +46,7 @@ export function registerSettings() {
   });
 
   game.settings.register(MOD_ID, "ownershipColors", {
-    name: "GBT.OwnershipColors.Name",
+    name: "GBTF.OwnershipColors.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -54,7 +54,7 @@ export function registerSettings() {
   });
 
   game.settings.register(MOD_ID, "tokenTools", {
-    name: "GBT.Tools.Config.Name",
+    name: "GBTF.Tools.Config.Name",
     scope: "world",
     config: false,
     type: Object,
@@ -68,48 +68,48 @@ export function registerSettings() {
 
   // Visible configuration menus
   game.settings.registerMenu(MOD_ID, "framesMenu", {
-    name: "GBT.Frames.Name",     // Settings menu: frame configuration
-    label: "GBT.Frames.Label",   // Open frame configuration dialog
+    name: "GBTF.Frames.Name",     // Settings menu: frame configuration
+    label: "GBTF.Frames.Label",   // Open frame configuration dialog
     icon: "fas fa-images",
     type: FramesForm,
     restricted: true
   });
 
   game.settings.registerMenu(MOD_ID, "nameplateMenu", {
-    name: "GBT.Nameplate.Name",   // Settings menu: nameplate configuration
-    label: "GBT.Nameplate.Label", // Open nameplate configuration dialog
+    name: "GBTF.Nameplate.Name",   // Settings menu: nameplate configuration
+    label: "GBTF.Nameplate.Label", // Open nameplate configuration dialog
     icon: "fas fa-font",
     type: NameplateForm,
     restricted: true
   });
 
   game.settings.registerMenu(MOD_ID, "colorsMenu", {
-    name: "GBT.DispositionColors.Name",     // Settings menu: disposition color mapping
-    label: "GBT.DispositionColors.Label",   // Open disposition color configuration dialog
+    name: "GBTF.DispositionColors.Name",     // Settings menu: disposition color mapping
+    label: "GBTF.DispositionColors.Label",   // Open disposition color configuration dialog
     icon: "fas fa-palette",
     type: DispositionColorsForm,
     restricted: true
   });
 
   game.settings.registerMenu(MOD_ID, "actorTypeColorsMenu", {
-    name: "GBT.ActorTypeColors.Name",
-    label: "GBT.ActorTypeColors.Label",
+    name: "GBTF.ActorTypeColors.Name",
+    label: "GBTF.ActorTypeColors.Label",
     icon: "fas fa-users",
     type: ActorTypeColorsForm,
     restricted: true
   });
 
   game.settings.registerMenu(MOD_ID, "ownershipColorsMenu", {
-    name: "GBT.OwnershipColors.Name",
-    label: "GBT.OwnershipColors.Label",
+    name: "GBTF.OwnershipColors.Name",
+    label: "GBTF.OwnershipColors.Label",
     icon: "fas fa-user-shield",
     type: OwnershipColorsForm,
     restricted: true
   });
 
   game.settings.registerMenu(MOD_ID, "tokenToolsMenu", {
-    name: "GBT.Tools.Config.Name",
-    label: "GBT.Tools.Config.Label",
+    name: "GBTF.Tools.Config.Name",
+    label: "GBTF.Tools.Config.Label",
     icon: "fas fa-screwdriver-wrench",
     type: TokenToolsForm,
     restricted: true

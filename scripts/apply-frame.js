@@ -219,8 +219,8 @@ function updateNameplate(token, S, tx, ty) {
   const tint = getTintColor(token, S, NP);
   if (tint != null) label.style.fill = tint;
    
-  const padding = Math.max(2, Math.round(fontPx * 0.10));
-  label.y = (token.h * (1 + ty) / 2) + padding;
+  const distance = Math.max(0, Number(NP.distance ?? 2) || 0);
+  label.y = (token.h * (1 + ty) / 2) + distance;
 
   label.updateText?.();
 }
