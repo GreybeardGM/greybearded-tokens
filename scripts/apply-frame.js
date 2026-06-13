@@ -220,10 +220,10 @@ function updateNameplate(token, S, tx, ty) {
   label.style.fontFamily = NP.fontFamily;
   const tint = getTintColor(token, S, NP);
   if (tint != null) label.style.fill = tint;
-   
+
   label.updateText?.();
 
-  const distance = Math.max(0, Number(NP.distance ?? 2) || 0) * nameplateScale;
+  const distance = (Number(NP.distance ?? 2) || 0) * nameplateScale;
   const tokenTextureBottom = token.h * (1 + ty) / 2;
   const labelBounds = label.getLocalBounds?.();
   const labelTopInset = Number.isFinite(labelBounds?.y) ? labelBounds.y : 0;
