@@ -48,7 +48,10 @@
       "Distance": "Abstand zum Token (px; negative Werte verschieben nach oben)",
       "BaseFontSize": "Grundschriftgröße (px)",
       "FontFamily": "Schriftfamilie",
-      "ScaleWithToken": "Mit Token skalieren"
+      "ScaleWithToken": "Mit Token skalieren",
+      "OutlineUsePlayerColor": "Spielerfarbe für Outline verwenden",
+      "OutlineDefaultColor": "Standardfarbe für Outline",
+      "OutlineTintMode": "Farbmodus für Outline"
     },
     "Sync": {
       "Name": "Porträt → Prototyp-Token-Synchronisation",

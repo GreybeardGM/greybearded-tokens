@@ -53,6 +53,9 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
       usePlayerColor: normalizeBoolean(cur.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
       defaultColor: isHex(cur.defaultColor) ? cur.defaultColor : DEFAULT_NAMEPLATES.defaultColor,
       tintMode: oneOf(cur.tintMode, TINT_CHOICES, DEFAULT_NAMEPLATES.tintMode),
+      outlineUsePlayerColor: normalizeBoolean(cur.outlineUsePlayerColor, DEFAULT_NAMEPLATES.outlineUsePlayerColor),
+      outlineDefaultColor: isHex(cur.outlineDefaultColor) ? cur.outlineDefaultColor : DEFAULT_NAMEPLATES.outlineDefaultColor,
+      outlineTintMode: oneOf(cur.outlineTintMode, TINT_CHOICES, DEFAULT_NAMEPLATES.outlineTintMode),
       scaleWithToken: normalizeBoolean(cur.scaleWithToken, DEFAULT_NAMEPLATES.scaleWithToken),
       TINT_CHOICES,
       fontChoices
@@ -67,6 +70,10 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
     bindHexSync(
       form.querySelector('input[name="defaultColor-text"]'),
       form.querySelector('input[name="defaultColor-color"]')
+    );
+    bindHexSync(
+      form.querySelector('input[name="outlineDefaultColor-text"]'),
+      form.querySelector('input[name="outlineDefaultColor-color"]')
     );
   }
 
@@ -100,6 +107,10 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
     const defaultColor = isHex(data["defaultColor-text"])
       ? data["defaultColor-text"]
       : (isHex(data["defaultColor-color"]) ? data["defaultColor-color"] : DEFAULT_NAMEPLATES.defaultColor);
+    const outlineTintMode = oneOf(String(data.outlineTintMode || ""), TINT_CHOICES, DEFAULT_NAMEPLATES.outlineTintMode);
+    const outlineDefaultColor = isHex(data["outlineDefaultColor-text"])
+      ? data["outlineDefaultColor-text"]
+      : (isHex(data["outlineDefaultColor-color"]) ? data["outlineDefaultColor-color"] : DEFAULT_NAMEPLATES.outlineDefaultColor);
 
     const next = {
       enabled: normalizeBoolean(Object.hasOwn(data, "enabled") ? data.enabled : false, DEFAULT_NAMEPLATES.enabled),
@@ -109,6 +120,9 @@ export class NameplateForm extends HandlebarsApplicationMixin(ApplicationV2) {
       usePlayerColor: normalizeBoolean(Object.hasOwn(data, "usePlayerColor") ? data.usePlayerColor : false, DEFAULT_NAMEPLATES.usePlayerColor),
       defaultColor,
       tintMode,
+      outlineUsePlayerColor: normalizeBoolean(Object.hasOwn(data, "outlineUsePlayerColor") ? data.outlineUsePlayerColor : false, DEFAULT_NAMEPLATES.outlineUsePlayerColor),
+      outlineDefaultColor,
+      outlineTintMode,
       scaleWithToken: normalizeBoolean(Object.hasOwn(data, "scaleWithToken") ? data.scaleWithToken : false, DEFAULT_NAMEPLATES.scaleWithToken)
     };
 

@@ -48,7 +48,10 @@
       "Distance": "Distance to Token (px; negative values move up)",
       "BaseFontSize": "Base Font Size (px)",
       "FontFamily": "Font Family",
-      "ScaleWithToken": "Scale With Token"
+      "ScaleWithToken": "Scale With Token",
+      "OutlineUsePlayerColor": "Use Player Color for Outline",
+      "OutlineDefaultColor": "Outline Default Color",
+      "OutlineTintMode": "Outline Tint Mode"
     },
     "Sync": {
       "Name": "Portrait → Prototype Token Sync",

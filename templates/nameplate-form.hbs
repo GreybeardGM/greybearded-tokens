@@ -47,6 +47,32 @@
     </select>
   </div>
 
+  <hr />
+
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-outline-use-player-color">{{localize "GBTF.Nameplate.OutlineUsePlayerColor"}}</label>
+    <input id="gbtf-setting-form-nameplate-outline-use-player-color" type="checkbox" name="outlineUsePlayerColor" {{#if outlineUsePlayerColor}}checked{{/if}} />
+  </div>
+
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-outline-default-color-text">{{localize "GBTF.Nameplate.OutlineDefaultColor"}}</label>
+    <div class="gbtf-setting-form__input-pair">
+      <input id="gbtf-setting-form-nameplate-outline-default-color-text" type="text" name="outlineDefaultColor-text" value="{{outlineDefaultColor}}" placeholder="#RRGGBB" />
+      <input id="gbtf-setting-form-nameplate-outline-default-color" type="color" name="outlineDefaultColor-color" value="{{outlineDefaultColor}}" />
+    </div>
+  </div>
+
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-nameplate-outline-tint-mode">{{localize "GBTF.Nameplate.OutlineTintMode"}}</label>
+    <select id="gbtf-setting-form-nameplate-outline-tint-mode" name="outlineTintMode">
+      {{#each TINT_CHOICES}}
+        <option value="{{@key}}" {{#if (eq ../outlineTintMode @key)}}selected{{/if}}>
+          {{localize this}}
+        </option>
+      {{/each}}
+    </select>
+  </div>
+
   <div class="gbtf-setting-form__row">
     <label for="gbtf-setting-form-nameplate-scale-with-token">{{localize "GBTF.Nameplate.ScaleWithToken"}}</label>
     <input id="gbtf-setting-form-nameplate-scale-with-token" type="checkbox" name="scaleWithToken" {{#if scaleWithToken}}checked{{/if}} />

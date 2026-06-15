@@ -206,7 +206,9 @@ function getNameplateBaseStyle(token, label) {
       strokeThickness: toFiniteNumber(current.strokeThickness, 0),
       dropShadowBlur: toFiniteNumber(current.dropShadowBlur, 0),
       dropShadowDistance: toFiniteNumber(current.dropShadowDistance, 0),
-      padding: toFiniteNumber(current.padding, 0)
+      padding: toFiniteNumber(current.padding, 0),
+      stroke: current.stroke,
+      dropShadowColor: current.dropShadowColor
     };
   }
 
@@ -259,6 +261,20 @@ function updateNameplate(token, S, tx, ty) {
   updateNameplateScaleEffects(token, label, nameplateScale);
   const tint = getTintColor(token, S, NP);
   if (tint != null) label.style.fill = tint;
+
+  const baseStyle = getNameplateBaseStyle(token, label);
+  const outlineTint = getTintColor(token, S, {
+    tintMode: NP.outlineTintMode,
+    usePlayerColor: NP.outlineUsePlayerColor,
+    defaultColor: NP.outlineDefaultColor
+  });
+  if (outlineTint != null) {
+    label.style.stroke = outlineTint;
+    label.style.dropShadowColor = outlineTint;
+  } else {
+    label.style.stroke = baseStyle.stroke;
+    label.style.dropShadowColor = baseStyle.dropShadowColor;
+  }
 
   label.updateText?.();
 
