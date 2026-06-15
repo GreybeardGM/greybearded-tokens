@@ -1,6 +1,7 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
 import { getGbFrameSettings } from "./settings/snapshot.js";
+import { toFiniteNumber } from "./utils/normalization.js";
 
 /* =========================
    Konsolidierter Namespace (mit Upgrade/Hydration)
@@ -196,6 +197,52 @@ function upsertOverlayOnToken(token) {
 /* =========================
    Nameplate (nur Änderungen anwenden)
    ========================= */
+function getNameplateBaseStyle(token, label) {
+  const gb = ensureGbNS(token);
+  const current = label?.style ?? {};
+
+  if (!gb.nameplateBaseStyle) {
+    gb.nameplateBaseStyle = {
+      strokeThickness: toFiniteNumber(current.strokeThickness, 0),
+      dropShadowBlur: toFiniteNumber(current.dropShadowBlur, 0),
+      dropShadowDistance: toFiniteNumber(current.dropShadowDistance, 0),
+      padding: toFiniteNumber(current.padding, 0)
+    };
+  }
+
+  return gb.nameplateBaseStyle;
+}
+
+function calculateNameplateScale(token, NP, tx, ty) {
+  if (!NP?.scaleWithToken) return 1;
+
+  const wSquares = toFiniteNumber(token?.document?.width, 1);
+  const hSquares = toFiniteNumber(token?.document?.height, 1);
+  const sizeFactor = Math.max(wSquares, hSquares);
+  const textureScale = Math.max(toFiniteNumber(tx, 1), toFiniteNumber(ty, 1));
+
+  return Math.max(0, sizeFactor * textureScale);
+}
+
+function scaleNameplateMetric(value, scale) {
+  return toFiniteNumber(value, 0) * Math.max(0, toFiniteNumber(scale, 1));
+}
+
+function updateNameplateScaleEffects(token, label, nameplateScale) {
+  const baseStyle = getNameplateBaseStyle(token, label);
+
+  const strokeThickness = scaleNameplateMetric(baseStyle.strokeThickness, nameplateScale);
+  const dropShadowBlur = scaleNameplateMetric(baseStyle.dropShadowBlur, nameplateScale);
+  const dropShadowDistance = scaleNameplateMetric(baseStyle.dropShadowDistance, nameplateScale);
+  const minPadding = strokeThickness + dropShadowBlur + Math.abs(dropShadowDistance);
+  const padding = Math.max(scaleNameplateMetric(baseStyle.padding, nameplateScale), minPadding);
+
+  label.style.strokeThickness = strokeThickness;
+  label.style.dropShadowBlur = dropShadowBlur;
+  label.style.dropShadowDistance = dropShadowDistance;
+  label.style.padding = Math.ceil(padding);
+}
+
 function updateNameplate(token, S, tx, ty) {
   const NP = S?.nameplate;
   if (!NP?.enabled) return;
@@ -203,27 +250,19 @@ function updateNameplate(token, S, tx, ty) {
   const label = token?.nameplate;
   if (!label || !label.style) return;
 
-  const basePx = Number(NP.baseFontSize ?? 22) || 22;
-  let fontPx = basePx;
-  let nameplateScale = 1;
-
-  if (NP.scaleWithToken) {
-    const wSquares = token?.document?.width  ?? 1;
-    const hSquares = token?.document?.height ?? 1;
-    const sizeFactor = Math.max(wSquares, hSquares);
-    const textureScale = Math.max(tx, ty);
-    nameplateScale = sizeFactor * textureScale;
-    fontPx = Math.max(8, Math.round(basePx * nameplateScale));
-  }
+  const basePx = toFiniteNumber(NP.baseFontSize, 22);
+  const nameplateScale = calculateNameplateScale(token, NP, tx, ty);
+  const fontPx = Math.max(8, Math.round(basePx * nameplateScale));
 
   label.style.fontSize = fontPx;
   label.style.fontFamily = NP.fontFamily;
+  updateNameplateScaleEffects(token, label, nameplateScale);
   const tint = getTintColor(token, S, NP);
   if (tint != null) label.style.fill = tint;
 
   label.updateText?.();
 
-  const distance = (Number(NP.distance ?? 2) || 0) * nameplateScale;
+  const distance = scaleNameplateMetric(NP.distance ?? 2, nameplateScale);
   const tokenTextureBottom = token.h * (1 + ty) / 2;
   const labelBounds = label.getLocalBounds?.();
   const labelTopInset = Number.isFinite(labelBounds?.y) ? labelBounds.y : 0;
