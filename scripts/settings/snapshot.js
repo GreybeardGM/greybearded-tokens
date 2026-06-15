@@ -96,6 +96,9 @@ function _readAll() {
     usePlayerColor: normalizeBoolean(NP?.usePlayerColor, DEFAULT_NAMEPLATES.usePlayerColor),
     defaultColor: isHex(NP?.defaultColor) ? NP.defaultColor : DEFAULT_NAMEPLATES.defaultColor,
     tintMode: oneOf(NP?.tintMode, TINT_CHOICES, DEFAULT_NAMEPLATES.tintMode),
+    outlineUsePlayerColor: normalizeBoolean(NP?.outlineUsePlayerColor, DEFAULT_NAMEPLATES.outlineUsePlayerColor),
+    outlineDefaultColor: isHex(NP?.outlineDefaultColor) ? NP.outlineDefaultColor : DEFAULT_NAMEPLATES.outlineDefaultColor,
+    outlineTintMode: oneOf(NP?.outlineTintMode, TINT_CHOICES, DEFAULT_NAMEPLATES.outlineTintMode),
     scaleWithToken: normalizeBoolean(NP?.scaleWithToken, DEFAULT_NAMEPLATES.scaleWithToken)
   };
 

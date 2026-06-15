@@ -38,6 +38,9 @@ export const DEFAULT_NAMEPLATES = {
   usePlayerColor: false,
   defaultColor: "#ffffff",
   tintMode: "NoTint",
+  outlineUsePlayerColor: false,
+  outlineDefaultColor: "#000000",
+  outlineTintMode: "NoTint",
   scaleWithToken: true
 };
 
