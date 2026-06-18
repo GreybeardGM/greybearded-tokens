@@ -82,30 +82,32 @@ function applyMaskScaleFromCache(token) {
 
 function getTextureSize(texture) {
   return {
-    width: texture?.width || texture?.baseTexture?.realWidth || 0,
-    height: texture?.height || texture?.baseTexture?.realHeight || 0
+    width: texture?.width || texture?.source?.width || texture?.baseTexture?.realWidth || 0,
+    height: texture?.height || texture?.source?.height || texture?.baseTexture?.realHeight || 0
   };
 }
 
-function fitArtworkToTokenBounds(token, tx, ty) {
-  const mesh = token?.mesh;
-  if (!mesh?.texture || !isFinite(token?.w) || !isFinite(token?.h) || token.w <= 0 || token.h <= 0) return;
+function getCoverTextureFitMode() {
+  const modes = globalThis.CONST?.TEXTURE_DATA_FIT_MODES;
+  if (!Array.isArray(modes)) return null;
+  return modes.includes("cover") ? "cover" : null;
+}
 
-  const { width: texW, height: texH } = getTextureSize(mesh.texture);
-  if (!isFinite(texW) || !isFinite(texH) || texW <= 0 || texH <= 0) return;
+async function ensureArtworkFitCover(token) {
+  const gb = ensureGbNS(token);
+  const coverFit = getCoverTextureFitMode();
+  if (!coverFit || gb.coverFitUpdatePending || gb.coverFitUnsupported) return;
+  if (token?.document?.texture?.fit === coverFit) return;
 
-  const tokenW = token.w;
-  const tokenH = token.h;
-  const coverScale = Math.max(tokenW / texW, tokenH / texH);
-  const scaleX = coverScale * Math.max(tx, 1);
-  const scaleY = coverScale * Math.max(ty, 1);
-  const signX = getScaleSign(token?.document?.texture?.scaleX ?? mesh.scale.x);
-  const signY = getScaleSign(token?.document?.texture?.scaleY ?? mesh.scale.y);
-  const drawH = texH * scaleY;
-
-  mesh.scale.set(scaleX * signX, scaleY * signY);
-  mesh.position.set(tokenW / 2, drawH > tokenH ? drawH / 2 : tokenH / 2);
-  mesh.rotation = 0;
+  try {
+    gb.coverFitUpdatePending = true;
+    await token.document.update({ "texture.fit": coverFit });
+  } catch (error) {
+    gb.coverFitUnsupported = true;
+    console.warn("Greybearded Token Frames | Unable to set token texture fit to cover.", error);
+  } finally {
+    gb.coverFitUpdatePending = false;
+  }
 }
 
 function getMaskLocalPlacement(token) {
@@ -347,7 +349,7 @@ async function applyFrameToToken(token, snapshot) {
   const tx = Math.abs(token?.document?.texture?.scaleX ?? 1);
   const ty = Math.abs(token?.document?.texture?.scaleY ?? 1);
 
-  fitArtworkToTokenBounds(token, tx, ty);
+  await ensureArtworkFitCover(token);
 
   // 1) Nameplate zuerst (nur wenn aktiviert)
   if (runtime.hasNameplate) {
