@@ -20,6 +20,8 @@ function ensureGbNS(token) {
   if (!("maskSignY" in gb)) gb.maskSignY = null;
   if (!("maskBoundsW" in gb)) gb.maskBoundsW = null;
   if (!("maskBoundsH" in gb)) gb.maskBoundsH = null;
+  if (!("coverFitUpdatePending" in gb)) gb.coverFitUpdatePending = false;
+  if (!("coverFitUnsupported" in gb)) gb.coverFitUnsupported = false;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
   //if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
@@ -82,30 +84,76 @@ function applyMaskScaleFromCache(token) {
 
 function getTextureSize(texture) {
   return {
-    width: texture?.width || texture?.baseTexture?.realWidth || 0,
-    height: texture?.height || texture?.baseTexture?.realHeight || 0
+    width: texture?.width || texture?.source?.width || texture?.baseTexture?.realWidth || 0,
+    height: texture?.height || texture?.source?.height || texture?.baseTexture?.realHeight || 0
   };
 }
 
-function fitArtworkToTokenBounds(token, tx, ty) {
-  const mesh = token?.mesh;
-  if (!mesh?.texture || !isFinite(token?.w) || !isFinite(token?.h) || token.w <= 0 || token.h <= 0) return;
+function getCoverTextureFitMode() {
+  const modes = globalThis.CONST?.TEXTURE_DATA_FIT_MODES;
+  if (!Array.isArray(modes)) return null;
+  return modes.includes("cover") ? "cover" : null;
+}
 
-  const { width: texW, height: texH } = getTextureSize(mesh.texture);
-  if (!isFinite(texW) || !isFinite(texH) || texW <= 0 || texH <= 0) return;
+function nearlyEqual(a, b, epsilon = 0.0001) {
+  return Math.abs(Number(a) - Number(b)) <= epsilon;
+}
 
-  const tokenW = token.w;
-  const tokenH = token.h;
-  const coverScale = Math.max(tokenW / texW, tokenH / texH);
-  const scaleX = coverScale * Math.max(tx, 1);
-  const scaleY = coverScale * Math.max(ty, 1);
-  const signX = getScaleSign(token?.document?.texture?.scaleX ?? mesh.scale.x);
-  const signY = getScaleSign(token?.document?.texture?.scaleY ?? mesh.scale.y);
-  const drawH = texH * scaleY;
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
 
-  mesh.scale.set(scaleX * signX, scaleY * signY);
-  mesh.position.set(tokenW / 2, drawH > tokenH ? drawH / 2 : tokenH / 2);
-  mesh.rotation = 0;
+function getCoverFitPlacement(token) {
+  const { width: texW, height: texH } = getTextureSize(token?.mesh?.texture);
+  if (!isFinite(texW) || !isFinite(texH) || texW <= 0 || texH <= 0) return null;
+  if (!isFinite(token?.w) || !isFinite(token?.h) || token.w <= 0 || token.h <= 0) return null;
+
+  const sourceRatio = texW / texH;
+  const targetRatio = token.w / token.h;
+  if (!isFinite(sourceRatio) || !isFinite(targetRatio) || sourceRatio <= 0 || targetRatio <= 0) return null;
+
+  // Foundry's default anchorY of 0.5 centers cover-fitted artwork, which crops
+  // tall images both above and below the token. Setting anchorY to 0 overcorrects:
+  // the artwork's top edge lands on the token center. For tall images, compute
+  // the anchor point whose top edge aligns with the token's top edge after cover
+  // scaling. Wide images stay vertically centered and crop left/right via anchorX.
+  const anchorY = sourceRatio < targetRatio
+    ? clamp(sourceRatio / (2 * targetRatio), 0, 0.5)
+    : 0.5;
+
+  return {
+    anchorX: 0.5,
+    anchorY
+  };
+}
+
+async function ensureArtworkFitCover(token) {
+  const gb = ensureGbNS(token);
+  const coverFit = getCoverTextureFitMode();
+  if (!coverFit || gb.coverFitUpdatePending || gb.coverFitUnsupported) return;
+
+  const placement = getCoverFitPlacement(token);
+  if (!placement) return;
+
+  const texture = token?.document?.texture;
+  const needsFit = texture?.fit !== coverFit;
+  const needsAnchorX = !nearlyEqual(texture?.anchorX, placement.anchorX);
+  const needsAnchorY = !nearlyEqual(texture?.anchorY, placement.anchorY);
+  if (!needsFit && !needsAnchorX && !needsAnchorY) return;
+
+  try {
+    gb.coverFitUpdatePending = true;
+    await token.document.update({
+      "texture.fit": coverFit,
+      "texture.anchorX": placement.anchorX,
+      "texture.anchorY": placement.anchorY
+    });
+  } catch (error) {
+    gb.coverFitUnsupported = true;
+    console.warn("Greybearded Token Frames | Unable to set token texture fit placement to cover.", error);
+  } finally {
+    gb.coverFitUpdatePending = false;
+  }
 }
 
 function getMaskLocalPlacement(token) {
@@ -118,11 +166,20 @@ function getMaskLocalPlacement(token) {
   const absSy = Math.abs(sy);
   if (!isFinite(absSx) || !isFinite(absSy) || absSx <= 0 || absSy <= 0) return null;
 
+  const width = token.w / absSx;
+  const height = token.h / absSy;
+  if (!isFinite(width) || !isFinite(height) || width <= 0 || height <= 0) return null;
+
+  // The mask is a child of Foundry's token mesh, so its placement must be in mesh-local
+  // coordinates. Do not subtract mesh.position here: Foundry may store canvas/world
+  // coordinates in that vector. Foundry's mesh local origin is already the token artwork
+  // center, so placing an anchored mask at width / 2 and height / 2 moves its center to
+  // the artwork's lower-right corner.
   return {
-    width: token.w / absSx,
-    height: token.h / absSy,
-    x: ((token.w / 2) - (mesh.position?.x ?? 0)) / sx,
-    y: ((token.h / 2) - (mesh.position?.y ?? 0)) / sy
+    width,
+    height,
+    x: 0,
+    y: 0
   };
 }
 
@@ -347,7 +404,7 @@ async function applyFrameToToken(token, snapshot) {
   const tx = Math.abs(token?.document?.texture?.scaleX ?? 1);
   const ty = Math.abs(token?.document?.texture?.scaleY ?? 1);
 
-  fitArtworkToTokenBounds(token, tx, ty);
+  await ensureArtworkFitCover(token);
 
   // 1) Nameplate zuerst (nur wenn aktiviert)
   if (runtime.hasNameplate) {
