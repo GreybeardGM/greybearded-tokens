@@ -22,6 +22,10 @@ function ensureGbNS(token) {
   if (!("maskBoundsH" in gb)) gb.maskBoundsH = null;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
+  if (!("artworkSourceTexture" in gb)) gb.artworkSourceTexture = null;
+  if (!("croppedArtworkTexture" in gb)) gb.croppedArtworkTexture = null;
+  if (!("croppedArtworkKey" in gb)) gb.croppedArtworkKey = null;
+  if (!("artworkCropFrame" in gb)) gb.artworkCropFrame = null;
   //if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
 
   return gb;
@@ -82,30 +86,113 @@ function applyMaskScaleFromCache(token) {
 
 function getTextureSize(texture) {
   return {
-    width: texture?.width || texture?.baseTexture?.realWidth || 0,
-    height: texture?.height || texture?.baseTexture?.realHeight || 0
+    width: texture?.width || texture?.source?.width || texture?.baseTexture?.realWidth || 0,
+    height: texture?.height || texture?.source?.height || texture?.baseTexture?.realHeight || 0
   };
 }
 
-function fitArtworkToTokenBounds(token, tx, ty) {
+function releaseCroppedArtworkTexture(gb) {
+  if (!gb?.croppedArtworkTexture) return;
+  gb.croppedArtworkTexture.destroy?.(false);
+  gb.croppedArtworkTexture = null;
+  gb.croppedArtworkKey = null;
+}
+
+function getArtworkSourceTexture(token, gb) {
+  const meshTexture = token?.mesh?.texture;
+  if (!meshTexture) return null;
+
+  if (meshTexture === gb.croppedArtworkTexture && gb.artworkSourceTexture) return gb.artworkSourceTexture;
+
+  gb.artworkSourceTexture = meshTexture;
+  return meshTexture;
+}
+
+function getTextureAspect(texture) {
+  const { width, height } = getTextureSize(texture);
+  if (!isFinite(width) || !isFinite(height) || width <= 0 || height <= 0) return null;
+  return { width, height, ratio: width / height };
+}
+
+// Cover-crop the displayed texture, not the Foundry-managed mesh transform.
+// Wide images are centered horizontally; tall images stay top-aligned and crop at the bottom.
+function buildCoverCropFrame(texture, targetRatio) {
+  const source = getTextureAspect(texture);
+  if (!source || !isFinite(targetRatio) || targetRatio <= 0) return null;
+
+  const epsilon = 0.0001;
+  if (Math.abs(source.ratio - targetRatio) <= epsilon) {
+    return { x: 0, y: 0, width: source.width, height: source.height, cropped: false };
+  }
+
+  if (source.ratio > targetRatio) {
+    const width = source.height * targetRatio;
+    return {
+      x: Math.max(0, (source.width - width) / 2),
+      y: 0,
+      width,
+      height: source.height,
+      cropped: true
+    };
+  }
+
+  const height = source.width / targetRatio;
+  return {
+    x: 0,
+    y: 0,
+    width: source.width,
+    height: Math.min(source.height, height),
+    cropped: true
+  };
+}
+
+function createCroppedTexture(sourceTexture, frame) {
+  const source = sourceTexture.source ?? sourceTexture.baseTexture;
+  if (!source) return null;
+
+  if (sourceTexture.source) return new PIXI.Texture({ source, frame });
+  return new PIXI.Texture(source, frame);
+}
+
+function fitArtworkTextureToTokenBounds(token) {
   const mesh = token?.mesh;
   if (!mesh?.texture || !isFinite(token?.w) || !isFinite(token?.h) || token.w <= 0 || token.h <= 0) return;
 
-  const { width: texW, height: texH } = getTextureSize(mesh.texture);
-  if (!isFinite(texW) || !isFinite(texH) || texW <= 0 || texH <= 0) return;
+  const gb = ensureGbNS(token);
+  const sourceTexture = getArtworkSourceTexture(token, gb);
+  const cropFrame = buildCoverCropFrame(sourceTexture, token.w / token.h);
+  if (!cropFrame) return;
 
-  const tokenW = token.w;
-  const tokenH = token.h;
-  const coverScale = Math.max(tokenW / texW, tokenH / texH);
-  const scaleX = coverScale * Math.max(tx, 1);
-  const scaleY = coverScale * Math.max(ty, 1);
-  const signX = getScaleSign(token?.document?.texture?.scaleX ?? mesh.scale.x);
-  const signY = getScaleSign(token?.document?.texture?.scaleY ?? mesh.scale.y);
-  const drawH = texH * scaleY;
+  if (!cropFrame.cropped) {
+    if (mesh.texture === gb.croppedArtworkTexture && gb.artworkSourceTexture) mesh.texture = gb.artworkSourceTexture;
+    releaseCroppedArtworkTexture(gb);
+    gb.artworkCropFrame = null;
+    return;
+  }
 
-  mesh.scale.set(scaleX * signX, scaleY * signY);
-  mesh.position.set(tokenW / 2, drawH > tokenH ? drawH / 2 : tokenH / 2);
-  mesh.rotation = 0;
+  const textureSource = sourceTexture.source ?? sourceTexture.baseTexture;
+  if (!textureSource) return;
+
+  const frame = new PIXI.Rectangle(
+    Math.round(cropFrame.x),
+    Math.round(cropFrame.y),
+    Math.max(1, Math.round(cropFrame.width)),
+    Math.max(1, Math.round(cropFrame.height))
+  );
+  const key = `${textureSource.uid ?? sourceTexture.uid ?? sourceTexture.textureCacheIds?.join(",") ?? "texture"}:${frame.x}:${frame.y}:${frame.width}:${frame.height}`;
+
+  if (gb.croppedArtworkTexture && gb.croppedArtworkKey === key) {
+    if (mesh.texture !== gb.croppedArtworkTexture) mesh.texture = gb.croppedArtworkTexture;
+    return;
+  }
+
+  releaseCroppedArtworkTexture(gb);
+  const croppedTexture = createCroppedTexture(sourceTexture, frame);
+  if (!croppedTexture) return;
+  gb.croppedArtworkTexture = croppedTexture;
+  gb.croppedArtworkKey = key;
+  gb.artworkCropFrame = frame;
+  mesh.texture = croppedTexture;
 }
 
 function getMaskLocalPlacement(token) {
@@ -347,7 +434,7 @@ async function applyFrameToToken(token, snapshot) {
   const tx = Math.abs(token?.document?.texture?.scaleX ?? 1);
   const ty = Math.abs(token?.document?.texture?.scaleY ?? 1);
 
-  fitArtworkToTokenBounds(token, tx, ty);
+  fitArtworkTextureToTokenBounds(token);
 
   // 1) Nameplate zuerst (nur wenn aktiviert)
   if (runtime.hasNameplate) {
