@@ -14,6 +14,8 @@ Past regressions from changing these transforms caused token artworks to render 
 If token artwork placement appears wrong, prefer one of these approaches instead:
 
 1. Leave Foundry's core artwork mesh transform untouched and adjust only Greybearded Token Frames overlays/masks/nameplates.
-2. For cover-fit artwork behavior, prefer Foundry token document data or supported Foundry APIs/settings, such as the token texture `fit` setting, when artwork behavior must change.
+2. For cover-fit artwork behavior, prefer Foundry token document data or supported Foundry APIs/settings, such as the token texture `fit`, `anchorX`, and `anchorY` settings, when artwork behavior must change.
 3. If Foundry settings are insufficient, implement cover-fit behavior with independent Greybearded overlay containers/sprites/masks rather than by replacing `token.mesh.texture`.
 4. Document any unavoidable exception explicitly in the PR, including a manual Foundry scene test that proves normal, mirrored, masked, and differently-sized tokens still render correctly.
+
+For Foundry-native cover fitting, do not assume `texture.anchorY = 0` means "crop only from the bottom." In Foundry's centered token mesh, that can place the artwork's top edge on the token center. If tall artwork should align to the token's top edge and crop only at the bottom, calculate a dynamic `texture.anchorY` from the source and token aspect ratios while keeping wide artwork horizontally centered.

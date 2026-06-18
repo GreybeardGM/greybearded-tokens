@@ -20,6 +20,8 @@ function ensureGbNS(token) {
   if (!("maskSignY" in gb)) gb.maskSignY = null;
   if (!("maskBoundsW" in gb)) gb.maskBoundsW = null;
   if (!("maskBoundsH" in gb)) gb.maskBoundsH = null;
+  if (!("coverFitUpdatePending" in gb)) gb.coverFitUpdatePending = false;
+  if (!("coverFitUnsupported" in gb)) gb.coverFitUnsupported = false;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
   if (!("artworkSourceTexture" in gb)) gb.artworkSourceTexture = null;
@@ -97,18 +99,62 @@ function getCoverTextureFitMode() {
   return modes.includes("cover") ? "cover" : null;
 }
 
+function nearlyEqual(a, b, epsilon = 0.0001) {
+  return Math.abs(Number(a) - Number(b)) <= epsilon;
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getCoverFitPlacement(token) {
+  const { width: texW, height: texH } = getTextureSize(token?.mesh?.texture);
+  if (!isFinite(texW) || !isFinite(texH) || texW <= 0 || texH <= 0) return null;
+  if (!isFinite(token?.w) || !isFinite(token?.h) || token.w <= 0 || token.h <= 0) return null;
+
+  const sourceRatio = texW / texH;
+  const targetRatio = token.w / token.h;
+  if (!isFinite(sourceRatio) || !isFinite(targetRatio) || sourceRatio <= 0 || targetRatio <= 0) return null;
+
+  // Foundry's default anchorY of 0.5 centers cover-fitted artwork, which crops
+  // tall images both above and below the token. Setting anchorY to 0 overcorrects:
+  // the artwork's top edge lands on the token center. For tall images, compute
+  // the anchor point whose top edge aligns with the token's top edge after cover
+  // scaling. Wide images stay vertically centered and crop left/right via anchorX.
+  const anchorY = sourceRatio < targetRatio
+    ? clamp(sourceRatio / (2 * targetRatio), 0, 0.5)
+    : 0.5;
+
+  return {
+    anchorX: 0.5,
+    anchorY
+  };
+}
+
 async function ensureArtworkFitCover(token) {
   const gb = ensureGbNS(token);
   const coverFit = getCoverTextureFitMode();
   if (!coverFit || gb.coverFitUpdatePending || gb.coverFitUnsupported) return;
-  if (token?.document?.texture?.fit === coverFit) return;
+
+  const placement = getCoverFitPlacement(token);
+  if (!placement) return;
+
+  const texture = token?.document?.texture;
+  const needsFit = texture?.fit !== coverFit;
+  const needsAnchorX = !nearlyEqual(texture?.anchorX, placement.anchorX);
+  const needsAnchorY = !nearlyEqual(texture?.anchorY, placement.anchorY);
+  if (!needsFit && !needsAnchorX && !needsAnchorY) return;
 
   try {
     gb.coverFitUpdatePending = true;
-    await token.document.update({ "texture.fit": coverFit });
+    await token.document.update({
+      "texture.fit": coverFit,
+      "texture.anchorX": placement.anchorX,
+      "texture.anchorY": placement.anchorY
+    });
   } catch (error) {
     gb.coverFitUnsupported = true;
-    console.warn("Greybearded Token Frames | Unable to set token texture fit to cover.", error);
+    console.warn("Greybearded Token Frames | Unable to set token texture fit placement to cover.", error);
   } finally {
     gb.coverFitUpdatePending = false;
   }
