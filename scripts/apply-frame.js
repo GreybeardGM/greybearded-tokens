@@ -22,6 +22,10 @@ function ensureGbNS(token) {
   if (!("maskBoundsH" in gb)) gb.maskBoundsH = null;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
+  if (!("artworkSourceTexture" in gb)) gb.artworkSourceTexture = null;
+  if (!("croppedArtworkTexture" in gb)) gb.croppedArtworkTexture = null;
+  if (!("croppedArtworkKey" in gb)) gb.croppedArtworkKey = null;
+  if (!("artworkCropFrame" in gb)) gb.artworkCropFrame = null;
   //if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
 
   return gb;
