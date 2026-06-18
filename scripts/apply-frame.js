@@ -130,12 +130,14 @@ function getMaskLocalPlacement(token) {
 
   // The mask is a child of Foundry's token mesh, so its placement must be in mesh-local
   // coordinates. Do not subtract mesh.position here: Foundry may store canvas/world
-  // coordinates in that vector, which would push the mask far away and hide the artwork.
+  // coordinates in that vector. Foundry's mesh local origin is already the token artwork
+  // center, so placing an anchored mask at width / 2 and height / 2 moves its center to
+  // the artwork's lower-right corner.
   return {
     width,
     height,
-    x: width / 2,
-    y: height / 2
+    x: 0,
+    y: 0
   };
 }
 
