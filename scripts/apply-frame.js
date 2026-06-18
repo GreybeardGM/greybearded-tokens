@@ -124,11 +124,18 @@ function getMaskLocalPlacement(token) {
   const absSy = Math.abs(sy);
   if (!isFinite(absSx) || !isFinite(absSy) || absSx <= 0 || absSy <= 0) return null;
 
+  const width = token.w / absSx;
+  const height = token.h / absSy;
+  if (!isFinite(width) || !isFinite(height) || width <= 0 || height <= 0) return null;
+
+  // The mask is a child of Foundry's token mesh, so its placement must be in mesh-local
+  // coordinates. Do not subtract mesh.position here: Foundry may store canvas/world
+  // coordinates in that vector, which would push the mask far away and hide the artwork.
   return {
-    width: token.w / absSx,
-    height: token.h / absSy,
-    x: ((token.w / 2) - (mesh.position?.x ?? 0)) / sx,
-    y: ((token.h / 2) - (mesh.position?.y ?? 0)) / sy
+    width,
+    height,
+    x: width / 2,
+    y: height / 2
   };
 }
 
