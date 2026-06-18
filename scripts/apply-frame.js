@@ -74,12 +74,56 @@ function applyMaskScaleFromCache(token) {
   const signX = getScaleSign(mesh.scale.x);
   const signY = getScaleSign(mesh.scale.y);
 
-  if (gb.maskSignX === signX && gb.maskSignY === signY) return false;
-
   maskSprite.scale.set(gb.maskScaleAbsX * signX, gb.maskScaleAbsY * signY);
   gb.maskSignX = signX;
   gb.maskSignY = signY;
   return true;
+}
+
+function getTextureSize(texture) {
+  return {
+    width: texture?.width || texture?.baseTexture?.realWidth || 0,
+    height: texture?.height || texture?.baseTexture?.realHeight || 0
+  };
+}
+
+function fitArtworkToTokenBounds(token, tx, ty) {
+  const mesh = token?.mesh;
+  if (!mesh?.texture || !isFinite(token?.w) || !isFinite(token?.h) || token.w <= 0 || token.h <= 0) return;
+
+  const { width: texW, height: texH } = getTextureSize(mesh.texture);
+  if (!isFinite(texW) || !isFinite(texH) || texW <= 0 || texH <= 0) return;
+
+  const tokenW = token.w;
+  const tokenH = token.h;
+  const coverScale = Math.max(tokenW / texW, tokenH / texH);
+  const scaleX = coverScale * Math.max(tx, 1);
+  const scaleY = coverScale * Math.max(ty, 1);
+  const signX = getScaleSign(token?.document?.texture?.scaleX ?? mesh.scale.x);
+  const signY = getScaleSign(token?.document?.texture?.scaleY ?? mesh.scale.y);
+  const drawH = texH * scaleY;
+
+  mesh.scale.set(scaleX * signX, scaleY * signY);
+  mesh.position.set(tokenW / 2, drawH > tokenH ? drawH / 2 : tokenH / 2);
+  mesh.rotation = 0;
+}
+
+function getMaskLocalPlacement(token) {
+  const mesh = token?.mesh;
+  if (!mesh || !isFinite(token?.w) || !isFinite(token?.h) || token.w <= 0 || token.h <= 0) return null;
+
+  const sx = mesh.scale.x || 1;
+  const sy = mesh.scale.y || 1;
+  const absSx = Math.abs(sx);
+  const absSy = Math.abs(sy);
+  if (!isFinite(absSx) || !isFinite(absSy) || absSx <= 0 || absSy <= 0) return null;
+
+  return {
+    width: token.w / absSx,
+    height: token.h / absSy,
+    x: ((token.w / 2) - (mesh.position?.x ?? 0)) / sx,
+    y: ((token.h / 2) - (mesh.position?.y ?? 0)) / sy
+  };
 }
 
 export function syncTokenMaskMirror(token) {
@@ -96,18 +140,21 @@ function updateMaskScaleIfDirty(token) {
   const tokenW = token.w || 0;
   const tokenH = token.h || 0;
 
+  const b = getMaskLocalPlacement(token);
+  if (!b) return;
+
+  const { width: texW, height: texH } = getTextureSize(maskSprite.texture);
+  if (texW <= 0 || texH <= 0) return;
+
   const boundsChanged =
     !isFinite(gb.maskScaleAbsX) ||
     !isFinite(gb.maskScaleAbsY) ||
     gb.maskBoundsW !== tokenW ||
-    gb.maskBoundsH !== tokenH;
+    gb.maskBoundsH !== tokenH ||
+    gb.maskScaleAbsX !== b.width / texW ||
+    gb.maskScaleAbsY !== b.height / texH;
 
   if (boundsChanged) {
-    const b = mesh.getLocalBounds?.();
-    if (!b || !isFinite(b.width) || !isFinite(b.height) || b.width <= 0 || b.height <= 0) return;
-
-    const texW = maskSprite.texture.width || maskSprite.texture.baseTexture?.realWidth || 1;
-    const texH = maskSprite.texture.height || maskSprite.texture.baseTexture?.realHeight || 1;
     gb.maskScaleAbsX = b.width / texW;
     gb.maskScaleAbsY = b.height / texH;
     gb.maskBoundsW = tokenW;
@@ -116,6 +163,7 @@ function updateMaskScaleIfDirty(token) {
     gb.maskSignY = null;
   }
 
+  maskSprite.position.set(b.x, b.y);
   applyMaskScaleFromCache(token);
 }
 
@@ -142,16 +190,14 @@ async function attachMaskIfNeeded(token, S) {
 
   mesh.addChild(maskSprite);
 
-  // Skalierung EINMALIG anhand der LocalBounds des Meshes
-  const b = mesh.getLocalBounds?.();
-  if (!b || !isFinite(b.width) || !isFinite(b.height) || b.width <= 0 || b.height <= 0) {
+  // Skalierung anhand der Tokenfläche im lokalen Mesh-Space, nicht anhand des Bildseitenverhältnisses.
+  const b = getMaskLocalPlacement(token);
+  const { width: texW, height: texH } = getTextureSize(maskSprite.texture);
+  if (!b || texW <= 0 || texH <= 0) {
     maskSprite.parent?.removeChild(maskSprite);
     maskSprite.destroy({ children: false, texture: false, baseTexture: false });
     return;
   }
-
-  const texW = maskSprite.texture.width  || maskSprite.texture.baseTexture?.realWidth  || 1;
-  const texH = maskSprite.texture.height || maskSprite.texture.baseTexture?.realHeight || 1;
 
   gb.maskScaleAbsX = b.width / texW;
   gb.maskScaleAbsY = b.height / texH;
@@ -159,6 +205,7 @@ async function attachMaskIfNeeded(token, S) {
   gb.maskBoundsH = token.h || 0;
   gb.maskSignX = null;
   gb.maskSignY = null;
+  maskSprite.position.set(b.x, b.y);
 
   applyMaskScaleFromCache(token);
 
@@ -299,6 +346,8 @@ async function applyFrameToToken(token, snapshot) {
   // Einmalige Reads
   const tx = Math.abs(token?.document?.texture?.scaleX ?? 1);
   const ty = Math.abs(token?.document?.texture?.scaleY ?? 1);
+
+  fitArtworkToTokenBounds(token, tx, ty);
 
   // 1) Nameplate zuerst (nur wenn aktiviert)
   if (runtime.hasNameplate) {
