@@ -5,22 +5,28 @@ import { getGbFrameSettings } from "./settings/snapshot.js";
 /* =========================
    Konsolidierter Namespace (mit Upgrade/Hydration)
    ========================= */
+const GB_DEFAULTS = {
+  overlay: null,
+  f1: null,
+  f2: null,
+  maskSprite: null,
+  maskScaleAbsX: null,
+  maskScaleAbsY: null,
+  maskSignX: null,
+  maskSignY: null,
+  maskBoundsW: null,
+  maskBoundsH: null,
+  lastTint1: null,
+  lastTint2: null,
+};
+
 function ensureGbNS(token) {
   if (typeof token._gb !== "object" || token._gb === null) token._gb = {};
   const gb = token._gb;
 
-  if (!("overlay"    in gb)) gb.overlay = null;
-  if (!("f1"         in gb)) gb.f1 = null;
-  if (!("f2"         in gb)) gb.f2 = null;
-  if (!("maskSprite" in gb)) gb.maskSprite = null;
-  if (!("maskScaleAbsX" in gb)) gb.maskScaleAbsX = null;
-  if (!("maskScaleAbsY" in gb)) gb.maskScaleAbsY = null;
-  if (!("maskSignX" in gb)) gb.maskSignX = null;
-  if (!("maskSignY" in gb)) gb.maskSignY = null;
-  if (!("maskBoundsW" in gb)) gb.maskBoundsW = null;
-  if (!("maskBoundsH" in gb)) gb.maskBoundsH = null;
-  if (!("lastTint1"  in gb)) gb.lastTint1 = null;
-  if (!("lastTint2"  in gb)) gb.lastTint2 = null;
+  for (const [key, value] of Object.entries(GB_DEFAULTS)) {
+    if (!(key in gb)) gb[key] = value;
+  }
 
   return gb;
 }
