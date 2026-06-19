@@ -1,3 +1,5 @@
+import { isHex } from "../utils/normalisation.js";
+
 // modules/greybearded-tokens/scripts/utils/helpers.js
 
 export function str(v, fb = "") {
