@@ -1,7 +1,7 @@
 // modules/greybearded-tokens/scripts/token-tools.js
 import { updateFrame } from "./apply-frame.js";
 import { MOD_ID, DEFAULT_DISPOSITION_COLORS } from "./settings/constants.js";
-import { isHex, normalizeTokenToolsConfig } from "./utils/normalisation.js";
+import { clampInt, isHex, normalizeTokenToolsConfig } from "./utils/normalisation.js";
 import { bindHexSync } from "./settings/helpers.js";
 
 const DISPOSITION_ENTRIES = [
@@ -18,7 +18,6 @@ const DISPOSITION_META = {
   SECRET: "fa-solid fa-user-secret"
 };
 
-const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 const currSize = (td) => Math.max(Number(td.width) || 1, Number(td.height) || 1);
 const getControlledTokenDocs = () => canvas.tokens.controlled.map((t) => t.document);
 const getRenderedTokenObject = (tokenDoc) => tokenDoc?.object ?? canvas.tokens?.get(tokenDoc?.id) ?? null;
@@ -100,7 +99,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
   const adjustToken = async (tokenDoc, direction) => {
     const current = currSize(tokenDoc);
     const base = direction < 0 ? Math.ceil(current) : Math.floor(current);
-    const next = clamp(base + direction, toolConfig.sizeMin, toolConfig.sizeMax);
+    const next = clampInt(base + direction, toolConfig.sizeMin, toolConfig.sizeMax, current);
     if (next === current) return;
     await tokenDoc.update({ width: next, height: next });
   };
