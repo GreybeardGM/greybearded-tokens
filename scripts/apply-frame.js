@@ -21,7 +21,6 @@ function ensureGbNS(token) {
   if (!("maskBoundsH" in gb)) gb.maskBoundsH = null;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
   if (!("lastTint2"  in gb)) gb.lastTint2 = null;
-  //if (!gb.npPrev) gb.npPrev = { size: null, family: null, fill: null, anchored: false };
 
   return gb;
 }
@@ -193,6 +192,119 @@ function upsertOverlayOnToken(token) {
   return overlay;
 }
 
+function createFrameSprite(path, name, markerProperty) {
+  const sprite = new PIXI.Sprite(PIXI.Texture.from(path));
+  sprite.name = name;
+  sprite[markerProperty] = true;
+  sprite._gbFramePath = path;
+  sprite.anchor.set(0.5);
+  return sprite;
+}
+
+function destroyFrameSprite(sprite) {
+  sprite.parent?.removeChild(sprite);
+  sprite.destroy({ children: true, texture: false, baseTexture: false });
+}
+
+function upsertFrameSprite({ gb, overlay, key, settings, name, markerProperty }) {
+  if (settings?.path) {
+    if (gb[key]?._gbFramePath !== settings.path) {
+      if (gb[key]) destroyFrameSprite(gb[key]);
+      gb[key] = createFrameSprite(settings.path, name, markerProperty);
+      overlay.addChild(gb[key]);
+      gb[key === "f1" ? "lastTint1" : "lastTint2"] = null;
+    }
+    return gb[key];
+  }
+
+  if (gb[key]) {
+    destroyFrameSprite(gb[key]);
+    gb[key] = null;
+    gb[key === "f1" ? "lastTint1" : "lastTint2"] = null;
+  }
+
+  return null;
+}
+
+function applyFrameTint(sprite, token, snapshot, settings, gb, cacheKey) {
+  if (!sprite || !settings) return;
+
+  const tintString = getTintColor(token, snapshot, settings);
+  const tint = (tintString != null) ? PIXI.utils.string2hex(tintString) : 0xFFFFFF;
+  if (tint === gb[cacheKey]) return;
+
+  sprite.tint = tint;
+  gb[cacheKey] = tint;
+}
+
+function resizeFrameSprite(sprite, token, textureScaleX, textureScaleY, frameScale, overlayScaleX, overlayScaleY) {
+  if (!sprite) return;
+
+  sprite.width = (token.w * textureScaleX * (frameScale || 1)) / overlayScaleX;
+  sprite.height = (token.h * textureScaleY * (frameScale || 1)) / overlayScaleY;
+  sprite.position.set(0, 0);
+}
+
+function cleanupTokenVisuals(token) {
+  removeGbFramesIfAny(token);
+  const gb = ensureGbNS(token);
+  if (gb.maskSprite) clearMaskInline(token);
+}
+
+function applyOverlayFrames(token, snapshot, textureScaleX, textureScaleY, gb) {
+  const mesh = token.mesh;
+  if (!mesh) return false;
+
+  const overlay = upsertOverlayOnToken(token);
+  if (!overlay) return false;
+
+  // Overlay relativ mittig platzieren.
+  // Wichtig: Spiegelung des Token-Meshes wird absichtlich NICHT auf Frames übernommen,
+  // damit Rahmen bei gespiegelten Tokens immer gleich ausgerichtet bleiben.
+  overlay.position.set(token.w / 2, token.h / 2);
+  overlay.scale.set(Math.abs(mesh.scale.x || 1), Math.abs(mesh.scale.y || 1));
+  overlay.rotation = mesh.rotation;
+
+  const frame1 = snapshot.frame1;
+  const frame2 = snapshot.frame2?.enabled ? snapshot.frame2 : null;
+
+  const sprite2 = upsertFrameSprite({
+    gb,
+    overlay,
+    key: "f2",
+    settings: frame2,
+    name: "gbtf-frame-2",
+    markerProperty: "_gbFrameSecondary"
+  });
+  const sprite1 = upsertFrameSprite({
+    gb,
+    overlay,
+    key: "f1",
+    settings: frame1,
+    name: "gbtf-frame-1",
+    markerProperty: "_gbFramePrimary"
+  });
+
+  applyFrameTint(sprite1, token, snapshot, frame1, gb, "lastTint1");
+  applyFrameTint(sprite2, token, snapshot, frame2, gb, "lastTint2");
+
+  const overlayScaleX = Math.abs(overlay.scale.x || 1);
+  const overlayScaleY = Math.abs(overlay.scale.y || 1);
+  resizeFrameSprite(sprite1, token, textureScaleX, textureScaleY, frame1?.scale, overlayScaleX, overlayScaleY);
+  resizeFrameSprite(sprite2, token, textureScaleX, textureScaleY, frame2?.scale, overlayScaleX, overlayScaleY);
+
+  return true;
+}
+
+async function applyMask(token, snapshot, gb) {
+  if (snapshot.runtime?.hasMask) {
+    await attachMaskIfNeeded(token, snapshot);
+    updateMaskScaleIfDirty(token);
+  } else if (gb.maskSprite) {
+    clearMaskInline(token);
+  }
+}
+
 /* =========================
    Nameplate (nur Änderungen anwenden)
    ========================= */
@@ -230,138 +342,31 @@ function updateNameplate(token, S, tx, ty) {
    ========================= */
 async function applyFrameToToken(token, snapshot) {
   if (!token || token.destroyed) return;
-  // if (!token.scene?.active) return; // Deaktivierung für Inaktive Szenen
 
-  // Settings laden
   const S = snapshot ?? getGbFrameSettings();
   const runtime = S?.runtime ?? {};
+  const textureScaleX = Math.abs(token?.document?.texture?.scaleX ?? 1);
+  const textureScaleY = Math.abs(token?.document?.texture?.scaleY ?? 1);
 
-  // Einmalige Reads
-  const tx = Math.abs(token?.document?.texture?.scaleX ?? 1);
-  const ty = Math.abs(token?.document?.texture?.scaleY ?? 1);
-
-  // 1) Nameplate zuerst (nur wenn aktiviert)
   if (runtime.hasNameplate) {
-    updateNameplate(token, S, tx, ty);
+    updateNameplate(token, S, textureScaleX, textureScaleY);
   }
 
-  // 2) Disable-Flag: Frames & Maske aufräumen
-  if (token.document.getFlag("greybearded-tokens", "disableFrame")) {
-    removeGbFramesIfAny(token);
-    const gb = ensureGbNS(token);
-    if (gb.maskSprite) clearMaskInline(token);
-    return;
-  }
-
-  // Wenn global keinerlei Visuals aktiv sind, sofort aufräumen
-  if (!runtime.hasAnyVisuals) {
-    removeGbFramesIfAny(token);
-    const gb = ensureGbNS(token);
-    if (gb.maskSprite) clearMaskInline(token);
+  if (token.document.getFlag("greybearded-tokens", "disableFrame") || !runtime.hasAnyVisuals) {
+    cleanupTokenVisuals(token);
     return;
   }
 
   const gb = ensureGbNS(token);
 
-  // 3) Overlay am TOKEN, Mesh-Eigenschaften spiegeln (nur wenn Frames aktiv)
   if (runtime.hasAnyOverlay) {
-    const mesh = token.mesh;
-    if (!mesh) return;
-
-    const overlay = upsertOverlayOnToken(token);
-    if (!overlay) return;
-
-    // Overlay relativ mittig platzieren.
-    // Wichtig: Spiegelung des Token-Meshes wird absichtlich NICHT auf Frames übernommen,
-    // damit Rahmen bei gespiegelten Tokens immer gleich ausgerichtet bleiben.
-    overlay.position.set(token.w / 2, token.h / 2);
-    overlay.scale.set(Math.abs(mesh.scale.x || 1), Math.abs(mesh.scale.y || 1));
-    overlay.rotation = mesh.rotation;
-
-    const F1 = S.frame1;
-    const F2 = S.frame2;
-
-    // Sekundär zuerst (liegt unten)
-    if (F2?.enabled && F2?.path) {
-      if (!gb.f2) {
-        const tex2 = PIXI.Texture.from(F2.path);
-        const spr2 = new PIXI.Sprite(tex2);
-        spr2.name = "gbtf-frame-2";
-        spr2._gbFrameSecondary = true;
-        spr2.anchor.set(0.5);
-        overlay.addChild(spr2);
-        gb.f2 = spr2;
-        gb.lastTint2 = null;
-      }
-    } else if (gb.f2) {
-      gb.f2.parent?.removeChild(gb.f2);
-      gb.f2.destroy({ children: true, texture: false, baseTexture: false });
-      gb.f2 = null;
-      gb.lastTint2 = null;
-    }
-
-    // Primär oben
-    if (F1?.path) {
-      if (!gb.f1) {
-        const tex1 = PIXI.Texture.from(F1.path);
-        const spr1 = new PIXI.Sprite(tex1);
-        spr1.name = "gbtf-frame-1";
-        spr1._gbFramePrimary = true;
-        spr1.anchor.set(0.5);
-        overlay.addChild(spr1);
-        gb.f1 = spr1;
-        gb.lastTint1 = null;
-      }
-    } else if (gb.f1) {
-      gb.f1.parent?.removeChild(gb.f1);
-      gb.f1.destroy({ children: true, texture: false, baseTexture: false });
-      gb.f1 = null;
-      gb.lastTint1 = null;
-    }
-
-    // Tints nur bei Änderung
-    if (gb.f1 && F1) {
-      const t1str = getTintColor(token, S, F1);
-      const t1 = (t1str != null) ? PIXI.utils.string2hex(t1str) : 0xFFFFFF;
-      if (t1 !== gb.lastTint1) {
-        gb.f1.tint = t1;
-        gb.lastTint1 = t1;
-      }
-    }
-    if (gb.f2 && F2) {
-      const t2str = getTintColor(token, S, F2);
-      const t2 = (t2str != null) ? PIXI.utils.string2hex(t2str) : 0xFFFFFF;
-      if (t2 !== gb.lastTint2) {
-        gb.f2.tint = t2;
-        gb.lastTint2 = t2;
-      }
-    }
-
-    // Größenlogik mit Gegenrechnen der Overlay-Skalierung (wie zuvor)
-    const kW = token.w, kH = token.h;
-    const sx = Math.abs(overlay.scale.x || 1), sy = Math.abs(overlay.scale.y || 1);
-
-    if (gb.f1 && F1) {
-      gb.f1.width  = (kW * tx * (F1.scale || 1)) / sx;
-      gb.f1.height = (kH * ty * (F1.scale || 1)) / sy;
-      gb.f1.position.set(0, 0);
-    }
-    if (gb.f2 && F2) {
-      gb.f2.width  = (kW * tx * (F2.scale || 1)) / sx;
-      gb.f2.height = (kH * ty * (F2.scale || 1)) / sy;
-      gb.f2.position.set(0, 0);
-    }
+    const overlayApplied = applyOverlayFrames(token, S, textureScaleX, textureScaleY, gb);
+    if (!overlayApplied) return;
   } else {
     removeGbFramesIfAny(token);
   }
 
-  // 4) Maske einmalig am Mesh (blockierend beibehalten)
-  if (runtime.hasMask) {
-    await attachMaskIfNeeded(token, S);
-    updateMaskScaleIfDirty(token);
-  } else if (gb.maskSprite) {
-    clearMaskInline(token);
-  }
+  await applyMask(token, S, gb);
 }
 /* =========================
    Frame Update Reservieren
@@ -370,12 +375,8 @@ const frameQueue = [];
 let frameQueueScheduled = false;
 const MAX_FRAME_RETRIES = 12;
 
-function nextTick(fn){
-  frameQueue.push(fn);
-  if (typeof queueMicrotask === "function") {
-    queueMicrotask(scheduleFrameQueue);
-    return;
-  }
+function queueFrameUpdate(callback) {
+  frameQueue.push(callback);
   scheduleFrameQueue();
 }
 
@@ -428,7 +429,7 @@ function scheduleRetry(token, snapshot) {
 export async function updateFrame(token, snapshot) {
   if (!reserveFrameUpdate(token)) return;
   const S = snapshot ?? getGbFrameSettings();
-  nextTick(async () => {
+  queueFrameUpdate(async () => {
     try {
       if (!isTokenVisualReady(token)) {
         scheduleRetry(token, S);

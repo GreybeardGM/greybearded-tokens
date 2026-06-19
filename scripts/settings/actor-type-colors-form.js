@@ -1,6 +1,7 @@
 // modules/greybearded-tokens/scripts/settings/actor-type-colors-form.js
 import { MOD_ID, DEFAULT_ACTOR_TYPE_COLORS, DEFAULT_ACTOR_TYPE_COLOR } from "./constants.js";
-import { isHex, bindHexPairs } from "./helpers.js";
+import { isHex } from "../utils/normalisation.js";
+import { bindHexPairs } from "./helpers.js";
 import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
 

@@ -1,6 +1,7 @@
 // get-tint-color.js
 import { getPlayerColor } from "./get-player-color.js";
 import { DEFAULT_ACTOR_TYPE_COLOR } from "./settings/constants.js";
+import { normalizeToHex } from "./utils/normalisation.js";
 
 /**
  * Liefert die Tint-Farbe für ein Token anhand eines spezifischen Settings-Objekts.
@@ -108,29 +109,4 @@ function getActorTypeColor(token, snapshot) {
   if (typeof actorType !== "string" || !actorType.length) return DEFAULT_ACTOR_TYPE_COLOR;
 
   return snapshot.actorTypeColors?.[actorType] ?? DEFAULT_ACTOR_TYPE_COLOR;
-}
-
-/** Hilfsfunktion: beliebige Eingaben nach "#rrggbb" normalisieren */
-function normalizeToHex(val) {
-  if (val == null) return null;
-
-  if (typeof val === "number" || val instanceof Number) {
-    const n = Number(val);
-    if (!Number.isFinite(n)) return null;
-    const clamped = Math.max(0, Math.min(0xFFFFFF, Math.floor(n)));
-    return "#" + clamped.toString(16).padStart(6, "0");
-  }
-
-  if (typeof val === "string") {
-    const s = val.trim();
-    const m = s.match(/^#?([0-9a-fA-F]{6})$/);
-    if (m) return "#" + m[1].toLowerCase();
-  }
-
-  if (Array.isArray(val) && val.length === 3) {
-    const [r, g, b] = val.map((x) => Math.max(0, Math.min(255, Number(x) || 0)));
-    return "#" + ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
-  }
-
-  return null;
 }

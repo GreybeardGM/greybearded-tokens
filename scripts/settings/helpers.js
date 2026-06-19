@@ -1,9 +1,5 @@
 // modules/greybearded-tokens/scripts/utils/helpers.js
 
-/** Strikte HEX-Validierung (#RRGGBB oder #RRGGBBAA) */
-export const HEX_RE = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
-export const isHex  = (v) => (typeof v === "string") && HEX_RE.test(v);
-
 export function str(v, fb = "") {
   return (typeof v === "string" && v.length) ? v : fb;
 }

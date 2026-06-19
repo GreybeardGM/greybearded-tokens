@@ -1,8 +1,8 @@
 // modules/greybearded-tokens/scripts/token-tools.js
 import { updateFrame } from "./apply-frame.js";
 import { MOD_ID, DEFAULT_DISPOSITION_COLORS } from "./settings/constants.js";
-import { normalizeTokenToolsConfig } from "./utils/normalization.js";
-import { isHex, bindHexSync } from "./settings/helpers.js";
+import { isHex, normalizeTokenToolsConfig } from "./utils/normalisation.js";
+import { bindHexSync } from "./settings/helpers.js";
 
 const DISPOSITION_ENTRIES = [
   { key: "HOSTILE", label: "GBT.Disposition.hostile", colorKey: "hostile" },

@@ -1,5 +1,35 @@
 import { DEFAULT_TOKEN_TOOLS } from "../settings/constants.js";
 
+export const HEX_RE = /^#([0-9a-f]{6}|[0-9a-f]{8})$/i;
+
+export function isHex(value) {
+  return (typeof value === "string") && HEX_RE.test(value);
+}
+
+export function normalizeToHex(value) {
+  if (value == null) return null;
+
+  if (typeof value === "number" || value instanceof Number) {
+    const numberValue = Number(value);
+    if (!Number.isFinite(numberValue)) return null;
+    const clamped = Math.max(0, Math.min(0xFFFFFF, Math.floor(numberValue)));
+    return `#${clamped.toString(16).padStart(6, "0")}`;
+  }
+
+  if (typeof value === "string") {
+    const stringValue = value.trim();
+    const match = stringValue.match(/^#?([0-9a-fA-F]{6})$/);
+    if (match) return `#${match[1].toLowerCase()}`;
+  }
+
+  if (Array.isArray(value) && value.length === 3) {
+    const [r, g, b] = value.map((channel) => Math.max(0, Math.min(255, Number(channel) || 0)));
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+  }
+
+  return null;
+}
+
 export function toFiniteNumber(value, fallback) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;

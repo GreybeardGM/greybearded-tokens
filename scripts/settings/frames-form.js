@@ -6,8 +6,8 @@ import {
 } from "./constants.js";
 import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
-import { toFiniteNumber, normalizeBoolean } from "../utils/normalization.js";
-import { str, oneOf, isHex, bindHexPairs, readObjectSetting } from "./helpers.js";
+import { isHex, toFiniteNumber, normalizeBoolean } from "../utils/normalisation.js";
+import { str, oneOf, bindHexPairs, readObjectSetting } from "./helpers.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
