@@ -6,7 +6,7 @@ let _playerColorSnapshot = null;
 function toCssHex(color) {
   if (color == null) return null;
 
-  // 1) Versuche IMMER, zu einer primitiven Zahl zu casten (handlet Number-Objekte & "0x..." Strings)
+  // Always try casting to a primitive number first (handles Number objects and "0x..." strings).
   const n = Number(color);
   if (Number.isFinite(n)) {
     try {
@@ -16,14 +16,14 @@ function toCssHex(color) {
     }
   }
 
-  // 2) String-Fälle (zur Sicherheit)
+  // String cases for safety.
   if (typeof color === "string") {
     const s = color.trim();
     // "#aabbcc"
     if (/^#[0-9a-f]{6}$/i.test(s)) return s.toLowerCase();
-    // "aabbcc" → "#aabbcc"
+    // "aabbcc" -> "#aabbcc"
     if (/^[0-9a-f]{6}$/i.test(s)) return `#${s}`.toLowerCase();
-    // "#abc" → "#aabbcc"
+    // "#abc" -> "#aabbcc"
     if (/^#[0-9a-f]{3}$/i.test(s)) {
       const r = s[1], g = s[2], b = s[3];
       return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();

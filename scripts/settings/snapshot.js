@@ -134,9 +134,9 @@ function _readAll() {
 }
 
 /**
- * Liefert den aktuellen Snapshot.
- * Vor `ready`: Live-Fallback ohne Memo (kein verfrühtes Cachen).
- * Ab `ready` (nach buildSnapshot): memoized Rückgabe.
+ * Return the current snapshot.
+ * Before `ready`: live fallback without memoization to avoid premature caching.
+ * After `ready` (after buildSnapshot): return the memoized snapshot.
  */
 export function getGbFrameSettings() {
   if (_S) return _S;
@@ -147,13 +147,13 @@ export function getGbFrameSettings() {
   return _readAll();
 }
 
-/** Erzwingt Neuaufbau und Memoisierung. */
+/** Force a rebuild and memoize it. */
 export function buildSnapshot() {
   _S = _readAll();
   return _S;
 }
 
-/** Optionales manuelles Invalidieren (Tests/Reloads) */
+/** Optional manual invalidation for tests and reloads. */
 export function invalidateGbFrameSettings() {
   _S = null;
 }
