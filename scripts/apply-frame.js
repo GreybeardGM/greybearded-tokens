@@ -202,33 +202,33 @@ function destroyFrameSprite(sprite) {
 
 const FRAME_DESCRIPTORS = {
   primary: {
-    spriteKey: "f1",
+    key: "f1",
     tintKey: "lastTint1",
     name: "gbtf-frame-1",
     markerProperty: "_gbFramePrimary"
   },
   secondary: {
-    spriteKey: "f2",
+    key: "f2",
     tintKey: "lastTint2",
     name: "gbtf-frame-2",
     markerProperty: "_gbFrameSecondary"
   }
 };
 
-function upsertFrameSprite({ gb, overlay, spriteKey, tintKey, settings, name, markerProperty }) {
+function upsertFrameSprite({ gb, overlay, key, tintKey, settings, name, markerProperty }) {
   if (settings?.path) {
-    if (gb[spriteKey]?._gbFramePath !== settings.path) {
-      if (gb[spriteKey]) destroyFrameSprite(gb[spriteKey]);
-      gb[spriteKey] = createFrameSprite(settings.path, name, markerProperty);
-      overlay.addChild(gb[spriteKey]);
+    if (gb[key]?._gbFramePath !== settings.path) {
+      if (gb[key]) destroyFrameSprite(gb[key]);
+      gb[key] = createFrameSprite(settings.path, name, markerProperty);
+      overlay.addChild(gb[key]);
       gb[tintKey] = null;
     }
-    return gb[spriteKey];
+    return gb[key];
   }
 
-  if (gb[spriteKey]) {
-    destroyFrameSprite(gb[spriteKey]);
-    gb[spriteKey] = null;
+  if (gb[key]) {
+    destroyFrameSprite(gb[key]);
+    gb[key] = null;
     gb[tintKey] = null;
   }
 
@@ -276,29 +276,37 @@ function applyOverlayFrames(token, snapshot, textureScaleX, textureScaleY, gb) {
 
   const frame1 = snapshot.frame1;
   const frame2 = snapshot.frame2?.enabled ? snapshot.frame2 : null;
-  const primaryFrame = FRAME_DESCRIPTORS.primary;
-  const secondaryFrame = FRAME_DESCRIPTORS.secondary;
-
-  const sprite2 = upsertFrameSprite({
-    gb,
-    overlay,
-    ...secondaryFrame,
-    settings: frame2
-  });
-  const sprite1 = upsertFrameSprite({
-    gb,
-    overlay,
-    ...primaryFrame,
-    settings: frame1
-  });
-
-  applyFrameTint(sprite1, token, snapshot, frame1, gb, primaryFrame.tintKey);
-  applyFrameTint(sprite2, token, snapshot, frame2, gb, secondaryFrame.tintKey);
+  const frameDescriptors = [
+    {
+      ...FRAME_DESCRIPTORS.secondary,
+      settings: frame2
+    },
+    {
+      ...FRAME_DESCRIPTORS.primary,
+      settings: frame1
+    }
+  ];
 
   const overlayScaleX = Math.abs(overlay.scale.x || 1);
   const overlayScaleY = Math.abs(overlay.scale.y || 1);
-  resizeFrameSprite(sprite1, token, textureScaleX, textureScaleY, frame1?.scale, overlayScaleX, overlayScaleY);
-  resizeFrameSprite(sprite2, token, textureScaleX, textureScaleY, frame2?.scale, overlayScaleX, overlayScaleY);
+
+  for (const frameDescriptor of frameDescriptors) {
+    const sprite = upsertFrameSprite({
+      gb,
+      overlay,
+      ...frameDescriptor
+    });
+    applyFrameTint(sprite, token, snapshot, frameDescriptor.settings, gb, frameDescriptor.tintKey);
+    resizeFrameSprite(
+      sprite,
+      token,
+      textureScaleX,
+      textureScaleY,
+      frameDescriptor.settings?.scale,
+      overlayScaleX,
+      overlayScaleY
+    );
+  }
 
   return true;
 }
