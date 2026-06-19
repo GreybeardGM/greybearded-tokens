@@ -2,8 +2,8 @@
 import { MOD_ID, TINT_CHOICES, DEFAULT_NAMEPLATES } from "./constants.js";
 import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
-import { toFiniteNumber, normalizeBoolean } from "../utils/normalization.js";
-import { isHex, oneOf, bindHexSync, getConfiguredFontFamilies } from "./helpers.js";
+import { isHex, toFiniteNumber, normalizeBoolean } from "../utils/normalisation.js";
+import { oneOf, bindHexSync, getConfiguredFontFamilies } from "./helpers.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 

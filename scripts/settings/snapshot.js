@@ -11,8 +11,8 @@ import {
   DEFAULT_FRAME2,
   DEFAULT_MASK
 } from "./constants.js";
-import { toFiniteNumber, normalizeBoolean } from "../utils/normalization.js";
-import { str, oneOf, isHex, readObjectSetting, getConfiguredFontFamilies } from "./helpers.js";
+import { isHex, toFiniteNumber, normalizeBoolean } from "../utils/normalisation.js";
+import { str, oneOf, readObjectSetting, getConfiguredFontFamilies } from "./helpers.js";
 
 let _S = null;
 

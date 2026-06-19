@@ -1,5 +1,5 @@
 import { MOD_ID } from "./constants.js";
-import { normalizeTokenToolsConfig } from "../utils/normalization.js";
+import { normalizeTokenToolsConfig } from "../utils/normalisation.js";
 
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;

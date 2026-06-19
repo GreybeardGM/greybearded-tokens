@@ -2,7 +2,8 @@
 import { MOD_ID, DEFAULT_DISPOSITION_COLORS } from "./constants.js";
 import { buildSnapshot } from "./snapshot.js";
 import { updateFrame } from "../apply-frame.js";
-import { isHex, bindHexPairs } from "./helpers.js";
+import { isHex } from "../utils/normalisation.js";
+import { bindHexPairs } from "./helpers.js";
 
 const DISPOSITION = ["hostile", "neutral", "friendly", "secret", "character"];
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
