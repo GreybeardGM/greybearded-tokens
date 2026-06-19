@@ -3,6 +3,12 @@ import { getPlayerColor } from "./get-player-color.js";
 import { DEFAULT_ACTOR_TYPE_COLOR } from "./settings/constants.js";
 import { normalizeToHex } from "./utils/normalisation.js";
 
+const OWNERSHIP_COLOR_PRIORITY = [
+  { level: "OWNER", colorKey: "owner" },
+  { level: "OBSERVER", colorKey: "observer" },
+  { level: "LIMITED", colorKey: "limited" },
+];
+
 /**
  * Liefert die Tint-Farbe für ein Token anhand eines spezifischen Settings-Objekts.
  * Übergib z. B. S.frame1, S.frame2 oder S.nameplate als 'part'.
@@ -85,16 +91,10 @@ function getOwnershipColor(token, snapshot, fallbackColor) {
   const tokenDoc = token?.document ?? null;
   const actor = token?.actor ?? null;
 
-  if (hasOwnership(tokenDoc, user, "OWNER") || hasOwnership(actor, user, "OWNER")) {
-    return normalizeToHex(ownershipColors.owner) ?? fallbackColor;
-  }
-
-  if (hasOwnership(tokenDoc, user, "OBSERVER") || hasOwnership(actor, user, "OBSERVER")) {
-    return normalizeToHex(ownershipColors.observer) ?? fallbackColor;
-  }
-
-  if (hasOwnership(tokenDoc, user, "LIMITED") || hasOwnership(actor, user, "LIMITED")) {
-    return normalizeToHex(ownershipColors.limited) ?? fallbackColor;
+  for (const { level, colorKey } of OWNERSHIP_COLOR_PRIORITY) {
+    if (hasOwnership(tokenDoc, user, level) || hasOwnership(actor, user, level)) {
+      return normalizeToHex(ownershipColors[colorKey]) ?? fallbackColor;
+    }
   }
 
   return normalizeToHex(ownershipColors.none) ?? fallbackColor;
