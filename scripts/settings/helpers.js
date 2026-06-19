@@ -6,17 +6,17 @@ export function str(v, fb = "") {
   return (typeof v === "string" && v.length) ? v : fb;
 }
 
-/** Validiert String gegen Choice-Map (z. B. TINT_CHOICES). */
+/** Validate a string against a choice map (for example, TINT_CHOICES). */
 export function oneOf(v, choices, fb) {
   return (typeof v === "string" && v in choices) ? v : fb;
 }
 
-/** Flaches Objekt mit Defaults auffüllen (shallow). */
+/** Fill a shallow object with defaults. */
 export function withDefaults(obj, defaults) {
   return Object.assign({}, defaults, (obj && typeof obj === "object") ? obj : {});
 }
 
-/** Setting als Objekt lesen, mit Defaults vereinigen. */
+/** Read a setting as an object and merge it with defaults. */
 export function readObjectSetting(modId, key, defaults) {
   try {
     const v = game.settings.get(modId, key);
@@ -26,7 +26,7 @@ export function readObjectSetting(modId, key, defaults) {
   }
 }
 
-/** Text- und Color-Input synchronisieren (HEX gewinnt). */
+/** Synchronize text and color inputs; valid HEX values win. */
 export function bindHexSync(textEl, colorEl) {
   if (!textEl || !colorEl) return;
 
@@ -44,19 +44,17 @@ export function bindHexSync(textEl, colorEl) {
   colorEl.addEventListener("change", syncColorToText);
 }
 
-/** Mehrere Paare nach Namenskonvention "<name>-text" / "<name>-color" binden. */
+/** Bind multiple pairs that follow the "<name>-text" / "<name>-color" naming convention. */
 export function bindHexPairs(root, names) {
   for (const n of names) {
-    const t = root.querySelector(`input[name="${n}-text"]`);
-    const c = root.querySelector(`input[name="${n}-color"]`);
-    bindHexSync(t, c);
+    bindHexSync(
+      root.querySelector(`input[name="${n}-text"]`),
+      root.querySelector(`input[name="${n}-color"]`)
+    );
   }
 }
 
-
-/**
- * Rendert SceneControls neu und nutzt reset=true, damit Tool-Definitionen sauber neu aufgebaut werden.
- */
+/** Re-render Scene Controls with reset=true so tool definitions are rebuilt cleanly. */
 export async function refreshSceneControls() {
   if (!ui?.controls || !canvas?.ready) return;
 
@@ -72,8 +70,7 @@ export async function refreshSceneControls() {
   });
 }
 
-
-/** Font-Familien ausschließlich aus Foundry-Config beziehen (alphabetisch, dedupliziert). */
+/** Read font families only from Foundry config, alphabetically and deduplicated. */
 export function getConfiguredFontFamilies() {
   const families = Object.keys(CONFIG?.fontDefinitions ?? {});
   return [...new Set(families)]

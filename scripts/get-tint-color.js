@@ -10,22 +10,22 @@ const OWNERSHIP_COLOR_PRIORITY = [
 ];
 
 /**
- * Liefert die Tint-Farbe für ein Token anhand eines spezifischen Settings-Objekts.
- * Übergib z. B. S.frame1, S.frame2 oder S.nameplate als 'part'.
+ * Return the tint color for a token from a specific settings object.
+ * Pass S.frame1, S.frame2, or S.nameplate as `part`.
  *
- * Unterstützte Tint-Modes:
+ * Supported tint modes:
  *   - "NoTint"        → null
  *   - "Unicolor"      → part.defaultColor
- *   - "PlayerColor"   → Spielerfarbe oder part.defaultColor (falls keine Spielerfarbe)
- *   - "Disposition"   → Farben aus S.dispositionColors.* (hostile, neutral, friendly, secret, character)
- *   - "ActorType"     → Farbe aus S.actorTypeColors[actor.type], sonst DEFAULT_ACTOR_TYPE_COLOR
- *   - "Ownership"    → Farbe anhand Nutzer-Berechtigung auf Token oder verlinktem Actor
- *   - "custom"|"Custom" → Token-Flag 'greybearded-tokens.customTint' (normalisiert), sonst part.defaultColor
+ *   - "PlayerColor"   -> player color or part.defaultColor when no player color exists
+ *   - "Disposition"   -> colors from S.dispositionColors.* (hostile, neutral, friendly, secret, character)
+ *   - "ActorType"     -> color from S.actorTypeColors[actor.type], otherwise DEFAULT_ACTOR_TYPE_COLOR
+ *   - "Ownership"    -> color based on user permission for the token or linked actor
+ *   - "custom"|"Custom" -> normalized `greybearded-tokens.customTint` token flag, otherwise part.defaultColor
  *
  * @param {Token} token            Foundry Token
- * @param {object} S               Gesamtsnapshot (muss S.dispositionColors, S.actorTypeColors und S.ownershipColors enthalten)
- * @param {object} part            Teil-Settings: { tintMode, usePlayerColor, defaultColor }
- * @returns {string|null}          "#rrggbb" oder null (bei NoTint)
+ * @param {object} S               Full snapshot; must include dispositionColors, actorTypeColors, and ownershipColors.
+ * @param {object} part            Partial settings: { tintMode, usePlayerColor, defaultColor }
+ * @returns {string|null}          "#rrggbb" or null for NoTint.
  */
 export function getTintColor(token, S, part) {
   if (!token || !S || !part) return "#888888";

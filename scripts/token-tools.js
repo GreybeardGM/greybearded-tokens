@@ -92,7 +92,7 @@ Hooks.on('getSceneControlButtons', (controls) => {
   const toolConfig = normalizeTokenToolsConfig(game.settings.get(MOD_ID, 'tokenTools'));
   const isGM = game.user.isGM;
 
-  // Foundry V13-Zielpfad: objektbasierte Scene Controls
+  // Foundry V13 target path: object-based Scene Controls.
   const tokenControl = controls?.tokens;
   if (!tokenControl || typeof tokenControl.tools !== 'object' || Array.isArray(tokenControl.tools)) return;
 
@@ -116,11 +116,11 @@ Hooks.on('getSceneControlButtons', (controls) => {
     const docs = getControlledTokenDocs();
     if (!docs.length) return;
 
-    // Pro Token invertieren: true -> false, false/undefined -> true
+    // Invert each token: true -> false, false/undefined -> true.
     await Promise.all(docs.map(async (td) => {
       const cur = !!(await td.getFlag(MOD_ID, 'disableFrame'));
       const next = !cur;
-      // setFlag statt unsetFlag für deterministisches Verhalten
+      // Use setFlag instead of unsetFlag for deterministic behavior.
       await td.setFlag(MOD_ID, 'disableFrame', next);
 
       const tokenObj = getRenderedTokenObject(td);

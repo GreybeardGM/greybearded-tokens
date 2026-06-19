@@ -1,6 +1,6 @@
 // scripts/portrait-sync.js
-// Minimal-invasives Sidecar-Skript für Actor→Prototype-Token Bild-Sync.
-// Core v12+, keine Abhängigkeiten vom Rest deines Moduls.
+// Minimally invasive sidecar script for actor-to-prototype-token image sync.
+// Core v12+, no dependencies on the rest of this module.
 
 import { MOD_ID } from "./settings/constants.js";
 const SETTING_KEY = "portraitSyncMode";
@@ -13,13 +13,13 @@ const SYNC_SOURCES = {
 
 Hooks.once("init", () => {
   game.settings.register(MOD_ID, SETTING_KEY, {
-    name: "GBT.Sync.Name",          // <-- Key, nicht localize(...)
+    name: "GBT.Sync.Name",          // Key, not localize(...)
     hint: "GBT.Sync.Hint",
     scope: "world",
     config: true,
     type: String,
     choices: {
-      [SYNC_MODES.ALWAYS]: "GBT.Sync.ChoiceAlways", // <-- Keys
+      [SYNC_MODES.ALWAYS]: "GBT.Sync.ChoiceAlways", // Keys
       [SYNC_MODES.DIALOG]: "GBT.Sync.ChoiceDialog",
       [SYNC_MODES.NOTHING]: "GBT.Sync.ChoiceNothing"
     },
@@ -28,29 +28,29 @@ Hooks.once("init", () => {
 });
 
 /**
- * Nach einem Actor-Update reagieren wir nur, wenn das Portrait (img) geändert wurde.
- * Wir führen die Aktion ausschließlich auf einem GM-Client aus, um Doppeltrigger zu vermeiden.
+ * After an actor update, react only when the portrait (img) changed.
+ * Run the action only on the triggering client to avoid duplicate prompts.
  */
 Hooks.on("updateActor", async (actor, changed, options, userId) => {
   try {
-    if (!("img" in changed)) return;                 // nichts zu tun, wenn Portrait unverändert
+    if (!("img" in changed)) return;                 // Nothing to do when the portrait is unchanged.
     if (options?.[SYNC_SOURCE_FLAG] === SYNC_SOURCES.TOKEN_TO_EMBEDDED_ACTOR) return;
     if (isEmbeddedActor(actor)) return;
 
     const mode = game.settings.get(MOD_ID, SETTING_KEY);
     if (mode === SYNC_MODES.NOTHING) return;
-    if (userId !== game.user.id) return;            // Nur für auslösenden Nutzer anzeigen
+    if (userId !== game.user.id) return;            // Show only for the triggering user.
 
-    const newImg = actor.img;                        // bereits persistierter Wert
+    const newImg = actor.img;                        // Already persisted value.
     if (!newImg) return;
 
-    if (!actor.prototypeToken) return;               // Fallback-Guard (sollte nie passieren)
+    if (!actor.prototypeToken) return;               // Fallback guard; should never happen.
     const currentProtoSrc = actor.prototypeToken.texture?.src;
 
-    // nichts tun, wenn bereits synchron
+    // Nothing to do when already synchronized.
     if (currentProtoSrc === newImg) return;
 
-    // Modusbehandlung
+    // Mode handling.
     if (mode === SYNC_MODES.ALWAYS) {
       await syncPrototypeTokenImage(actor, newImg);
       return;
@@ -65,8 +65,8 @@ Hooks.on("updateActor", async (actor, changed, options, userId) => {
 });
 
 /**
- * Unverlinkte Token mit eingebettetem Actor: Wird das Token-Bild geändert,
- * synchronisieren wir das Portrait des eingebetteten Actors.
+ * Unlinked tokens with embedded actors: when the token image changes,
+ * synchronize the embedded actor portrait.
  */
 Hooks.on("updateToken", async (tokenDoc, changed, options, userId) => {
   try {
@@ -92,14 +92,14 @@ Hooks.on("updateToken", async (tokenDoc, changed, options, userId) => {
   }
 });
 
-/** Setzt das Prototype-Token-Image auf das Actor-Portrait. */
+/** Set the prototype token image to the actor portrait. */
 async function syncPrototypeTokenImage(actor, img) {
-  // Dot-path Update für v10+ Dokumente
+  // Dot-path update for v10+ documents.
   await actor.prototypeToken.update({ "texture.src": img });
   ui.notifications?.info(game.i18n.format("GBT.Sync.DoneInfo", { name: actor.name }));
 }
 
-/** Einfache Bestätigungsabfrage mit zwei Buttons: Synchronize / Cancel. */
+/** Simple confirmation prompt with two buttons: Synchronize / Cancel. */
 async function promptSyncDialog(actor, oldSrc, newImg) {
   const DialogV2 = foundry?.applications?.api?.DialogV2;
   if (!DialogV2) {

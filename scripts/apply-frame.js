@@ -3,7 +3,7 @@ import { getTintColor } from "./get-tint-color.js";
 import { getGbFrameSettings } from "./settings/snapshot.js";
 
 /* =========================
-   Konsolidierter Namespace (mit Upgrade/Hydration)
+   Consolidated namespace (with upgrade/hydration)
    ========================= */
 const GB_DEFAULTS = {
   overlay: null,
@@ -32,7 +32,7 @@ function ensureGbNS(token) {
 }
 
 /* =========================
-   Masken-Helfer (V13-pur)
+   Mask helpers (V13-native)
    ========================= */
 const MASK_TEX_CACHE = new Map();
 
@@ -130,7 +130,7 @@ function updateMaskScaleIfDirty(token) {
 
 async function attachMaskIfNeeded(token, S) {
   const gb = ensureGbNS(token);
-  if (gb.maskSprite) return; // bereits gesetzt
+  if (gb.maskSprite) return; // Already attached
 
   const M = S?.mask;
   if (!M?.enabled || !M?.path) return;
@@ -141,7 +141,7 @@ async function attachMaskIfNeeded(token, S) {
   const tex = await loadMaskOnce(M.path);
   if (!tex) return;
 
-  // Maske im lokalen Space des Meshes
+  // Keep the mask in the mesh local space.
   const maskSprite = new PIXI.Sprite(tex);
   maskSprite.name = "gbtf-mask";
   maskSprite.renderable = false;
@@ -151,7 +151,7 @@ async function attachMaskIfNeeded(token, S) {
 
   mesh.addChild(maskSprite);
 
-  // Skalierung EINMALIG anhand der LocalBounds des Meshes
+  // Cache scaling once from the mesh local bounds.
   if (!updateMaskScaleCache(token, mesh, maskSprite, gb)) {
     maskSprite.parent?.removeChild(maskSprite);
     maskSprite.destroy({ children: false, texture: false, baseTexture: false });
@@ -165,7 +165,7 @@ async function attachMaskIfNeeded(token, S) {
 }
 
 /* =========================
-   Frames-Helfer
+   Frame helpers
    ========================= */
 function removeGbFramesIfAny(token) {
   const gb = ensureGbNS(token);
@@ -182,10 +182,10 @@ function upsertOverlayOnToken(token) {
   const gb = ensureGbNS(token);
   if (gb.overlay) return gb.overlay;
 
-  // Overlay am TOKEN, nicht am Mesh (Masken-Isolation)
+  // Attach the overlay to the token, not the mesh, to isolate masks.
   const overlay = new PIXI.Container();
   overlay.name = "gbtf-overlay";
-  overlay.sortableChildren = false; // Reihenfolge statt Sorting
+  overlay.sortableChildren = false; // Use insertion order instead of sorting.
   token.addChild(overlay);
 
   gb.overlay = overlay;
@@ -273,24 +273,15 @@ function applyOverlayFrames(token, snapshot, textureScaleX, textureScaleY, gb) {
   const overlay = upsertOverlayOnToken(token);
   if (!overlay) return false;
 
-  // Overlay relativ mittig platzieren.
-  // Wichtig: Spiegelung des Token-Meshes wird absichtlich NICHT auf Frames übernommen,
-  // damit Rahmen bei gespiegelten Tokens immer gleich ausgerichtet bleiben.
+  // Center the overlay and intentionally do not mirror frames with token artwork.
+  // This keeps frames aligned consistently for mirrored tokens.
   overlay.position.set(token.w / 2, token.h / 2);
   overlay.scale.set(Math.abs(mesh.scale.x || 1), Math.abs(mesh.scale.y || 1));
   overlay.rotation = mesh.rotation;
 
-  const frame1 = snapshot.frame1;
-  const frame2 = snapshot.frame2?.enabled ? snapshot.frame2 : null;
   const frameDescriptors = [
-    {
-      ...FRAME_DESCRIPTORS.secondary,
-      settings: frame2
-    },
-    {
-      ...FRAME_DESCRIPTORS.primary,
-      settings: frame1
-    }
+    { ...FRAME_DESCRIPTORS.secondary, settings: snapshot.frame2?.enabled ? snapshot.frame2 : null },
+    { ...FRAME_DESCRIPTORS.primary, settings: snapshot.frame1 }
   ];
 
   const overlayScaleX = Math.abs(overlay.scale.x || 1);
@@ -327,7 +318,7 @@ async function applyMask(token, snapshot, gb) {
 }
 
 /* =========================
-   Nameplate (nur Änderungen anwenden)
+   Nameplate (apply only changes)
    ========================= */
 function updateNameplate(token, S, tx, ty) {
   const NP = S?.nameplate;
@@ -359,7 +350,7 @@ function updateNameplate(token, S, tx, ty) {
 }
 
 /* =========================
-   Hauptfunktion
+   Main entry point
    ========================= */
 async function applyFrameToToken(token, snapshot) {
   if (!token || token.destroyed) return;
@@ -390,7 +381,7 @@ async function applyFrameToToken(token, snapshot) {
   await applyMask(token, S, gb);
 }
 /* =========================
-   Frame Update Reservieren
+   Reserve frame updates
    ========================= */
 const frameQueue = [];
 let frameQueueScheduled = false;
