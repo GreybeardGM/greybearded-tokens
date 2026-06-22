@@ -1,7 +1,8 @@
 // apply-frame.js
 import { getTintColor } from "./get-tint-color.js";
 import { getGbFrameSettings } from "./settings/snapshot.js";
-import { toFiniteNumber } from "./utils/normalization.js";
+import { MOD_ID } from "./settings/constants.js";
+import { normalizeAutoAlignConfig, toFiniteNumber } from "./utils/normalization.js";
 
 /* =========================
    Konsolidierter Namespace (mit Upgrade/Hydration)
@@ -107,7 +108,7 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
-function getCoverFitPlacement(token) {
+function getCoverFitPlacement(token, autoAlign) {
   const { width: texW, height: texH } = getTextureSize(token?.mesh?.texture);
   if (!isFinite(texW) || !isFinite(texH) || texW <= 0 || texH <= 0) return null;
   if (!isFinite(token?.w) || !isFinite(token?.h) || token.w <= 0 || token.h <= 0) return null;
@@ -116,27 +117,31 @@ function getCoverFitPlacement(token) {
   const targetRatio = token.w / token.h;
   if (!isFinite(sourceRatio) || !isFinite(targetRatio) || sourceRatio <= 0 || targetRatio <= 0) return null;
 
-  // Foundry's default anchorY of 0.5 centers cover-fitted artwork, which crops
-  // tall images both above and below the token. Setting anchorY to 0 overcorrects:
-  // the artwork's top edge lands on the token center. For tall images, compute
-  // the anchor point whose top edge aligns with the token's top edge after cover
-  // scaling. Wide images stay vertically centered and crop left/right via anchorX.
-  const anchorY = sourceRatio < targetRatio
+  const verticalCropAnchor = sourceRatio < targetRatio
     ? clamp(sourceRatio / (2 * targetRatio), 0, 0.5)
     : 0.5;
+  const horizontalCropAnchor = sourceRatio > targetRatio
+    ? clamp(targetRatio / (2 * sourceRatio), 0, 0.5)
+    : 0.5;
 
-  return {
-    anchorX: 0.5,
-    anchorY
-  };
+  const anchorY = autoAlign.verticalAlign === "center"
+    ? 0.5
+    : (autoAlign.verticalAlign === "bottom" ? 1 - verticalCropAnchor : verticalCropAnchor);
+  const anchorX = autoAlign.horizontalAlign === "center"
+    ? 0.5
+    : (autoAlign.horizontalAlign === "right" ? 1 - horizontalCropAnchor : horizontalCropAnchor);
+
+  return { anchorX, anchorY };
 }
 
-async function ensureArtworkFitCover(token) {
+async function ensureArtworkFitCover(token, autoAlign) {
+  if (!autoAlign?.enabled) return;
+
   const gb = ensureGbNS(token);
   const coverFit = getCoverTextureFitMode();
   if (!coverFit || gb.coverFitUpdatePending || gb.coverFitUnsupported) return;
 
-  const placement = getCoverFitPlacement(token);
+  const placement = getCoverFitPlacement(token, autoAlign);
   if (!placement) return;
 
   const texture = token?.document?.texture;
@@ -408,7 +413,8 @@ async function applyFrameToToken(token, snapshot) {
   const tx = Math.abs(token?.document?.texture?.scaleX ?? 1);
   const ty = Math.abs(token?.document?.texture?.scaleY ?? 1);
 
-  await ensureArtworkFitCover(token);
+  const autoAlign = normalizeAutoAlignConfig(game.settings.get(MOD_ID, "autoAlign"));
+  await ensureArtworkFitCover(token, autoAlign);
 
   // 1) Nameplate zuerst (nur wenn aktiviert)
   if (runtime.hasNameplate) {

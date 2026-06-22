@@ -1,11 +1,12 @@
 // settings/register.js
-import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_ACTOR_TYPE_COLORS, DEFAULT_OWNERSHIP_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK, DEFAULT_TOKEN_TOOLS } from "./constants.js";
+import { MOD_ID, DEFAULT_DISPOSITION_COLORS, DEFAULT_ACTOR_TYPE_COLORS, DEFAULT_OWNERSHIP_COLORS, DEFAULT_NAMEPLATES, DEFAULT_FRAME1, DEFAULT_FRAME2, DEFAULT_MASK, DEFAULT_TOKEN_TOOLS, DEFAULT_AUTO_ALIGN } from "./constants.js";
 import { DispositionColorsForm } from "./disposition-colors-form.js";
 import { ActorTypeColorsForm } from "./actor-type-colors-form.js";
 import { OwnershipColorsForm } from "./ownership-colors-form.js";
 import { NameplateForm } from "./nameplate-form.js";
 import { FramesForm } from "./frames-form.js";
 import { TokenToolsForm } from "./token-tools-form.js";
+import { AutoAlignForm } from "./auto-align-form.js";
 import { refreshSceneControls } from "./helpers.js";
 import { registerPortraitSyncSetting } from "../portrait-sync.js";
 
@@ -51,6 +52,14 @@ export function registerSettings() {
     config: false,
     type: Object,
     default: DEFAULT_OWNERSHIP_COLORS
+  });
+
+  game.settings.register(MOD_ID, "autoAlign", {
+    name: "GBTF.AutoAlign.Name",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: DEFAULT_AUTO_ALIGN
   });
 
   game.settings.register(MOD_ID, "tokenTools", {
@@ -104,6 +113,14 @@ export function registerSettings() {
     label: "GBTF.OwnershipColors.Label",
     icon: "fas fa-user-shield",
     type: OwnershipColorsForm,
+    restricted: true
+  });
+
+  game.settings.registerMenu(MOD_ID, "autoAlignMenu", {
+    name: "GBTF.AutoAlign.Name",
+    label: "GBTF.AutoAlign.Label",
+    icon: "fas fa-arrows-to-eye",
+    type: AutoAlignForm,
     restricted: true
   });
 

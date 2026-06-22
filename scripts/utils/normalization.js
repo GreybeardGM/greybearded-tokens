@@ -1,4 +1,4 @@
-import { DEFAULT_TOKEN_TOOLS } from "../settings/constants.js";
+import { DEFAULT_TOKEN_TOOLS, DEFAULT_AUTO_ALIGN, ALIGN_CHOICES } from "../settings/constants.js";
 
 export function toFiniteNumber(value, fallback) {
   const n = Number(value);
@@ -37,5 +37,18 @@ export function normalizeTokenToolsConfig(config = {}, defaults = DEFAULT_TOKEN_
     disposition: normalizeBoolean(config.disposition, defaults.disposition),
     mirrorArtwork: normalizeBoolean(config.mirrorArtwork, defaults.mirrorArtwork),
     customTint: normalizeBoolean(config.customTint, defaults.customTint)
+  };
+}
+
+
+export function oneOf(value, choices, fallback) {
+  return Object.hasOwn(choices ?? {}, value) ? value : fallback;
+}
+
+export function normalizeAutoAlignConfig(config = {}, defaults = DEFAULT_AUTO_ALIGN) {
+  return {
+    enabled: normalizeBoolean(config.enabled, defaults.enabled),
+    verticalAlign: oneOf(String(config.verticalAlign || ""), ALIGN_CHOICES.vertical, defaults.verticalAlign),
+    horizontalAlign: oneOf(String(config.horizontalAlign || ""), ALIGN_CHOICES.horizontal, defaults.horizontalAlign)
   };
 }
