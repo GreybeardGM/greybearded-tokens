@@ -67,6 +67,25 @@ export const DEFAULT_MASK = {
   path: "modules/greybearded-tokens/assets/mask-round.png"
 };
 
+export const DEFAULT_AUTO_ALIGN = {
+  enabled: false,
+  verticalAlign: "top",
+  horizontalAlign: "center"
+};
+
+export const ALIGN_CHOICES = {
+  vertical: {
+    top: "GBTF.AutoAlign.Top",
+    center: "GBTF.AutoAlign.Center",
+    bottom: "GBTF.AutoAlign.Bottom"
+  },
+  horizontal: {
+    left: "GBTF.AutoAlign.Left",
+    center: "GBTF.AutoAlign.Center",
+    right: "GBTF.AutoAlign.Right"
+  }
+};
+
 export const DEFAULT_TOKEN_TOOLS = {
   size: true,
   sizeMin: 1,

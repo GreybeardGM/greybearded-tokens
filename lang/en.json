@@ -122,6 +122,18 @@
       "Label": "Configure Ownership Colors",
       "Level": "Ownership",
       "Hint": "Define default tint colors for each ownership level."
+    },
+    "AutoAlign": {
+      "Name": "Auto Align Token Artwork",
+      "Label": "Configure Auto Align Token Artwork",
+      "Enabled": "Enable Auto Align",
+      "VerticalAlign": "Vertical Align",
+      "HorizontalAlign": "Horizontal Align",
+      "Top": "Top",
+      "Center": "Center",
+      "Bottom": "Bottom",
+      "Left": "Left",
+      "Right": "Right"
     }
   }
 }

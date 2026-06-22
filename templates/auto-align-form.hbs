@@ -1,0 +1,20 @@
+<div class="gbtf-setting-form__body">
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-auto-align-enabled">{{localize "GBTF.AutoAlign.Enabled"}}</label>
+    <input id="gbtf-setting-form-auto-align-enabled" type="checkbox" name="enabled" {{checked enabled}} />
+  </div>
+
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-auto-align-vertical">{{localize "GBTF.AutoAlign.VerticalAlign"}}</label>
+    <select id="gbtf-setting-form-auto-align-vertical" name="verticalAlign">
+      {{selectOptions verticalChoices selected=verticalAlign localize=true}}
+    </select>
+  </div>
+
+  <div class="gbtf-setting-form__row">
+    <label for="gbtf-setting-form-auto-align-horizontal">{{localize "GBTF.AutoAlign.HorizontalAlign"}}</label>
+    <select id="gbtf-setting-form-auto-align-horizontal" name="horizontalAlign">
+      {{selectOptions horizontalChoices selected=horizontalAlign localize=true}}
+    </select>
+  </div>
+</div>

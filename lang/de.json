@@ -122,6 +122,18 @@
       "Label": "Berechtigungsfarben konfigurieren",
       "Level": "Berechtigung",
       "Hint": "Lege die Standardfärbungen für jede Berechtigungsstufe fest."
+    },
+    "AutoAlign": {
+      "Name": "Token-Artwork automatisch ausrichten",
+      "Label": "Automatische Token-Artwork-Ausrichtung konfigurieren",
+      "Enabled": "Automatische Ausrichtung aktivieren",
+      "VerticalAlign": "Vertikale Ausrichtung",
+      "HorizontalAlign": "Horizontale Ausrichtung",
+      "Top": "Oben",
+      "Center": "Zentriert",
+      "Bottom": "Unten",
+      "Left": "Links",
+      "Right": "Rechts"
     }
   }
 }
