@@ -1,7 +1,7 @@
 // rendering-hooks.js
 import { getGbFrameSettings, buildSnapshot } from "./settings/snapshot.js";
 import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
-import { updateFrame, syncTokenMaskMirror } from "./apply-frame.js";
+import { updateFrame, syncTokenMaskMirror, alignTokenArtworkAfterArtworkChange } from "./apply-frame.js";
 import { handlePortraitSyncTokenUpdate } from "./portrait-sync.js";
 
 /* ---------- Texture preload cache ---------- */
@@ -47,6 +47,16 @@ function sweepAllTokenFrames(snapshot) {
   });
 }
 
+function alignChangedTokenArtwork(tokenDoc) {
+  const run = () => {
+    const token = tokenDoc?.object;
+    if (!token) return;
+    void alignTokenArtworkAfterArtworkChange(token);
+  };
+
+  requestAnimationFrame(run);
+}
+
 export function registerRenderingHooks() {
 
   // Intentionally centralized to reduce duplication and keep future user-color
@@ -63,15 +73,21 @@ export function registerRenderingHooks() {
   // Centralized updateToken dispatcher to avoid fragmented registrations.
   // Responsibilities:
   // 1) mirror mask orientation when texture scale changes
-  // 2) portrait-sync for unlinked tokens when texture source changes
+  // 2) auto-align token artwork only when this client changed the artwork source
+  // 3) portrait-sync for unlinked tokens when texture source changes
   Hooks.on("updateToken", async (tokenDoc, changed, options, userId) => {
     const texture = changed?.texture;
     if (texture) {
       const hasScaleX = Object.prototype.hasOwnProperty.call(texture, "scaleX");
       const hasScaleY = Object.prototype.hasOwnProperty.call(texture, "scaleY");
+      const hasTextureSource = Object.prototype.hasOwnProperty.call(texture, "src");
       if (hasScaleX || hasScaleY) {
         const token = tokenDoc?.object;
         if (token) syncTokenMaskMirror(token);
+      }
+
+      if (hasTextureSource && userId === game.user.id) {
+        alignChangedTokenArtwork(tokenDoc);
       }
     }
 

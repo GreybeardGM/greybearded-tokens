@@ -150,6 +150,8 @@ async function ensureArtworkFitCover(token, autoAlign) {
   const needsAnchorY = !nearlyEqual(texture?.anchorY, placement.anchorY);
   if (!needsFit && !needsAnchorX && !needsAnchorY) return;
 
+  if (!token?.document?.canUserModify?.(game.user, "update")) return;
+
   try {
     gb.coverFitUpdatePending = true;
     await token.document.update({
@@ -163,6 +165,12 @@ async function ensureArtworkFitCover(token, autoAlign) {
   } finally {
     gb.coverFitUpdatePending = false;
   }
+}
+
+export async function alignTokenArtworkAfterArtworkChange(token) {
+  if (!token || token.destroyed) return;
+  const autoAlign = normalizeAutoAlignConfig(game.settings.get(MOD_ID, "autoAlign"));
+  await ensureArtworkFitCover(token, autoAlign);
 }
 
 function getMaskLocalPlacement(token) {
@@ -413,8 +421,12 @@ async function applyFrameToToken(token, snapshot) {
   const tx = Math.abs(token?.document?.texture?.scaleX ?? 1);
   const ty = Math.abs(token?.document?.texture?.scaleY ?? 1);
 
-  const autoAlign = normalizeAutoAlignConfig(game.settings.get(MOD_ID, "autoAlign"));
-  await ensureArtworkFitCover(token, autoAlign);
+  // Auto Align is temporarily disabled in the generic render path. Keep the
+  // implementation intact, but only trigger document alignment from explicit
+  // token artwork changes so every rendering client does not try to update the
+  // Scene Token document.
+  // const autoAlign = normalizeAutoAlignConfig(game.settings.get(MOD_ID, "autoAlign"));
+  // await ensureArtworkFitCover(token, autoAlign);
 
   // 1) Nameplate zuerst (nur wenn aktiviert)
   if (runtime.hasNameplate) {
