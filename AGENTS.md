@@ -19,3 +19,11 @@ If token artwork placement appears wrong, prefer one of these approaches instead
 4. Document any unavoidable exception explicitly in the PR, including a manual Foundry scene test that proves normal, mirrored, masked, and differently-sized tokens still render correctly.
 
 For Foundry-native cover fitting, do not assume `texture.anchorY = 0` means "crop only from the bottom." In Foundry's centered token mesh, that can place the artwork's top edge on the token center. If tall artwork should align to the token's top edge and crop only at the bottom, calculate a dynamic `texture.anchorY` from the source and token aspect ratios while keeping wide artwork horizontally centered.
+
+## Code simplicity and error visibility
+
+Keep runtime code lean and explicit:
+
+- Do not add helper functions that only wrap a single call or expression unless they encapsulate distinct behavior, clarify a non-obvious domain rule, or are reused by multiple call sites.
+- Do not use fallback chains to hide errors or problem locations. Prefer direct checks for required data and let unexpected missing state fail visibly during development.
+- When a permission check guards a document update, keep the check close to the update so reviewers can see exactly which operation is protected.
