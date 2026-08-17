@@ -22,7 +22,7 @@ For Foundry-native cover fitting, do not assume `texture.anchorY = 0` means "cro
 
 ## Mask transform regression guard
 
-Keep the mask sprite as a child of `token.mesh` and assign it only to `token.mesh.mask`. Size it from the artwork's local bounds before attaching it, or temporarily detach it while remeasuring, so the mask never becomes part of its own bounds calculation. Do not divide mask dimensions by `token.mesh.scale` or apply scale/mirror signs a second time: the child already inherits Foundry's scale, mirroring, and rotation. Keep frame overlays as siblings on the token container so the artwork mask cannot clip them.
+Keep the mask sprite as a sibling of `token.mesh` in the token container and assign it only to `token.mesh.mask`. Center and size it from the same token-space footprint used by the frames, including the document texture scale; never derive its geometry from the source artwork bounds, whose aspect ratio would stretch or offset a round mask. Keep frame and nameplate containers outside `token.mesh` so the artwork mask cannot clip them. Update the cached mask layout only when its token-space size or rotation changes.
 
 ## Code simplicity and error visibility
 

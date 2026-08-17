@@ -15,8 +15,8 @@ function ensureGbNS(token) {
   if (!("f1"         in gb)) gb.f1 = null;
   if (!("f2"         in gb)) gb.f2 = null;
   if (!("maskSprite" in gb)) gb.maskSprite = null;
-  if (!("maskArtworkTexture" in gb)) gb.maskArtworkTexture = null;
-  if (!("maskArtworkKey" in gb)) gb.maskArtworkKey = null;
+  if (!("maskTarget" in gb)) gb.maskTarget = null;
+  if (!("maskLayoutKey" in gb)) gb.maskLayoutKey = null;
   if (!("coverFitUpdatePending" in gb)) gb.coverFitUpdatePending = false;
   if (!("coverFitUnsupported" in gb)) gb.coverFitUnsupported = false;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
@@ -48,14 +48,13 @@ async function loadMaskOnce(url) {
 
 function clearMaskInline(token) {
   const gb = ensureGbNS(token);
-  const mesh = token?.mesh;
-  if (mesh && mesh.mask === gb.maskSprite) mesh.mask = null;
+  if (gb.maskTarget?.mask === gb.maskSprite) gb.maskTarget.mask = null;
 
   if (gb.maskSprite?.parent) gb.maskSprite.parent.removeChild(gb.maskSprite);
   gb.maskSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
   gb.maskSprite = null;
-  gb.maskArtworkTexture = null;
-  gb.maskArtworkKey = null;
+  gb.maskTarget = null;
+  gb.maskLayoutKey = null;
 }
 
 function getTextureSize(texture) {
@@ -139,61 +138,30 @@ async function ensureArtworkFitCover(token, autoAlign) {
   }
 }
 
-function getMaskArtworkKey(token) {
-  const mesh = token?.mesh;
-  if (!mesh?.texture) return null;
-
-  const { width, height } = getTextureSize(mesh.texture);
-  const texture = token?.document?.texture;
-  return [
-    token.w,
-    token.h,
-    width,
-    height,
-    texture?.src,
-    texture?.fit,
-    texture?.anchorX,
-    texture?.anchorY
-  ].join(":");
-}
-
 function updateMaskGeometryIfDirty(token, { force = false } = {}) {
   const gb = ensureGbNS(token);
   const mesh = token?.mesh;
   const maskSprite = gb.maskSprite;
-  if (!mesh || !maskSprite) return false;
+  const texture = token?.document?.texture;
+  if (!mesh || !maskSprite || !texture) return false;
 
-  const { width: texW, height: texH } = getTextureSize(maskSprite.texture);
-  const artworkKey = getMaskArtworkKey(token);
-  if (texW <= 0 || texH <= 0 || artworkKey === null) return false;
+  const textureScaleX = Math.abs(Number(texture.scaleX ?? 1));
+  const textureScaleY = Math.abs(Number(texture.scaleY ?? 1));
+  const width = token.w * textureScaleX;
+  const height = token.h * textureScaleY;
+  if (!isFinite(width) || !isFinite(height) || width <= 0 || height <= 0) return false;
 
-  const artworkUnchanged = gb.maskArtworkTexture === mesh.texture && gb.maskArtworkKey === artworkKey;
-  if (!force && artworkUnchanged) return false;
+  const layoutKey = [token.w, token.h, textureScaleX, textureScaleY, mesh.rotation].join(":");
+  if (!force && gb.maskLayoutKey === layoutKey) return false;
 
-  // Regression guard: measure only the artwork. An attached mask is a mesh child and can
-  // otherwise expand getLocalBounds(), making the mask part of its own sizing input.
-  const wasAttached = maskSprite.parent === mesh;
-  const childIndex = wasAttached ? mesh.getChildIndex(maskSprite) : -1;
-  if (wasAttached) mesh.removeChild(maskSprite);
-
-  let bounds;
-  try {
-    bounds = mesh.getLocalBounds?.();
-  } finally {
-    if (wasAttached) mesh.addChildAt(maskSprite, Math.min(childIndex, mesh.children.length));
-  }
-
-  if (!bounds || !isFinite(bounds.width) || !isFinite(bounds.height) || bounds.width <= 0 || bounds.height <= 0) {
-    return false;
-  }
-
-  // Regression guard: the mask stays in mesh-local coordinates and deliberately does not
-  // divide by mesh.scale. As a mesh child it inherits Foundry's scale, mirror, and rotation
-  // exactly once. Counter-scaling here would pin it to the token footprint again.
-  maskSprite.position.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
-  maskSprite.scale.set(bounds.width / texW, bounds.height / texH);
-  gb.maskArtworkTexture = mesh.texture;
-  gb.maskArtworkKey = artworkKey;
+  // Regression guard: the frame aperture, not the source artwork bounds, defines the mask.
+  // This keeps a round mask round for portrait and landscape artwork while Foundry's cover
+  // fit crops the long artwork axis behind it.
+  maskSprite.position.set(token.w / 2, token.h / 2);
+  maskSprite.width = width;
+  maskSprite.height = height;
+  maskSprite.rotation = mesh.rotation;
+  gb.maskLayoutKey = layoutKey;
   return true;
 }
 
@@ -205,30 +173,32 @@ async function attachMaskIfNeeded(token, S) {
   const mesh = token?.mesh;
   if (!mesh) return;
 
-  if (gb.maskSprite?.parent === mesh && gb.maskSprite._gbMaskPath === M.path) return;
+  if (gb.maskSprite?.parent === token && gb.maskSprite._gbMaskPath === M.path) {
+    if (gb.maskTarget?.mask === gb.maskSprite && gb.maskTarget !== mesh) gb.maskTarget.mask = null;
+    gb.maskTarget = mesh;
+    mesh.mask = gb.maskSprite;
+    return;
+  }
   if (gb.maskSprite) clearMaskInline(token);
 
   const tex = await loadMaskOnce(M.path);
   if (!tex) return;
 
-  // Keep the mask on Foundry's artwork mesh. mesh.mask therefore clips only the artwork;
-  // the frame overlay remains a sibling on the token and cannot be cut by this mask.
+  // Keep the mask beside the mesh in token space so it shares the frame's center and size.
+  // Assign it only to mesh.mask: sibling frame and nameplate containers remain unmasked.
   const maskSprite = new PIXI.Sprite(tex);
   maskSprite.name = "gbtf-mask";
   maskSprite._gbMaskPath = M.path;
   maskSprite.renderable = false;
   maskSprite.anchor?.set?.(0.5, 0.5);
-  maskSprite.position.set(0, 0);
-  maskSprite.rotation = 0;
-
   gb.maskSprite = maskSprite;
+  gb.maskTarget = mesh;
+  token.addChild(maskSprite);
   if (!updateMaskGeometryIfDirty(token, { force: true })) {
-    gb.maskSprite = null;
-    maskSprite.destroy({ children: false, texture: false, baseTexture: false });
+    clearMaskInline(token);
     return;
   }
 
-  mesh.addChild(maskSprite);
   mesh.mask = maskSprite;
 }
 
