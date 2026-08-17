@@ -246,15 +246,33 @@ function removeGbFramesIfAny(token) {
   gb.f2 = null;
 }
 
+function keepOverlayBelowNameplate(token, overlay) {
+  const nameplate = token?.nameplate;
+  if (overlay?.parent !== token || nameplate?.parent !== token) return;
+
+  const overlayIndex = token.getChildIndex(overlay);
+  const nameplateIndex = token.getChildIndex(nameplate);
+  if (overlayIndex <= nameplateIndex) return;
+
+  // Regression guard: move the frame container instead of lifting Foundry's nameplate.
+  // This preserves Foundry's ordering for bars and other interface children while keeping
+  // the frames outside token.mesh, where the artwork mask cannot clip them.
+  token.setChildIndex(overlay, nameplateIndex);
+}
+
 function upsertOverlayOnToken(token) {
   const gb = ensureGbNS(token);
-  if (gb.overlay) return gb.overlay;
+  if (gb.overlay) {
+    keepOverlayBelowNameplate(token, gb.overlay);
+    return gb.overlay;
+  }
 
   // Overlay am TOKEN, nicht am Mesh (Masken-Isolation)
   const overlay = new PIXI.Container();
   overlay.name = "gbtf-overlay";
   overlay.sortableChildren = false; // Reihenfolge statt Sorting
   token.addChild(overlay);
+  keepOverlayBelowNameplate(token, overlay);
 
   gb.overlay = overlay;
   return overlay;
