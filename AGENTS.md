@@ -20,6 +20,10 @@ If token artwork placement appears wrong, prefer one of these approaches instead
 
 For Foundry-native cover fitting, do not assume `texture.anchorY = 0` means "crop only from the bottom." In Foundry's centered token mesh, that can place the artwork's top edge on the token center. If tall artwork should align to the token's top edge and crop only at the bottom, calculate a dynamic `texture.anchorY` from the source and token aspect ratios while keeping wide artwork horizontally centered.
 
+## Mask transform regression guard
+
+Keep the mask sprite as a child of `token.mesh` and assign it only to `token.mesh.mask`. Size it from the artwork's local bounds before attaching it, or temporarily detach it while remeasuring, so the mask never becomes part of its own bounds calculation. Do not divide mask dimensions by `token.mesh.scale` or apply scale/mirror signs a second time: the child already inherits Foundry's scale, mirroring, and rotation. Keep frame overlays as siblings on the token container so the artwork mask cannot clip them.
+
 ## Code simplicity and error visibility
 
 Keep runtime code lean and explicit:

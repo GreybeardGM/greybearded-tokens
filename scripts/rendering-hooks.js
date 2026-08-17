@@ -1,7 +1,7 @@
 // rendering-hooks.js
 import { getGbFrameSettings, buildSnapshot } from "./settings/snapshot.js";
 import { rebuildPlayerColorSnapshot } from "./get-player-color.js";
-import { updateFrame, syncTokenMaskMirror } from "./apply-frame.js";
+import { updateFrame } from "./apply-frame.js";
 import { handlePortraitSyncTokenUpdate } from "./portrait-sync.js";
 
 /* ---------- Texture preload cache ---------- */
@@ -60,21 +60,9 @@ export function registerRenderingHooks() {
     updateFrame(t);
   });
 
-  // Centralized updateToken dispatcher to avoid fragmented registrations.
-  // Responsibilities:
-  // 1) mirror mask orientation when texture scale changes
-  // 2) portrait-sync for unlinked tokens when texture source changes
+  // The mask is a child of token.mesh and inherits scale and mirroring without a hook.
+  // Keep updateToken here only for portrait-sync on unlinked token texture changes.
   Hooks.on("updateToken", async (tokenDoc, changed, options, userId) => {
-    const texture = changed?.texture;
-    if (texture) {
-      const hasScaleX = Object.prototype.hasOwnProperty.call(texture, "scaleX");
-      const hasScaleY = Object.prototype.hasOwnProperty.call(texture, "scaleY");
-      if (hasScaleX || hasScaleY) {
-        const token = tokenDoc?.object;
-        if (token) syncTokenMaskMirror(token);
-      }
-    }
-
     await handlePortraitSyncTokenUpdate(tokenDoc, changed, options, userId);
   });
 

@@ -15,12 +15,8 @@ function ensureGbNS(token) {
   if (!("f1"         in gb)) gb.f1 = null;
   if (!("f2"         in gb)) gb.f2 = null;
   if (!("maskSprite" in gb)) gb.maskSprite = null;
-  if (!("maskScaleAbsX" in gb)) gb.maskScaleAbsX = null;
-  if (!("maskScaleAbsY" in gb)) gb.maskScaleAbsY = null;
-  if (!("maskSignX" in gb)) gb.maskSignX = null;
-  if (!("maskSignY" in gb)) gb.maskSignY = null;
-  if (!("maskBoundsW" in gb)) gb.maskBoundsW = null;
-  if (!("maskBoundsH" in gb)) gb.maskBoundsH = null;
+  if (!("maskArtworkTexture" in gb)) gb.maskArtworkTexture = null;
+  if (!("maskArtworkKey" in gb)) gb.maskArtworkKey = null;
   if (!("coverFitUpdatePending" in gb)) gb.coverFitUpdatePending = false;
   if (!("coverFitUnsupported" in gb)) gb.coverFitUnsupported = false;
   if (!("lastTint1"  in gb)) gb.lastTint1 = null;
@@ -58,33 +54,8 @@ function clearMaskInline(token) {
   if (gb.maskSprite?.parent) gb.maskSprite.parent.removeChild(gb.maskSprite);
   gb.maskSprite?.destroy?.({ children: false, texture: false, baseTexture: false });
   gb.maskSprite = null;
-  gb.maskScaleAbsX = null;
-  gb.maskScaleAbsY = null;
-  gb.maskSignX = null;
-  gb.maskSignY = null;
-  gb.maskBoundsW = null;
-  gb.maskBoundsH = null;
-}
-
-function getScaleSign(value) {
-  return (Math.sign(value || 1) || 1);
-}
-
-function applyMaskScaleFromCache(token) {
-  const gb = ensureGbNS(token);
-  const mesh = token?.mesh;
-  const maskSprite = gb.maskSprite;
-  if (!mesh || !maskSprite) return false;
-
-  if (!isFinite(gb.maskScaleAbsX) || !isFinite(gb.maskScaleAbsY)) return false;
-
-  const signX = getScaleSign(mesh.scale.x);
-  const signY = getScaleSign(mesh.scale.y);
-
-  maskSprite.scale.set(gb.maskScaleAbsX * signX, gb.maskScaleAbsY * signY);
-  gb.maskSignX = signX;
-  gb.maskSignY = signY;
-  return true;
+  gb.maskArtworkTexture = null;
+  gb.maskArtworkKey = null;
 }
 
 function getTextureSize(texture) {
@@ -168,118 +139,97 @@ async function ensureArtworkFitCover(token, autoAlign) {
   }
 }
 
-function getMaskLocalPlacement(token) {
+function getMaskArtworkKey(token) {
   const mesh = token?.mesh;
-  if (!mesh || !isFinite(token?.w) || !isFinite(token?.h) || token.w <= 0 || token.h <= 0) return null;
+  if (!mesh?.texture) return null;
 
-  const sx = mesh.scale.x || 1;
-  const sy = mesh.scale.y || 1;
-  const absSx = Math.abs(sx);
-  const absSy = Math.abs(sy);
-  if (!isFinite(absSx) || !isFinite(absSy) || absSx <= 0 || absSy <= 0) return null;
-
-  const width = token.w / absSx;
-  const height = token.h / absSy;
-  if (!isFinite(width) || !isFinite(height) || width <= 0 || height <= 0) return null;
-
-  // The mask is a child of Foundry's token mesh, so its placement must be in mesh-local
-  // coordinates. Do not subtract mesh.position here: Foundry may store canvas/world
-  // coordinates in that vector. Foundry's mesh local origin is already the token artwork
-  // center, so placing an anchored mask at width / 2 and height / 2 moves its center to
-  // the artwork's lower-right corner.
-  return {
+  const { width, height } = getTextureSize(mesh.texture);
+  const texture = token?.document?.texture;
+  return [
+    token.w,
+    token.h,
     width,
     height,
-    x: 0,
-    y: 0
-  };
+    texture?.src,
+    texture?.fit,
+    texture?.anchorX,
+    texture?.anchorY
+  ].join(":");
 }
 
-export function syncTokenMaskMirror(token) {
-  if (!token || token.destroyed) return false;
-  return applyMaskScaleFromCache(token);
-}
-
-function updateMaskScaleIfDirty(token) {
+function updateMaskGeometryIfDirty(token, { force = false } = {}) {
   const gb = ensureGbNS(token);
   const mesh = token?.mesh;
   const maskSprite = gb.maskSprite;
-  if (!mesh || !maskSprite) return;
-
-  const tokenW = token.w || 0;
-  const tokenH = token.h || 0;
-
-  const b = getMaskLocalPlacement(token);
-  if (!b) return;
+  if (!mesh || !maskSprite) return false;
 
   const { width: texW, height: texH } = getTextureSize(maskSprite.texture);
-  if (texW <= 0 || texH <= 0) return;
+  const artworkKey = getMaskArtworkKey(token);
+  if (texW <= 0 || texH <= 0 || artworkKey === null) return false;
 
-  const boundsChanged =
-    !isFinite(gb.maskScaleAbsX) ||
-    !isFinite(gb.maskScaleAbsY) ||
-    gb.maskBoundsW !== tokenW ||
-    gb.maskBoundsH !== tokenH ||
-    gb.maskScaleAbsX !== b.width / texW ||
-    gb.maskScaleAbsY !== b.height / texH;
+  const artworkUnchanged = gb.maskArtworkTexture === mesh.texture && gb.maskArtworkKey === artworkKey;
+  if (!force && artworkUnchanged) return false;
 
-  if (boundsChanged) {
-    gb.maskScaleAbsX = b.width / texW;
-    gb.maskScaleAbsY = b.height / texH;
-    gb.maskBoundsW = tokenW;
-    gb.maskBoundsH = tokenH;
-    gb.maskSignX = null;
-    gb.maskSignY = null;
+  // Regression guard: measure only the artwork. An attached mask is a mesh child and can
+  // otherwise expand getLocalBounds(), making the mask part of its own sizing input.
+  const wasAttached = maskSprite.parent === mesh;
+  const childIndex = wasAttached ? mesh.getChildIndex(maskSprite) : -1;
+  if (wasAttached) mesh.removeChild(maskSprite);
+
+  let bounds;
+  try {
+    bounds = mesh.getLocalBounds?.();
+  } finally {
+    if (wasAttached) mesh.addChildAt(maskSprite, Math.min(childIndex, mesh.children.length));
   }
 
-  maskSprite.position.set(b.x, b.y);
-  applyMaskScaleFromCache(token);
+  if (!bounds || !isFinite(bounds.width) || !isFinite(bounds.height) || bounds.width <= 0 || bounds.height <= 0) {
+    return false;
+  }
+
+  // Regression guard: the mask stays in mesh-local coordinates and deliberately does not
+  // divide by mesh.scale. As a mesh child it inherits Foundry's scale, mirror, and rotation
+  // exactly once. Counter-scaling here would pin it to the token footprint again.
+  maskSprite.position.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+  maskSprite.scale.set(bounds.width / texW, bounds.height / texH);
+  gb.maskArtworkTexture = mesh.texture;
+  gb.maskArtworkKey = artworkKey;
+  return true;
 }
 
 async function attachMaskIfNeeded(token, S) {
   const gb = ensureGbNS(token);
-  if (gb.maskSprite) return; // bereits gesetzt
-
   const M = S?.mask;
   if (!M?.enabled || !M?.path) return;
 
   const mesh = token?.mesh;
   if (!mesh) return;
 
+  if (gb.maskSprite?.parent === mesh && gb.maskSprite._gbMaskPath === M.path) return;
+  if (gb.maskSprite) clearMaskInline(token);
+
   const tex = await loadMaskOnce(M.path);
   if (!tex) return;
 
-  // Maske im lokalen Space des Meshes
+  // Keep the mask on Foundry's artwork mesh. mesh.mask therefore clips only the artwork;
+  // the frame overlay remains a sibling on the token and cannot be cut by this mask.
   const maskSprite = new PIXI.Sprite(tex);
   maskSprite.name = "gbtf-mask";
+  maskSprite._gbMaskPath = M.path;
   maskSprite.renderable = false;
   maskSprite.anchor?.set?.(0.5, 0.5);
   maskSprite.position.set(0, 0);
   maskSprite.rotation = 0;
 
-  mesh.addChild(maskSprite);
-
-  // Skalierung anhand der Tokenfläche im lokalen Mesh-Space, nicht anhand des Bildseitenverhältnisses.
-  const b = getMaskLocalPlacement(token);
-  const { width: texW, height: texH } = getTextureSize(maskSprite.texture);
-  if (!b || texW <= 0 || texH <= 0) {
-    maskSprite.parent?.removeChild(maskSprite);
+  gb.maskSprite = maskSprite;
+  if (!updateMaskGeometryIfDirty(token, { force: true })) {
+    gb.maskSprite = null;
     maskSprite.destroy({ children: false, texture: false, baseTexture: false });
     return;
   }
 
-  gb.maskScaleAbsX = b.width / texW;
-  gb.maskScaleAbsY = b.height / texH;
-  gb.maskBoundsW = token.w || 0;
-  gb.maskBoundsH = token.h || 0;
-  gb.maskSignX = null;
-  gb.maskSignY = null;
-  maskSprite.position.set(b.x, b.y);
-
-  applyMaskScaleFromCache(token);
-
+  mesh.addChild(maskSprite);
   mesh.mask = maskSprite;
-  gb.maskSprite = maskSprite;
 }
 
 /* =========================
@@ -537,7 +487,7 @@ async function applyFrameToToken(token, snapshot) {
   // 4) Maske einmalig am Mesh (blockierend beibehalten)
   if (runtime.hasMask) {
     await attachMaskIfNeeded(token, S);
-    updateMaskScaleIfDirty(token);
+    updateMaskGeometryIfDirty(token);
   } else if (gb.maskSprite) {
     clearMaskInline(token);
   }
